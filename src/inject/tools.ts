@@ -11,6 +11,10 @@ function wheelRemoveElementEventListener(event: MouseEvent) {
         if (event.target instanceof HTMLElement) {
             // 不能移除自己
             if (event.target === shadowDomDiv) return
+            if (event.target.tagName==="BODY"&&event.target.parentElement?.tagName==="HTML") {
+                showToast("顶层元素无法删除")
+                return
+            }
             event.target.remove();
         }
     }
