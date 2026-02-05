@@ -498,5 +498,21 @@ export const Tools: { [key: string]: () => void } = {
             document.dir="rtl"
         }
         showToast(`已${document.dir==="rtl"?"开启":"关闭"}强制RTL`)
+    },
+    "changeTitle":()=>{
+        const newTitle=prompt("输入新标题");
+        if (newTitle) document.title=newTitle;
+        showToast(newTitle?"执行成功":"操作被取消")
+    },
+    "disableSpellCheck":()=>{
+        const elements=document.querySelectorAll("[spellcheck]");
+        if (elements.length===0) {
+            showToast("没有元素要求进行拼写检查")
+            return
+        }
+        for (const element of elements) {
+            element.removeAttribute("spellcheck");
+        }
+        showToast(`已移除${elements.length}个元素的拼写检查`)
     }
 }

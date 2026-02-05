@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
   </head>
-  <!-- 修改标题  关闭拼写检查  -->
   <body>
   <!-- 避免使用强制rtl时自身被影响 反正没i18n需求 -->
   <dialog id="root" dir="ltr">
@@ -33,6 +32,7 @@
         <button class="itemButton toolButton" tool="wheelRemoveElement" tooltip="通过鼠标中键(按下滚轮)移除所指的元素\n并不一定准确 错删刷新网页即可\n再次点击可关闭">中键移除</button>
         <button class="itemButton toolButton" tool="forceOpenInNewTab" tooltip="强制所有a标签超链接使用新标签页打开">强制新标签</button>
         <button class="itemButton toolButton" tool="forceRTL" tooltip="强制使用RTL(右到左)布局\n再次点击可恢复">强制RTL</button>
+        <button class="itemButton toolButton" tool="disableSpellCheck" tooltip="移除所有spellcheck属性">关闭拼写检查</button>
       </div>
       <div class="toolList" type="program" style="display: none;">
         <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入JS(插入元素)</button>
@@ -55,6 +55,7 @@
         <button class="itemButton toolButton" tool="playAudio" tooltip="选择本地音频文件播放\n除刷新或关闭页面外无法中断播放">播放音频</button>
         <button class="itemButton toolButton" tool="webBackground" tooltip="选择本地图片文件作为当前网页背景\n可能只在部分页面有效">修改网页背景</button>
         <button class="itemButton toolButton" tool="changePageIcon" tooltip="将网页icon改为指定的本地图片">修改网页图标</button>
+        <button class="itemButton toolButton" tool="changeTitle" tooltip="修改标签页显示的标题">修改标题</button>
       </div>
       <div class="toolList" type="about" style="display: none;">
         <button class="itemButton helpButton" helpText="Alt+M显示/关闭菜单\nAlt+Shift+M重置菜单位置并显示/关闭">快捷键</button>
