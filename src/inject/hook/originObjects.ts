@@ -1,61 +1,21 @@
 export const OriginObjects={
     AbortController,
-    Error,
     TypeError,
-    RangeError,
-    ReferenceError,
-    SyntaxError,
-    EvalError,
-    URIError,
-    AggregateError,
-    WebAssembly:{
-        CompileError:WebAssembly.CompileError,
-        LinkError:WebAssembly.LinkError,
-        RuntimeError:WebAssembly.RuntimeError,
-        SuspendError:Reflect.get(WebAssembly, "SuspendError"),
-    },
     Object:{
-        defineProperty:Object.defineProperty,
-        getOwnPropertyDescriptor:Object.getOwnPropertyDescriptor,
         freeze:Object.freeze,
-        keys:Object.keys,
     },
     Reflect:{
-        apply:Reflect.apply,
-        construct:Reflect.construct,
-        defineProperty:Reflect.defineProperty,
-        deleteProperty:Reflect.deleteProperty,
-        get:Reflect.get,
-        getOwnPropertyDescriptor:Reflect.getOwnPropertyDescriptor,
-        getPrototypeOf:Reflect.getPrototypeOf,
         has:Reflect.has,
-        isExtensible:Reflect.isExtensible,
-        ownKeys:Reflect.ownKeys,
-        preventExtensions:Reflect.preventExtensions,
-        set:Reflect.set,
-        setPrototypeOf:Reflect.setPrototypeOf
     },
     Proxy,
     String:{
         toString:String.prototype.toString,
         includes:String.prototype.includes,
-        indexOf:String.prototype.indexOf,
-        lastIndexOf:String.prototype.lastIndexOf,
-        match:String.prototype.match,
-        replace:String.prototype.replace,
-        search:String.prototype.search,
     },
     console:{
         log:console.log,
-        warn:console.warn,
-        error:console.error,
-        info:console.info,
-        debug:console.debug
+        warn:console.warn
     },
-    JSON:{
-        parse:JSON.parse,
-        stringify:JSON.stringify
-
-    }
+    open
 }
 OriginObjects.Object.freeze(OriginObjects);

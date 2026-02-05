@@ -98,7 +98,7 @@ export class Hooker {
             }
             return false;
         } catch (error) {
-            console.warn("Error on hooking method:", error);
+            OriginObjects.console.warn("Error on hooking method:", error);
             return false;
         }
     }
@@ -173,7 +173,7 @@ export class Hooker {
             }
             return false;
         } catch (error) {
-            console.warn("Error on hooking async method:", error);
+            OriginObjects.console.warn("Error on hooking async method:", error);
             return false;
         }
     }

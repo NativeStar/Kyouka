@@ -1,5 +1,6 @@
 ///<reference path="../dom.d.ts" />
 import { Hooker } from "./hook/hooker";
+import { OriginObjects } from "./hook/originObjects";
 import { showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
@@ -41,7 +42,7 @@ export const Tools: { [key: string]: () => void } = {
                     document.body.appendChild(script);
                 } catch (e) {
                     alert("执行失败 详见控制台")
-                    console.log(e);
+                    OriginObjects.console.log(e);
                 } finally {
                     URL.revokeObjectURL(url);
                 }
@@ -242,7 +243,7 @@ export const Tools: { [key: string]: () => void } = {
                     const audio = new Audio(blobUrl);
                     audio.addEventListener("error", (e) => {
                         alert("播放异常 可能是格式不支持")
-                        console.log(e);
+                        OriginObjects.console.log(e);
                     })
                     audio.addEventListener("ended", () => {
                         requestIdleCallback(() => {
@@ -254,7 +255,7 @@ export const Tools: { [key: string]: () => void } = {
                     showToast("执行成功")
                 } catch (error) {
                     showToast("播放异常 可能是格式不支持")
-                    console.log(error);
+                    OriginObjects.console.log(error);
                 }
             }).catch(() => { })
         })
@@ -277,7 +278,7 @@ export const Tools: { [key: string]: () => void } = {
                     showToast("执行成功");
                 } catch (e) {
                     showToast("执行时发生异常 详见控制台")
-                    console.log(e);
+                    OriginObjects.console.log(e);
                 }
             })
         }).catch(() => { });
@@ -332,12 +333,12 @@ export const Tools: { [key: string]: () => void } = {
         }
         Hooker.hookMethod<string>(window.JSON, "stringify", "window.JSON.stringify", {
             afterMethodInvoke(args) {
-                console.log("JSON Stringify:", args[0])
+                OriginObjects.console.log("JSON Stringify:", args[0])
             },
         });
         Hooker.hookMethod<object>(window.JSON, "parse", "window.JSON.parse", {
             afterMethodInvoke(_args, tempMethodResult) {
-                console.log("JSON Parse:", tempMethodResult.current)
+                OriginObjects.console.log("JSON Parse:", tempMethodResult.current)
             },
         });
         showToast("执行成功")
@@ -514,5 +515,9 @@ export const Tools: { [key: string]: () => void } = {
             element.removeAttribute("spellcheck");
         }
         showToast(`已移除${elements.length}个元素的拼写检查`)
+    },
+    "openRepository":()=>{
+        // 防止使用屏蔽open后把自己也坑了
+        OriginObjects.open.call(window,"https://github.com/NativeStar/Kyouka")
     }
 }
