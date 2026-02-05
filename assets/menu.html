@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <!-- 修改标题  关闭拼写检查  -->
+  <body>
+  <!-- 避免使用强制rtl时自身被影响 反正没i18n需求 -->
+  <dialog id="root" dir="ltr">
+    <span id="tooltip" hidden>
+      tooltip
+    </span>
+    <div id="menuTitleBar" class="keepCursor">
+      Kyouka Panel
+      <button class="itemButton" id="closeButton" style="z-index: 999999;height: 100%;">X</button>
+    </div>
+    <div id="menuContainer">
+      <div id="toolTypeSelect">
+        <button class="itemButton typeButton typeSelected" targetType="document">文档</button>
+        <button class="itemButton typeButton" targetType="program">程序</button>
+        <button class="itemButton typeButton" targetType="tool">工具</button>
+        <button class="itemButton typeButton" targetType="joy">娱乐</button>
+        <button class="itemButton typeButton" targetType="about">帮助</button>
+      </div>
+      <div class="toolList" type="document">
+        <button class="itemButton toolButton" tool="controllableAllMedia" tooltip="为所有audio和video元素恢复控制条并修复下载和(视频)画中画支持\n并不保证添加后就能正常控制 可能还要手动处理元素被隐藏、z-index过低等情况">音视频控制器</button>
+        <button class="itemButton toolButton" tool="editPage" tooltip="像修改文本一样修改网页内容\n再次点击可关闭">自由编辑</button>
+        <button class="itemButton toolButton" tool="enableAllElement" tooltip="移除所有元素的'disabled'属性">启用所有元素</button>
+        <button class="itemButton toolButton" tool="removeInputLimit" tooltip="移除以下所有限制项:\n数字、日期输入框的范围和只读限制\n文本输入框的长度和只读限制\n文件上传框格式限制">移除输入限制</button>
+        <button class="itemButton toolButton" tool="showHiddenElements" tooltip="显示通过hidden属性隐藏的元素">显示隐藏元素(hidden)</button>
+        <button class="itemButton toolButton" tool="forceTranslate" tooltip="移除元素的'translate'属性\n当该属性为'no'时 元素内容不会被翻译">强制翻译</button>
+        <button class="itemButton toolButton" tool="showDisplayNoneElements" tooltip="显示通过'display:none'样式隐藏的元素">显示隐藏元素(display)</button>
+        <button class="itemButton toolButton" tool="wheelRemoveElement" tooltip="通过鼠标中键(按下滚轮)移除所指的元素\n并不一定准确 错删刷新网页即可\n再次点击可关闭">中键移除</button>
+        <button class="itemButton toolButton" tool="forceOpenInNewTab" tooltip="强制所有a标签超链接使用新标签页打开">强制新标签</button>
+        <button class="itemButton toolButton" tool="forceRTL" tooltip="强制使用RTL(右到左)布局\n再次点击可恢复">强制RTL</button>
+      </div>
+      <div class="toolList" type="program" style="display: none;">
+        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入JS(插入元素)</button>
+        <button class="itemButton toolButton" id="execJavascriptByExtension" tooltip="读取内容后通过chrome.scripting.executeScript执行">注入JS(扩展执行)</button>
+        <button class="itemButton toolButton" id="injectCssByExtension" tooltip="顾名思义 很普通的加载CSS">注入CSS</button>
+        <button class="itemButton toolButton" tool="blockEval" tooltip="使所有eval函数调用无法执行">屏蔽eval</button>
+        <button class="itemButton toolButton" id="persistCookieByExtension" tooltip="将所有非会话Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态">持久化Cookie</button>
+        <button class="itemButton toolButton" tool="forcePropertyRW" tooltip="强制修改设置属性时的\nwritable和configurable为true">强制可配置</button>
+        <button class="itemButton toolButton" tool="blockOpen" tooltip="屏蔽所有open调用\n不能完全作为阻止重定向使用">屏蔽open</button>
+        <button class="itemButton toolButton" tool="logJsonOperation" tooltip="将页面所有JSON操作打印至控制台\n(即stringify和parse调用)">打印JSON操作</button>
+        <button class="itemButton toolButton" tool="blockConsole" tooltip="阻止调用console进行日志输出">屏蔽日志</button>
+        <button class="itemButton toolButton" tool="blockSendBeacon" tooltip="阻止调用navigator.sendBeacon\n用于离开页面前上报 似乎很冷门的API">屏蔽sendBeacon</button>
+      </div>
+      <div class="toolList" type="tool" style="display: none;">
+        <button class="itemButton toolButton" tool="openEyeDropper" tooltip="获取选中像素的颜色RGB值">屏幕取色</button>
+        <button class="itemButton toolButton" tool="becomeDocumentPictureInPicture" tooltip="将页面使用文档画中画显示\n可能会有很多问题">转为画中画</button>
+        <button class="itemButton toolButton" tool="recordCanvas" tooltip="60帧录制canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的">录制canvas</button>
+      </div>
+      <div class="toolList" type="joy" style="display: none;"> 
+        <button class="itemButton toolButton" tool="playAudio" tooltip="选择本地音频文件播放\n除刷新或关闭页面外无法中断播放">播放音频</button>
+        <button class="itemButton toolButton" tool="webBackground" tooltip="选择本地图片文件作为当前网页背景\n可能只在部分页面有效">修改网页背景</button>
+        <button class="itemButton toolButton" tool="changePageIcon" tooltip="将网页icon改为指定的本地图片">修改网页图标</button>
+      </div>
+      <div class="toolList" type="about" style="display: none;">
+        <button class="itemButton helpButton" helpText="Alt+M显示/关闭菜单\nAlt+Shift+M重置菜单位置并显示/关闭">快捷键</button>
+        <button class="itemButton helpButton" helpText="选择本地JavaScript文件并注入页面\n两种方式暂未发现明显区别 且注入可能被CSP阻止 如果一种方式注入无效可尝试另一种">注入JS</button>
+        <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能\n目前只对Ant Design的input做出适配">DOM操作提醒</button>
+        <button class="itemButton helpButton" helpText="移除后具体如何数据处理取决于网页本身代码\n且异常的数据大概率被后端拦截">移除输入限制</button>
+        <button class="itemButton helpButton" helpText="显示所有被隐藏的元素\n该功能可能破坏页面布局!">显示隐藏元素</button>
+        <button class="itemButton helpButton" helpText="部分页面会非常频繁的调用这两个方法 某些情况下会造成性能问题 多清空日志即可\n如果发现打印了奇怪的对象 可能是某些polyfill库在探测API实现 通常不必理会">打印JSON操作</button>
+        <button class="itemButton helpButton" helpText="由于实现原理是直接复制DOM 画中画页面会有各种问题\n且该功能本身限制较多 在该场景下实用性只能说一般">转为画中画</button>
+        <button class="itemButton helpButton" helpText="用于简单录制一些表格 页游等使用canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况">录制canvas</button>
+        <button class="itemButton helpButton" helpText="该功能还能顺便解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
+      </div>
+    </div>
+  </dialog>
+</body>
+
+</html>

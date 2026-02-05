@@ -1,0 +1,5 @@
+/.vscode
+/dist
+/dist.crx
+/dist.pem
+/node_modules

@@ -1,0 +1,18 @@
+{
+  "name": "kyouka",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node ./script/build.js && tsc && esbuild ./src/inject/main.ts --bundle --minify --keep-names --outfile=./dist/inject.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.2",
+  "devDependencies": {
+    "@types/chrome": "^0.1.36",
+    "@types/node": "^25.1.0",
+    "esbuild": "^0.27.2"
+  }
+}

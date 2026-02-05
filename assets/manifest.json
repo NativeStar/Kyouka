@@ -1,0 +1,48 @@
+{
+  "name": "Kyouka",
+  "description": "魔法凝结",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "cookies"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "icons": {
+    "128": "/icons/icon128.png"
+  },
+  "action":{},
+  "background": {
+    "service_worker": "service.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "inject.js",
+        "menu.html",
+        "menu.css"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "js": [
+        "content.js"
+      ],
+      "type": "module",
+      "run_at": "document_start"
+    }
+  ]
+}
