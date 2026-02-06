@@ -1,5 +1,6 @@
 /.vscode
 /dist
 /dist.crx
-/dist.pem
+*.pem
 /node_modules
+*.crx

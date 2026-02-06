@@ -110,7 +110,9 @@ function initDom(shadow: ShadowRoot) {
             toolButton.addEventListener("click", (event) => {
                 event.stopPropagation();
                 const toolName = toolButton.getAttribute("tool") ?? null;
-                if (toolName && toolName in Tools) {
+                //由contentScript负责
+                if (!toolName) return
+                if (toolName in Tools) {
                     Tools[toolName]();
                 }else{
                     alert(`Error: Tool not found:${toolName}`)
