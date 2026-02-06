@@ -11,7 +11,7 @@ function wheelRemoveElementEventListener(event: MouseEvent) {
         if (event.target instanceof HTMLElement) {
             // 不能移除自己
             if (event.target === shadowDomDiv) return
-            if (event.target.tagName==="BODY"&&event.target.parentElement?.tagName==="HTML") {
+            if (event.target.tagName === "BODY" && event.target.parentElement?.tagName === "HTML") {
                 showToast("顶层元素无法删除")
                 return
             }
@@ -19,13 +19,10 @@ function wheelRemoveElementEventListener(event: MouseEvent) {
         }
     }
 }
-function stopCanvasRecorderKeyEventListener(event: KeyboardEvent) {
+function stopMediaRecorderKeyEventListener(event: KeyboardEvent) {
     if (event.altKey && event.key.toLowerCase() === "p") {
         event.preventDefault();
         recorder?.stop();
-        showToast("已停止录制")
-        document.removeEventListener("keydown", stopCanvasRecorderKeyEventListener);
-        recorder = null;
     }
 }
 const toolState = {
@@ -379,7 +376,9 @@ export const Tools: { [key: string]: () => void } = {
             return
         }
         if (recorder) {
-            showToast("请先停止上一个录制!")
+            if (confirm("停止正在进行的录制?")) {
+                recorder?.stop();
+            }
             return
         }
         const canvasElementList = document.querySelectorAll("canvas")
@@ -427,9 +426,12 @@ export const Tools: { [key: string]: () => void } = {
             });
             recorder.addEventListener("stop", () => {
                 writeStream.close();
+                showToast("已停止录制");
+                document.removeEventListener("keydown", stopMediaRecorderKeyEventListener);
+                recorder = null;
             });
-            document.addEventListener("keydown", stopCanvasRecorderKeyEventListener);
-            alert("使用alt+p快捷键停止录制\n点击'确定'开始录制")
+            document.addEventListener("keydown", stopMediaRecorderKeyEventListener);
+            alert("使用Alt+P快捷键停止录制\n点击'确定'开始录制")
             recorder.start();
         }).catch(() => { })
     },
@@ -448,7 +450,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "blockConsole": () => {
         //两个典型
-        if (Hooker.isModifiedMethodOrObject(console.table)&&Hooker.isModifiedMethodOrObject(console.log)) {
+        if (Hooker.isModifiedMethodOrObject(console.table) && Hooker.isModifiedMethodOrObject(console.log)) {
             return showToast("该功能已执行过")
         }
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
@@ -483,7 +485,7 @@ export const Tools: { [key: string]: () => void } = {
         });
         showToast("执行成功")
     },
-    "blockSendBeacon":()=>{
+    "blockSendBeacon": () => {
         if (Hooker.isModifiedMethodOrObject(navigator.sendBeacon)) {
             return showToast("该功能已执行过")
         }
@@ -496,22 +498,22 @@ export const Tools: { [key: string]: () => void } = {
         });
         showToast("执行成功")
     },
-    "forceRTL":()=>{
-        if (document.dir==="rtl") {
-            document.dir=""
-        }else{
-            document.dir="rtl"
+    "forceRTL": () => {
+        if (document.dir === "rtl") {
+            document.dir = ""
+        } else {
+            document.dir = "rtl"
         }
-        showToast(`已${document.dir==="rtl"?"开启":"关闭"}强制RTL`)
+        showToast(`已${document.dir === "rtl" ? "开启" : "关闭"}强制RTL`)
     },
-    "changeTitle":()=>{
-        const newTitle=prompt("输入新标题");
-        if (newTitle) document.title=newTitle;
-        showToast(newTitle?"执行成功":"操作被取消")
+    "changeTitle": () => {
+        const newTitle = prompt("输入新标题");
+        if (newTitle) document.title = newTitle;
+        showToast(newTitle ? "执行成功" : "操作被取消")
     },
-    "disableSpellCheck":()=>{
-        const elements=document.querySelectorAll("[spellcheck]");
-        if (elements.length===0) {
+    "disableSpellCheck": () => {
+        const elements = document.querySelectorAll("[spellcheck]");
+        if (elements.length === 0) {
             showToast("没有元素要求进行拼写检查")
             return
         }
@@ -520,8 +522,46 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(`已移除${elements.length}个元素的拼写检查`)
     },
-    "openRepository":()=>{
-        // 防止使用屏蔽open后把自己也坑了
-        OriginObjects.open.call(window,"https://github.com/NativeStar/Kyouka")
+    "openRepository": () => {
+        // 防止使用屏蔽open后把自己给坑了
+        OriginObjects.open.call(window, "https://github.com/NativeStar/Kyouka")
+    },
+    "screenRecorder": () => {
+        if (!("showSaveFilePicker" in window)) {
+            showToast("当前浏览器不支持showSaveFilePicker")
+            return
+        }
+        if (recorder) {
+            if (confirm("停止正在进行的录制?")) {
+                recorder?.stop();
+            }
+            return
+        }
+        // 检查api支持
+        showSaveFilePicker({ suggestedName: `ScreenRecorder-${Date.now()}.webm` }).then(async (fd) => {
+            try {
+                const displayMedia = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
+                recorder = new MediaRecorder(displayMedia, { mimeType: "video/webm" });
+                const writeStream = await fd.createWritable();
+                recorder.addEventListener("dataavailable", (event) => {
+                    writeStream.write(event.data);
+                });
+                recorder.addEventListener("stop", () => {
+                    writeStream.close();
+                    showToast("已停止录制")
+                    displayMedia.getTracks().forEach(track => track.stop());
+                    document.removeEventListener("keydown", stopMediaRecorderKeyEventListener);
+                    recorder = null;
+                });
+                displayMedia.addEventListener("inactive", () => {
+                    recorder?.stop();
+                })
+                document.addEventListener("keydown", stopMediaRecorderKeyEventListener);
+                alert("使用Alt+P快捷键停止录制\n点击'确定'开始录制")
+                recorder.start();
+            } catch (error) {
+                showToast("用户未授权或发生异常\n由于API限制 请手动删除空录屏文件", 5000)
+            }
+        }).catch(() => { })
     }
 }
