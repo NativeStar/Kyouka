@@ -114,7 +114,11 @@ export class Hooker {
                 return true
             }
             const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : Reflect.get(parent, methodName);
-            originMethod.toString = createBypassToStringMethod(methodName);
+            try {
+                originMethod.toString = createBypassToStringMethod(methodName);
+            } catch (error) {
+                OriginObjects.console.warn("Error on create bypass toString detect method:", error);
+            }
             const hookEntry = new Proxy(originMethod, {
                 apply(_target, thisArg, args) {
                     return new Promise<T>(async (resolve, reject) => {

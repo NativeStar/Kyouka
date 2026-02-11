@@ -8,14 +8,20 @@ function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (event.target instanceof HTMLElement) {
-            // 不能移除自己
-            if (event.target === shadowDomDiv) return
-            if (event.target.tagName === "BODY" && event.target.parentElement?.tagName === "HTML") {
-                showToast("顶层元素无法删除")
-                return
+        try {
+            if (event.target instanceof HTMLElement) {
+                // 不能移除自己
+                if (event.target === shadowDomDiv) return
+                if (event.target.tagName === "BODY" && event.target.parentElement?.tagName === "HTML") {
+                    showToast("顶层元素无法删除")
+                    return
+                }
+                event.target.remove();
             }
-            event.target.remove();
+        } catch (error) {
+            OriginObjects.console.warn("Error on remove element:", error);
+            showToast("执行时发生异常 已尝试强制移除");
+            (event.target as HTMLElement).remove();
         }
     }
 }
@@ -40,6 +46,7 @@ export const Tools: { [key: string]: () => void } = {
                 try {
                     const script = document.createElement("script");
                     script.src = url;
+                    script.type = "module";
                     document.body.appendChild(script);
                 } catch (e) {
                     alert("执行失败 详见控制台")
@@ -184,25 +191,25 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(eval)) {
             return showToast("该功能已执行过")
         }
-        Hooker.hookMethod(window, "eval", "window.eval", {
+        const result=Hooker.hookMethod(window, "eval", "window.eval", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
         });
-        showToast("执行完成")
+        showToast(result ? "执行成功" : "执行失败 详见控制台")
     },
     "forcePropertyRW": () => {
         if (Hooker.isModifiedMethodOrObject(Object.defineProperty)) {
             return showToast("该功能已执行过")
         }
-        Hooker.hookMethod(Object, "defineProperty", "Object.defineProperty", {
+        const definePropertyHook=Hooker.hookMethod(Object, "defineProperty", "Object.defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
         });
-        Hooker.hookMethod(Object, "defineProperties", "Object.defineProperties", {
+        const definePropertiesHook=Hooker.hookMethod(Object, "defineProperties", "Object.defineProperties", {
             beforeMethodInvoke(args) {
                 const [_target, descriptors] = args as [object, PropertyDescriptorMap & ThisType<any>];
                 for (const property in descriptors) {
@@ -211,14 +218,14 @@ export const Tools: { [key: string]: () => void } = {
                 }
             },
         });
-        Hooker.hookMethod(Reflect, "defineProperty", "Reflect.defineProperty", {
+        const reflectDefinePropertyHook=Hooker.hookMethod(Reflect, "defineProperty", "Reflect.defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
         });
-        showToast("执行完成")
+        showToast(definePropertiesHook&&definePropertyHook&&reflectDefinePropertyHook?"执行成功":"执行失败 详见控制台")
     },
     "wheelRemoveElement": () => {
         if (toolState.wheelRemoveElement) {
@@ -329,20 +336,20 @@ export const Tools: { [key: string]: () => void } = {
         })
     },
     "logJsonOperation": () => {
-        if (Hooker.isModifiedMethodOrObject(JSON.stringify)) {
+        if (Hooker.isModifiedMethodOrObject(JSON?.stringify??{})) {
             return showToast("该功能已执行过")
         }
-        Hooker.hookMethod<string>(window.JSON, "stringify", "window.JSON.stringify", {
+        const stringifyHook=Hooker.hookMethod<string>(window.JSON, "stringify", "window.JSON.stringify", {
             afterMethodInvoke(args) {
                 OriginObjects.console.log("JSON Stringify:", args[0])
             },
         });
-        Hooker.hookMethod<object>(window.JSON, "parse", "window.JSON.parse", {
+        const parseHook=Hooker.hookMethod<object>(window.JSON, "parse", "window.JSON.parse", {
             afterMethodInvoke(_args, tempMethodResult) {
                 OriginObjects.console.log("JSON Parse:", tempMethodResult.current)
             },
         });
-        showToast("执行成功")
+        showToast(stringifyHook&&parseHook?"执行成功":"执行失败 详见控制台")
     },
     "changePageIcon": () => {
         if (!("showOpenFilePicker" in window)) {
@@ -439,14 +446,13 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(window.open)) {
             return showToast("该功能已执行过")
         }
-        Hooker.hookMethod(window, "open", "window.open", {
+        const result = Hooker.hookMethod(window, "open", "window.open", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("已阻止一次open调用")
                 abortController.abort();
             }
         });
-        showToast("执行成功")
-
+        showToast(result ? "执行成功" : "执行失败 详见控制台")
     },
     "blockConsole": () => {
         //两个典型
@@ -456,47 +462,47 @@ export const Tools: { [key: string]: () => void } = {
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
             abortController.abort();
         }
-        Hooker.hookMethod(console, "table", "console.table", {
+        const tableHook=Hooker.hookMethod(console, "table", "console.table", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        Hooker.hookMethod(console, "debug", "console.debug", {
+        const debugHook=Hooker.hookMethod(console, "debug", "console.debug", {
             beforeMethodInvoke: rejectAllInvoke
         })
-        Hooker.hookMethod(console, "log", "console.log", {
+        const logHook=Hooker.hookMethod(console, "log", "console.log", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        Hooker.hookMethod(console, "info", "console.info", {
+        const infoHook=Hooker.hookMethod(console, "info", "console.info", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        Hooker.hookMethod(console, "warn", "console.warn", {
+        const warnHook=Hooker.hookMethod(console, "warn", "console.warn", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        Hooker.hookMethod(console, "error", "console.error", {
+        const errorHook=Hooker.hookMethod(console, "error", "console.error", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        Hooker.hookMethod(console, "dir", "console.dir", {
+        const dirHook=Hooker.hookMethod(console, "dir", "console.dir", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        Hooker.hookMethod(console, "dirxml", "console.dirxml", {
+        const dirxmlHook=Hooker.hookMethod(console, "dirxml", "console.dirxml", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        Hooker.hookMethod(console, "clear", "console.clear", {
+        const clearHook=Hooker.hookMethod(console, "clear", "console.clear", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        showToast("执行成功")
+        showToast(tableHook&&debugHook&&logHook&&infoHook&&warnHook&&errorHook&&dirHook&&dirxmlHook&&clearHook?"执行成功":"执行失败 详见控制台")
     },
     "blockSendBeacon": () => {
         if (Hooker.isModifiedMethodOrObject(navigator.sendBeacon)) {
             return showToast("该功能已执行过")
         }
-        Hooker.hookMethod(navigator, "sendBeacon", "navigator.sendBeacon", {
+        const result = Hooker.hookMethod(navigator, "sendBeacon", "navigator.sendBeacon", {
             beforeMethodInvoke(_args, abortController) {
                 // 顺便看看有多少网站用了这个API
                 showToast("已阻止一次sendBeacon调用")
                 abortController.abort();
             }
         });
-        showToast("执行成功")
+        showToast(result ? "执行成功" : "执行失败 详见控制台")
     },
     "forceRTL": () => {
         if (document.dir === "rtl") {
@@ -570,14 +576,14 @@ export const Tools: { [key: string]: () => void } = {
         try {
             const script = document.createElement("script");
             script.src = url;
-            script.type="module";
+            script.type = "module";
             document.body.appendChild(script);
         } catch (error) {
             alert("执行失败 详见控制台")
             OriginObjects.console.log(error);
         }
     },
-    "injectOnlineCss":()=>{
+    "injectOnlineCss": () => {
         const url = prompt("输入目标文件URL");
         if (!url) return;
         try {
@@ -589,5 +595,20 @@ export const Tools: { [key: string]: () => void } = {
             alert("执行失败 详见控制台")
             OriginObjects.console.log(error);
         }
+    },
+    "changePageIconOnline": () => {
+        const url = prompt("输入目标图片URL");
+        if (!url) return;
+        const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
+        if (linkElement) {
+            linkElement.href = url;
+        } else {
+            // 原本就没有标签 创建
+            const newLinkElement = document.createElement("link");
+            newLinkElement.rel = "icon";
+            newLinkElement.href = url;
+            document.head.appendChild(newLinkElement);
+        }
+        showToast("执行成功")
     }
 }
