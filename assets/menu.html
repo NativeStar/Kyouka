@@ -35,9 +35,11 @@
         <button class="itemButton toolButton" tool="disableSpellCheck" tooltip="移除所有spellcheck属性">关闭拼写检查</button>
       </div>
       <div class="toolList" type="program" style="display: none;">
-        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入JS(插入元素)</button>
-        <button class="itemButton toolButton" id="execJavascriptByExtension" tooltip="读取内容后通过chrome.scripting.executeScript执行">注入JS(扩展执行)</button>
-        <button class="itemButton toolButton" id="injectCssByExtension" tooltip="顾名思义 很普通的加载CSS">注入CSS</button>
+        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS(插入元素)</button>
+        <button class="itemButton toolButton" id="execJavascriptByExtension" tooltip="读取内容后通过chrome.scripting.executeScript执行">注入本地JS(扩展执行)</button>
+        <button class="itemButton toolButton" tool="injectOnlineScript" tooltip="加载指定URL的代码后执行\n可能被跨域政策或CSP阻止加载">注入网络JS</button>
+        <button class="itemButton toolButton" id="injectCssByExtension" tooltip="读取内容后通过chrome.scripting.insertCSS执行">注入本地CSS</button>
+        <button class="itemButton toolButton" tool="injectOnlineCss" tooltip="加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入网络CSS</button>
         <button class="itemButton toolButton" tool="blockEval" tooltip="使所有eval函数调用无法执行">屏蔽eval</button>
         <button class="itemButton toolButton" id="persistCookieByExtension" tooltip="将所有非会话Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态">持久化Cookie</button>
         <button class="itemButton toolButton" tool="forcePropertyRW" tooltip="强制修改设置属性时的\nwritable和configurable为true">强制可配置</button>

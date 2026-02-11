@@ -563,5 +563,31 @@ export const Tools: { [key: string]: () => void } = {
                 showToast("用户未授权或发生异常\n由于API限制 请手动删除空录屏文件", 5000)
             }
         }).catch(() => { })
+    },
+    "injectOnlineScript": () => {
+        const url = prompt("输入目标脚本URL");
+        if (!url) return;
+        try {
+            const script = document.createElement("script");
+            script.src = url;
+            script.type="module";
+            document.body.appendChild(script);
+        } catch (error) {
+            alert("执行失败 详见控制台")
+            OriginObjects.console.log(error);
+        }
+    },
+    "injectOnlineCss":()=>{
+        const url = prompt("输入目标文件URL");
+        if (!url) return;
+        try {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = url;
+            document.head.appendChild(link);
+        } catch (error) {
+            alert("执行失败 详见控制台")
+            OriginObjects.console.log(error);
+        }
     }
 }
