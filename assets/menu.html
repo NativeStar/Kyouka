@@ -33,6 +33,7 @@
         <button class="itemButton toolButton" tool="forceOpenInNewTab" tooltip="强制所有a标签超链接使用新标签页打开">强制新标签</button>
         <button class="itemButton toolButton" tool="forceRTL" tooltip="强制使用RTL(右到左)布局\n再次点击可恢复">强制RTL</button>
         <button class="itemButton toolButton" tool="disableSpellCheck" tooltip="移除所有spellcheck属性">关闭拼写检查</button>
+        <button class="itemButton toolButton" tool="removeWatermark" tooltip="实验性功能 移除符合特征的元素\n可能存在严重误判漏判">移除页面水印</button>
       </div>
       <div class="toolList" type="program" style="display: none;">
         <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS(插入元素)</button>
@@ -51,8 +52,9 @@
       <div class="toolList" type="tool" style="display: none;">
         <button class="itemButton toolButton" tool="openEyeDropper" tooltip="获取选中像素的颜色RGB值">屏幕取色</button>
         <button class="itemButton toolButton" tool="becomeDocumentPictureInPicture" tooltip="将页面使用文档画中画显示\n可能会有很多问题">转为画中画</button>
-        <button class="itemButton toolButton" tool="recordCanvas" tooltip="60帧录制canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的">录制canvas</button>
+        <button class="itemButton toolButton" tool="recordCanvas" tooltip="60帧录制canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas</button>
         <button class="itemButton toolButton" tool="screenRecorder" tooltip="执行录屏并保存至本地\n类似于录屏软件">录制屏幕</button>
+        <button class="itemButton toolButton" tool="recordCanvasWithAudio" tooltip="60帧录制canvas渲染内容并保存至本地\n同时申请录音应对游戏录制等情况\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas并录音</button>
       </div>
       <div class="toolList" type="joy" style="display: none;"> 
         <button class="itemButton toolButton" tool="playAudio" tooltip="选择本地音频文件播放\n除刷新或关闭页面外无法中断播放">播放音频</button>
@@ -70,7 +72,7 @@
         <button class="itemButton helpButton" helpText="显示所有被隐藏的元素\n该功能可能破坏页面布局!">显示隐藏元素</button>
         <button class="itemButton helpButton" helpText="部分页面会非常频繁的调用这两个方法 某些情况下会造成性能问题 多清空日志即可\n如果发现打印了奇怪的对象 可能是某些polyfill库在探测API实现 通常不必理会">打印JSON操作</button>
         <button class="itemButton helpButton" helpText="由于实现原理是直接复制DOM 画中画页面会有各种问题\n且该功能本身限制较多 在该场景下实用性只能说一般">转为画中画</button>
-        <button class="itemButton helpButton" helpText="用于简单录制一些表格 页游等使用canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况">录制canvas</button>
+        <button class="itemButton helpButton" helpText="用于简单录制一些表格 页游等使用Canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况\n带音频录制为实验性功能">录制canvas</button>
         <button class="itemButton helpButton" helpText="该功能还能顺便解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
       </div>
     </div>

@@ -191,7 +191,7 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(eval)) {
             return showToast("该功能已执行过")
         }
-        const result=Hooker.hookMethod(window, "eval", "window.eval", {
+        const result = Hooker.hookMethod(window, "eval", "window.eval", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
@@ -202,14 +202,14 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(Object.defineProperty)) {
             return showToast("该功能已执行过")
         }
-        const definePropertyHook=Hooker.hookMethod(Object, "defineProperty", "Object.defineProperty", {
+        const definePropertyHook = Hooker.hookMethod(Object, "defineProperty", "Object.defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
         });
-        const definePropertiesHook=Hooker.hookMethod(Object, "defineProperties", "Object.defineProperties", {
+        const definePropertiesHook = Hooker.hookMethod(Object, "defineProperties", "Object.defineProperties", {
             beforeMethodInvoke(args) {
                 const [_target, descriptors] = args as [object, PropertyDescriptorMap & ThisType<any>];
                 for (const property in descriptors) {
@@ -218,14 +218,14 @@ export const Tools: { [key: string]: () => void } = {
                 }
             },
         });
-        const reflectDefinePropertyHook=Hooker.hookMethod(Reflect, "defineProperty", "Reflect.defineProperty", {
+        const reflectDefinePropertyHook = Hooker.hookMethod(Reflect, "defineProperty", "Reflect.defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
         });
-        showToast(definePropertiesHook&&definePropertyHook&&reflectDefinePropertyHook?"执行成功":"执行失败 详见控制台")
+        showToast(definePropertiesHook && definePropertyHook && reflectDefinePropertyHook ? "执行成功" : "执行失败 详见控制台")
     },
     "wheelRemoveElement": () => {
         if (toolState.wheelRemoveElement) {
@@ -336,20 +336,20 @@ export const Tools: { [key: string]: () => void } = {
         })
     },
     "logJsonOperation": () => {
-        if (Hooker.isModifiedMethodOrObject(JSON?.stringify??{})) {
+        if (Hooker.isModifiedMethodOrObject(JSON?.stringify ?? {})) {
             return showToast("该功能已执行过")
         }
-        const stringifyHook=Hooker.hookMethod<string>(window.JSON, "stringify", "window.JSON.stringify", {
+        const stringifyHook = Hooker.hookMethod<string>(window.JSON, "stringify", "window.JSON.stringify", {
             afterMethodInvoke(args) {
                 OriginObjects.console.log("JSON Stringify:", args[0])
             },
         });
-        const parseHook=Hooker.hookMethod<object>(window.JSON, "parse", "window.JSON.parse", {
+        const parseHook = Hooker.hookMethod<object>(window.JSON, "parse", "window.JSON.parse", {
             afterMethodInvoke(_args, tempMethodResult) {
                 OriginObjects.console.log("JSON Parse:", tempMethodResult.current)
             },
         });
-        showToast(stringifyHook&&parseHook?"执行成功":"执行失败 详见控制台")
+        showToast(stringifyHook && parseHook ? "执行成功" : "执行失败 详见控制台")
     },
     "changePageIcon": () => {
         if (!("showOpenFilePicker" in window)) {
@@ -462,34 +462,34 @@ export const Tools: { [key: string]: () => void } = {
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
             abortController.abort();
         }
-        const tableHook=Hooker.hookMethod(console, "table", "console.table", {
+        const tableHook = Hooker.hookMethod(console, "table", "console.table", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const debugHook=Hooker.hookMethod(console, "debug", "console.debug", {
+        const debugHook = Hooker.hookMethod(console, "debug", "console.debug", {
             beforeMethodInvoke: rejectAllInvoke
         })
-        const logHook=Hooker.hookMethod(console, "log", "console.log", {
+        const logHook = Hooker.hookMethod(console, "log", "console.log", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const infoHook=Hooker.hookMethod(console, "info", "console.info", {
+        const infoHook = Hooker.hookMethod(console, "info", "console.info", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const warnHook=Hooker.hookMethod(console, "warn", "console.warn", {
+        const warnHook = Hooker.hookMethod(console, "warn", "console.warn", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const errorHook=Hooker.hookMethod(console, "error", "console.error", {
+        const errorHook = Hooker.hookMethod(console, "error", "console.error", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const dirHook=Hooker.hookMethod(console, "dir", "console.dir", {
+        const dirHook = Hooker.hookMethod(console, "dir", "console.dir", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const dirxmlHook=Hooker.hookMethod(console, "dirxml", "console.dirxml", {
+        const dirxmlHook = Hooker.hookMethod(console, "dirxml", "console.dirxml", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const clearHook=Hooker.hookMethod(console, "clear", "console.clear", {
+        const clearHook = Hooker.hookMethod(console, "clear", "console.clear", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        showToast(tableHook&&debugHook&&logHook&&infoHook&&warnHook&&errorHook&&dirHook&&dirxmlHook&&clearHook?"执行成功":"执行失败 详见控制台")
+        showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? "执行成功" : "执行失败 详见控制台")
     },
     "blockSendBeacon": () => {
         if (Hooker.isModifiedMethodOrObject(navigator.sendBeacon)) {
@@ -610,5 +610,100 @@ export const Tools: { [key: string]: () => void } = {
             document.head.appendChild(newLinkElement);
         }
         showToast("执行成功")
+    },
+    "recordCanvasWithAudio": () => {
+        if (!("showSaveFilePicker" in window)) {
+            showToast("当前浏览器不支持showSaveFilePicker")
+            return
+        }
+        if (recorder) {
+            if (confirm("停止正在进行的录制?")) {
+                recorder?.stop();
+            }
+            return
+        }
+        const canvasElementList = document.querySelectorAll("canvas")
+        if (canvasElementList.length === 0) {
+            showToast("未找到canvas元素")
+            return
+        }
+        if (canvasElementList.length > 1) {
+            if (!confirm("找到多个canvas 将自动选择可见且尺寸最大的\n确认继续?")) {
+                return
+            }
+        }
+        let targetCanvas: HTMLCanvasElement | null = null
+        for (const canvasElementItem of canvasElementList) {
+            if (!targetCanvas) {
+                targetCanvas = canvasElementItem
+            }
+            const targetCanvasVisibility = getComputedStyle(targetCanvas).display !== "none" && !targetCanvas.hidden;
+            const newCanvasVisibility = getComputedStyle(canvasElementItem).display !== "none" && !canvasElementItem.hidden;
+            const targetCanvasSize = canvasElementItem.width * canvasElementItem.height;
+            const newCanvasSize = targetCanvas.width * targetCanvas.height;
+            // 优先选择可见的
+            if (!targetCanvasVisibility && newCanvasVisibility) {
+                targetCanvas = canvasElementItem
+                continue
+            }
+            //原先canvas可见的情况下 忽略一切不可见的
+            if (!newCanvasVisibility && targetCanvasVisibility) {
+                continue
+            }
+            //剩余情况 比大小
+            if (newCanvasSize > targetCanvasSize) {
+                targetCanvas = canvasElementItem
+            }
+        }
+        if (!targetCanvas) {
+            showToast("发生异常 请刷新页面重试")
+            return
+        }
+        showSaveFilePicker({ suggestedName: `CanvasRecorderWithAudio-${Date.now()}.webm` }).then(async (fd) => {
+            const writeStream = await fd.createWritable();
+            const canvasVideoStream = targetCanvas.captureStream(60);
+            try {
+                const audioStream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
+                const mixedStream = new MediaStream([
+                    ...canvasVideoStream.getVideoTracks(),
+                    ...audioStream.getAudioTracks(),
+                ]);
+                recorder = new MediaRecorder(mixedStream, { mimeType: "video/webm" })
+                // recorder = new MediaRecorder(targetCanvas.captureStream(60), { mimeType: "video/webm" });
+                recorder.addEventListener("dataavailable", (event) => {
+                    writeStream.write(event.data);
+                });
+                recorder.addEventListener("stop", () => {
+                    writeStream.close();
+                    audioStream.getTracks().forEach(track => track.stop());
+                    mixedStream.getTracks().forEach(track => track.stop());
+                    showToast("已停止录制");
+                    document.removeEventListener("keydown", stopMediaRecorderKeyEventListener);
+                    recorder = null;
+                });
+                document.addEventListener("keydown", stopMediaRecorderKeyEventListener);
+                alert("使用Alt+P快捷键停止录制\n点击'确定'开始录制")
+                recorder.start();
+            } catch (error) {
+                OriginObjects.console.log(error)
+                showToast("用户未授权或发生异常\n由于API限制 请手动删除空录屏文件", 5000)
+            }
+        }).catch(() => { })
+    },
+    "removeWatermark": () => {
+        const allElements = document.querySelectorAll('*') as NodeListOf<HTMLElement>;
+        let removedElementCount=0;
+        for (const element of allElements) {
+            const elementStyle=getComputedStyle(element);
+            const zIndexNumber=parseInt(elementStyle.zIndex);
+            //防止异常
+            if(isNaN(zIndexNumber)) continue
+            // 将所有忽略指针事件且带zIndex的元素判为水印
+            if (elementStyle.pointerEvents === "none"&&zIndexNumber>1) {
+                element.remove();
+                removedElementCount++;
+            }
+        }
+        showToast(removedElementCount===0?"未找到符合条件的元素":`已移除${removedElementCount}个元素`)
     }
 }
