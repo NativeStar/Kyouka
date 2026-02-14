@@ -513,7 +513,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(`已${document.dir === "rtl" ? "开启" : "关闭"}强制RTL`)
     },
     "changeTitle": () => {
-        const newTitle = prompt("输入新标题");
+        const newTitle = prompt("输入新标题", document.title);
         if (newTitle) document.title = newTitle;
         showToast(newTitle ? "执行成功" : "操作被取消")
     },
@@ -692,18 +692,31 @@ export const Tools: { [key: string]: () => void } = {
     },
     "removeWatermark": () => {
         const allElements = document.querySelectorAll('*') as NodeListOf<HTMLElement>;
-        let removedElementCount=0;
+        let removedElementCount = 0;
         for (const element of allElements) {
-            const elementStyle=getComputedStyle(element);
-            const zIndexNumber=parseInt(elementStyle.zIndex);
+            const elementStyle = getComputedStyle(element);
+            const zIndexNumber = parseInt(elementStyle.zIndex);
             //防止异常
-            if(isNaN(zIndexNumber)) continue
+            if (isNaN(zIndexNumber)) continue
             // 将所有忽略指针事件且带zIndex的元素判为水印
-            if (elementStyle.pointerEvents === "none"&&zIndexNumber>1) {
+            if (elementStyle.pointerEvents === "none" && zIndexNumber > 1) {
                 element.remove();
                 removedElementCount++;
             }
         }
-        showToast(removedElementCount===0?"未找到符合条件的元素":`已移除${removedElementCount}个元素`)
+        showToast(removedElementCount === 0 ? "未找到符合条件的元素" : `已移除${removedElementCount}个元素`)
+    },
+    "copyPageIconUrl": () => {
+        const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
+        if (linkElement) {
+            navigator.clipboard.writeText(linkElement.href);
+            showToast("已复制图标URL")
+        } else {
+            showToast("该网页未设置图标")
+        }
+    },
+    "copyTitle": () => {
+        navigator.clipboard.writeText(document.title);
+        showToast("已复制页面标题")
     }
 }
