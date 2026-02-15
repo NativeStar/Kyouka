@@ -597,9 +597,9 @@ export const Tools: { [key: string]: () => void } = {
         }
     },
     "changePageIconOnline": () => {
-        const url = prompt("输入目标图片URL");
+        const linkElement: HTMLLinkElement|null = document.querySelector("link[rel='icon']");;
+        const url = prompt("输入目标图片URL",linkElement?.href??"");
         if (!url) return;
-        const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
         if (linkElement) {
             linkElement.href = url;
         } else {
