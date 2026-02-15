@@ -1,18 +1,20 @@
 {
   "name": "Kyouka",
   "description": "魔法凝结",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "manifest_version": 3,
   "permissions": [
     "scripting",
     "activeTab",
     "cookies"
   ],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "icons": {
     "128": "/icons/icon128.png"
   },
-  "action":{},
+  "action": {},
   "background": {
     "service_worker": "service.js",
     "type": "module"
@@ -44,5 +46,15 @@
       "type": "module",
       "run_at": "document_start"
     }
-  ]
+  ],
+  "commands": {
+    "openPanelHotkey": {
+      "suggested_key": "Alt+M",
+      "description": "开关控制面板"
+    },
+    "openWithResetPosition":{
+      "suggested_key": "Alt+Shift+M",
+      "description": "重置位置并开关控制面板"
+    }
+  }
 }

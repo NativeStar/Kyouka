@@ -30,6 +30,10 @@ function init() {
     observer.observe(document.documentElement, { childList: true, subtree: true });
 }
 function initDom(dom: Document) {
+    //带自动获取版本号的标题
+    {
+        dom.getElementById("menuTitleBar")!.insertAdjacentText("afterbegin", `Kyouka-${chrome.runtime.getManifest().version}`);
+    }
     // 注入js
     const root: HTMLDialogElement = dom.getElementById("root") as HTMLDialogElement;
     {
@@ -78,7 +82,11 @@ function initDom(dom: Document) {
         chrome.runtime.onMessage.addListener((message, sender) => {
             if (chrome.runtime.id !== sender.id) return
             if (message.type === "openDialog") {
-                root.show();
+                root.open ? root.close() : root.show();
+            } else if (message.type === "openWithResetPosition") {
+                root.style.top = "25%";
+                root.style.left = "25%";
+                root.open ? root.close() : root.show();
             }
         })
     }

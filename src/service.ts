@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender, sendResponse) 
             break
         case "persistCookie":
             const expire = Math.floor(Date.now() / 1000) + 390 * 24 * 60 * 60;
-            chrome.cookies.getAll({ session: false, url: sender.url}).then(cookies => {
+            chrome.cookies.getAll({ session: false, url: sender.url }).then(cookies => {
                 for (const cookieItem of cookies) {
                     const host = cookieItem.domain.startsWith(".") ? cookieItem.domain.slice(1) : cookieItem.domain;
                     const scheme = cookieItem.secure ? "https://" : "http://";
@@ -63,3 +63,13 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender, sendResponse) 
 chrome.action.onClicked.addListener((tab) => {
     chrome.tabs.sendMessage(tab.id!, { type: "openDialog" })
 });
+//快捷键
+chrome.commands.onCommand.addListener((command, tab) => {
+    if (!tab) return
+    if (command === "openPanelHotkey") {
+        chrome.tabs.sendMessage(tab.id!, { type: "openDialog" })
+    }else if(command==="openWithResetPosition"){
+        chrome.tabs.sendMessage(tab.id!, { type: "openWithResetPosition" })
+    }
+
+})

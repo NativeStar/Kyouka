@@ -11,21 +11,6 @@ async function init() {
         return
     }
     shadowDomDiv.removeAttribute("id");
-    document.addEventListener("keydown", event => {
-        if (event.altKey && event.key.toLowerCase() === "m") {
-            event.stopImmediatePropagation();
-            event.preventDefault();
-            if (document.pointerLockElement) {
-                document.exitPointerLock();
-            }
-            const rootDom = menuShadowRoot.getElementById("root") as HTMLDialogElement;
-            if (event.shiftKey) {
-                rootDom.style.top = "25%";
-                rootDom.style.left = "25%";
-            }
-            rootDom.open ? rootDom.close() : rootDom.show();
-        }
-    });
     initDom(menuShadowRoot);
     menuShadowRoot.getElementById("injectScript")?.remove();
 }
