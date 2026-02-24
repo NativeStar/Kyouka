@@ -597,8 +597,8 @@ export const Tools: { [key: string]: () => void } = {
         }
     },
     "changePageIconOnline": () => {
-        const linkElement: HTMLLinkElement|null = document.querySelector("link[rel='icon']");;
-        const url = prompt("输入目标图片URL",linkElement?.href??"");
+        const linkElement: HTMLLinkElement | null = document.querySelector("link[rel='icon']");;
+        const url = prompt("输入目标图片URL", linkElement?.href ?? "");
         if (!url) return;
         if (linkElement) {
             linkElement.href = url;
@@ -705,6 +705,32 @@ export const Tools: { [key: string]: () => void } = {
             }
         }
         showToast(removedElementCount === 0 ? "未找到符合条件的元素" : `已移除${removedElementCount}个元素`)
+    },
+    "removeWatermarkEnchant": () => {
+        //hook append
+        const hookAppendResult = Hooker.hookMethod(HTMLElement.prototype, "append", "removeWatermarkEnchant", {
+            beforeMethodInvoke(args, abortController) {
+                if (!(args[0] instanceof HTMLElement)) {
+                    return
+                }
+                const element = args[0] as HTMLElement;
+                // 还没挂载到DOM 只能这样
+                const elementStyle = element.style;
+                const zIndexNumber = parseInt(elementStyle.zIndex);
+                //防止异常
+                if (isNaN(zIndexNumber)) return
+                if (elementStyle.pointerEvents === "none" && zIndexNumber > 1) {
+                    element.remove();
+                    abortController.abort();
+                }
+            },
+        });
+        if (!hookAppendResult) {
+            showToast("发生异常 请刷新页面重试")
+            return
+        }
+        //调用旧的移除水印即可
+        Tools["removeWatermark"]();
     },
     "copyPageIconUrl": () => {
         const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
