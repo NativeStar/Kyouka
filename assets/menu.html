@@ -68,6 +68,7 @@
         <button class="itemButton toolButton" tool="changePageIconOnline" tooltip="将网页icon改为指定的网络图片\n可能被跨域政策或CSP阻止加载">修改网页图标(网络)</button>
         <button class="itemButton toolButton" tool="changeTitle" tooltip="修改标签页显示的标题">修改标题</button>
         <button class="itemButton toolButton" tool="copyTitle" tooltip="修改标签页显示的标题">复制标题</button>
+        <button class="itemButton toolButton" tool="closePageConfirm" tooltip="离开页面时弹出二次确认\n不保证所有浏览器都能生效">离开页面确认</button>
       </div>
       <div class="toolList" type="about" style="display: none;">
         <button class="itemButton toolButton" tool="openRepository">项目链接</button>
@@ -81,7 +82,7 @@
         <button class="itemButton helpButton" helpText="用于简单录制一些表格 页游等使用Canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况\n带音频录制为实验性功能">录制canvas</button>
         <button class="itemButton helpButton" helpText="该功能还能顺便解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
         <button class="itemButton helpButton" helpText="移除所有忽略指针事件且带zIndex参数的元素\n增强功能会在执行移除前Hook相关方法阻止符合规则的元素被追加\n该功能不易维护且难以避免漏(误)判 如问题过多后续可能删除">移除水印</button>
-        <button class="itemButton helpButton" helpText="方便调试页面的事件监听器\n自定义事件仅支持不带参数的事件(如pagehide blur等)\n注意某些扩展的监听器也会被触发且可能发生异常 (毕竟正常不会有多次load之类事件)">伪造事件</button>
+        <button class="itemButton helpButton" helpText="方便调试页面的事件监听器\n自定义事件仅支持不带参数的事件(如pagehide blur等)\n注意某些扩展的监听器也会被触发且可能发生异常 (毕竟正常不会有多次load之类事件)\n且此类由脚本创建的事件可能被页面忽略">伪造事件</button>
       </div>
     </div>
   </dialog>

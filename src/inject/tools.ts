@@ -766,5 +766,11 @@ export const Tools: { [key: string]: () => void } = {
         if (!eventName||eventName==="") return
         window.dispatchEvent(new CustomEvent(eventName));
         showToast(`分发自定义事件:${eventName}`,750)
+    },
+    "closePageConfirm":()=>{
+        window.addEventListener("beforeunload",(event)=>{
+            event.preventDefault();
+        });
+        showToast("执行成功")
     }
 }
