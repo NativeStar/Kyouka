@@ -747,5 +747,24 @@ export const Tools: { [key: string]: () => void } = {
     "copyTitle": () => {
         navigator.clipboard.writeText(document.title);
         showToast("已复制页面标题")
+    },
+    "dispatchLoadEvent": () => {
+        window.dispatchEvent(new Event("load"));
+        showToast("已分发load事件",750)
+    },
+    "dispatchBeforeunloadEvent": () => {
+        window.dispatchEvent(new Event("beforeunload"));
+        // 缩短显示时间因为屏蔽sendBeacon的提示也可能弹出
+        showToast("已分发beforeunload事件",750)
+    },
+    "dispatchUnloadEvent": () => {
+        window.dispatchEvent(new Event("unload"));
+        showToast("已分发unload事件",750)
+    },
+    "dispatchCustomEvent":()=>{
+        const eventName=prompt("请输入事件名","pagehide");
+        if (!eventName||eventName==="") return
+        window.dispatchEvent(new CustomEvent(eventName));
+        showToast(`分发自定义事件:${eventName}`,750)
     }
 }

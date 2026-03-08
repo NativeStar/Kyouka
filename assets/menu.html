@@ -36,20 +36,24 @@
         <button class="itemButton toolButton" tool="removeWatermarkEnchant" tooltip="实验性功能 移除符合特征的元素并尝试防止恢复\n可能存在严重误判漏判">增强移除水印</button>
       </div>
       <div class="toolList" type="program" style="display: none;">
-        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS(插入元素)</button>
-        <button class="itemButton toolButton" id="execJavascriptByExtension" tooltip="读取内容后通过chrome.scripting.executeScript执行">注入本地JS(扩展执行)</button>
-        <button class="itemButton toolButton" tool="injectOnlineScript" tooltip="加载指定URL的代码后执行\n可能被跨域政策或CSP阻止加载">注入网络JS</button>
-        <button class="itemButton toolButton" id="injectCssByExtension" tooltip="读取内容后通过chrome.scripting.insertCSS执行">注入本地CSS</button>
-        <button class="itemButton toolButton" tool="injectOnlineCss" tooltip="加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入网络CSS</button>
         <button class="itemButton toolButton" tool="blockEval" tooltip="使所有eval函数调用无法执行">屏蔽eval</button>
         <button class="itemButton toolButton" id="persistCookieByExtension" tooltip="将所有非会话Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态">持久化Cookie</button>
         <button class="itemButton toolButton" tool="forcePropertyRW" tooltip="强制修改设置属性时的\nwritable和configurable为true">强制可配置</button>
         <button class="itemButton toolButton" tool="blockOpen" tooltip="屏蔽所有open调用\n不能完全作为阻止重定向使用">屏蔽open</button>
         <button class="itemButton toolButton" tool="logJsonOperation" tooltip="将页面所有JSON操作打印至控制台\n(即stringify和parse调用)">打印JSON操作</button>
         <button class="itemButton toolButton" tool="blockConsole" tooltip="阻止调用console进行日志输出">屏蔽日志</button>
-        <button class="itemButton toolButton" tool="blockSendBeacon" tooltip="阻止调用navigator.sendBeacon\n用于离开页面前上报 似乎很冷门的API">屏蔽sendBeacon</button>
+        <button class="itemButton toolButton" tool="blockSendBeacon" tooltip="阻止调用navigator.sendBeacon并打印其调用参数\n通常用于离开页面前上报数据">屏蔽sendBeacon</button>
+        <button class="itemButton toolButton" tool="dispatchLoadEvent" tooltip="触发load事件监听器\n用于调试页面初始化">伪造load</button>
+        <button class="itemButton toolButton" tool="dispatchBeforeunloadEvent" tooltip="触发beforeunload事件监听器\n用于调试相关功能">伪造beforeunload</button>
+        <button class="itemButton toolButton" tool="dispatchUnloadEvent" tooltip="触发unload事件监听器\n用于调试相关功能">伪造unload</button>
+        <button class="itemButton toolButton" tool="dispatchCustomEvent" tooltip="在window对象上分发指定事件\n仅建议使用blur等无参数事件 否则可能导致异常">伪造自定义事件</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
+        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS(插入元素)</button>
+        <button class="itemButton toolButton" id="execJavascriptByExtension" tooltip="读取内容后通过chrome.scripting.executeScript执行">注入本地JS(扩展执行)</button>
+        <button class="itemButton toolButton" tool="injectOnlineScript" tooltip="加载指定URL的代码后执行\n可能被跨域政策或CSP阻止加载">注入网络JS</button>
+        <button class="itemButton toolButton" id="injectCssByExtension" tooltip="读取内容后通过chrome.scripting.insertCSS执行">注入本地CSS</button>
+        <button class="itemButton toolButton" tool="injectOnlineCss" tooltip="加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入网络CSS</button>
         <button class="itemButton toolButton" tool="openEyeDropper" tooltip="获取选中像素的颜色RGB值">屏幕取色</button>
         <button class="itemButton toolButton" tool="becomeDocumentPictureInPicture" tooltip="将页面使用文档画中画显示\n可能会有很多问题">转为画中画</button>
         <button class="itemButton toolButton" tool="recordCanvas" tooltip="60帧录制canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas</button>
@@ -76,6 +80,8 @@
         <button class="itemButton helpButton" helpText="由于实现原理是直接复制DOM 画中画页面会有各种问题\n且该功能本身限制较多 在该场景下实用性只能说一般">转为画中画</button>
         <button class="itemButton helpButton" helpText="用于简单录制一些表格 页游等使用Canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况\n带音频录制为实验性功能">录制canvas</button>
         <button class="itemButton helpButton" helpText="该功能还能顺便解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
+        <button class="itemButton helpButton" helpText="移除所有忽略指针事件且带zIndex参数的元素\n增强功能会在执行移除前Hook相关方法阻止符合规则的元素被追加\n该功能不易维护且难以避免漏(误)判 如问题过多后续可能删除">移除水印</button>
+        <button class="itemButton helpButton" helpText="方便调试页面的事件监听器\n自定义事件仅支持不带参数的事件(如pagehide blur等)\n注意某些扩展的监听器也会被触发且可能发生异常 (毕竟正常不会有多次load之类事件)">伪造事件</button>
       </div>
     </div>
   </dialog>
