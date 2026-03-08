@@ -61,15 +61,32 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender, sendResponse) 
 });
 // action
 chrome.action.onClicked.addListener((tab) => {
-    chrome.tabs.sendMessage(tab.id!, { type: "openDialog" })
+    chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err,tab))
 });
 //快捷键
 chrome.commands.onCommand.addListener((command, tab) => {
     if (!tab) return
     if (command === "openPanelHotkey") {
-        chrome.tabs.sendMessage(tab.id!, { type: "openDialog" })
-    }else if(command==="openWithResetPosition"){
-        chrome.tabs.sendMessage(tab.id!, { type: "openWithResetPosition" })
+        
+        chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err,tab))
+    } else if (command === "openWithResetPosition") {
+        chrome.tabs.sendMessage(tab.id!, { type: "openWithResetPosition" }).catch((err) => onSendMessageError(err,tab))
     }
-
-})
+});
+function onSendMessageError(errorInstance: Error,currentTab:chrome.tabs.Tab) {
+    if(errorInstance instanceof Error&&errorInstance.message==="Could not establish connection. Receiving end does not exist."){
+        const tabId = currentTab.id;
+        if(!tabId) return
+        chrome.scripting.executeScript({
+            target: {
+                tabId
+            },
+            func: () => {
+                if(window.confirm("扩展已更新 需刷新页面才能生效\n点击'确定'将执行刷新")) window.location.reload()
+            }
+        })
+    }else{
+        //其他超出预期的东西
+        console.error(errorInstance);
+    }
+}
