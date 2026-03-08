@@ -496,9 +496,10 @@ export const Tools: { [key: string]: () => void } = {
             return showToast("该功能已执行过")
         }
         const result = Hooker.hookMethod(navigator, "sendBeacon", "navigator.sendBeacon", {
-            beforeMethodInvoke(_args, abortController) {
+            beforeMethodInvoke(args, abortController) {
                 // 顺便看看有多少网站用了这个API
                 showToast("已阻止一次sendBeacon调用")
+                OriginObjects.console.log(args)
                 abortController.abort();
             }
         });
@@ -669,7 +670,6 @@ export const Tools: { [key: string]: () => void } = {
                     ...audioStream.getAudioTracks(),
                 ]);
                 recorder = new MediaRecorder(mixedStream, { mimeType: "video/webm" })
-                // recorder = new MediaRecorder(targetCanvas.captureStream(60), { mimeType: "video/webm" });
                 recorder.addEventListener("dataavailable", (event) => {
                     writeStream.write(event.data);
                 });
@@ -708,28 +708,31 @@ export const Tools: { [key: string]: () => void } = {
     },
     "removeWatermarkEnchant": () => {
         //hook append
-        const hookAppendResult = Hooker.hookMethod(HTMLElement.prototype, "append", "removeWatermarkEnchant", {
-            beforeMethodInvoke(args, abortController) {
-                if (!(args[0] instanceof HTMLElement)) {
-                    return
-                }
-                const element = args[0] as HTMLElement;
-                // 还没挂载到DOM 只能这样
-                const elementStyle = element.style;
-                const zIndexNumber = parseInt(elementStyle.zIndex);
-                //防止异常
-                if (isNaN(zIndexNumber)) return
-                if (elementStyle.pointerEvents === "none" && zIndexNumber > 1) {
-                    element.remove();
-                    abortController.abort();
-                }
-            },
-        });
-        if (!hookAppendResult) {
-            showToast("发生异常 请刷新页面重试")
-            return
+        //确保没有hook相关方法
+        if (!Hooker.isModifiedMethodOrObject(HTMLElement.prototype.append)) {
+            const hookAppendResult = Hooker.hookMethod(HTMLElement.prototype, "append", "removeWatermarkEnchant", {
+                beforeMethodInvoke(args, abortController) {
+                    if (!(args[0] instanceof HTMLElement)) {
+                        return
+                    }
+                    const element = args[0] as HTMLElement;
+                    // 还没挂载到DOM 只能这样
+                    const elementStyle = element.style;
+                    const zIndexNumber = parseInt(elementStyle.zIndex);
+                    //防止异常
+                    if (isNaN(zIndexNumber)) return
+                    if (elementStyle.pointerEvents === "none" && zIndexNumber > 1) {
+                        element.remove();
+                        abortController.abort();
+                    }
+                },
+            });
+            if (!hookAppendResult) {
+                showToast("发生异常 请刷新页面重试")
+                return
+            }
         }
-        //调用旧的移除水印即可
+        //之后调用旧的移除水印即可
         Tools["removeWatermark"]();
     },
     "copyPageIconUrl": () => {
