@@ -61,13 +61,14 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender, sendResponse) 
 });
 // action
 chrome.action.onClicked.addListener((tab) => {
+    //chrome内部标签页必定无法访问
+    if (tab.url?.startsWith("chrome://")) return
     chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err,tab))
 });
 //快捷键
 chrome.commands.onCommand.addListener((command, tab) => {
-    if (!tab) return
+    if (!tab||tab.url?.startsWith("chrome://")) return
     if (command === "openPanelHotkey") {
-        
         chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err,tab))
     } else if (command === "openWithResetPosition") {
         chrome.tabs.sendMessage(tab.id!, { type: "openWithResetPosition" }).catch((err) => onSendMessageError(err,tab))
