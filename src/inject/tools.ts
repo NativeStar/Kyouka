@@ -1,7 +1,7 @@
 ///<reference path="../dom.d.ts" />
 import { Hooker } from "./hook/hooker";
 import { OriginObjects } from "./hook/originObjects";
-import { showToast } from "./util";
+import { parseFileSize, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
 function wheelRemoveElementEventListener(event: MouseEvent) {
@@ -778,7 +778,7 @@ export const Tools: { [key: string]: () => void } = {
             return showToast("该功能已执行过")
         }
         const atobHook = Hooker.hookMethod<any>(window, "atob", "window.atob", {
-            afterMethodInvoke(_args,tempMethodResult) {
+            afterMethodInvoke(_args, tempMethodResult) {
                 OriginObjects.console.log("Base64 decode:", tempMethodResult.current)
             },
         });
@@ -788,5 +788,76 @@ export const Tools: { [key: string]: () => void } = {
             },
         });
         showToast(atobHook && parseHook ? "执行成功" : "执行失败 详见控制台")
-    }
+    },
+    "pageInfo": async () => {
+        showToast("统计中...")
+        const scriptElementCount = document.querySelectorAll("script").length;
+        const styleElementCount = document.querySelectorAll("style").length;
+        const resourcesInfoList: PerformanceResourceTiming[] = performance.getEntriesByType("resource");
+        const resCounts = {
+            //css文件
+            cssCount: 0,
+            //由css引用的文件
+            cssRefCount: 0,
+            //js文件
+            jsCount: 0,
+            //音频
+            audioCount: 0,
+            //sendBeacon发送的数据
+            beaconCount: 0,
+            //网络请求
+            networkCount: 0,
+            //图片
+            imgCount: 0,
+            //视频
+            videoCount: 0
+        };
+        for (const resInfo of resourcesInfoList) {
+            switch (resInfo.initiatorType) {
+                case "link":
+                    if (resInfo.name.endsWith(".css")) {
+                        resCounts.cssCount++;
+                    }
+                    break;
+                case "css":
+                    resCounts.cssRefCount++;
+                    break;
+                case "script":
+                    resCounts.jsCount++;
+                    break;
+                case "audio":
+                    resCounts.audioCount++;
+                    break;
+                case "beacon":
+                    resCounts.beaconCount++;
+                    return
+                case "fetch":
+                case "xmlhttprequest":
+                    resCounts.networkCount++;
+                    break;
+                case "image":
+                    resCounts.imgCount++;
+                    break
+                case "video":
+                    resCounts.videoCount++;
+                    break
+                default:
+                    break;
+            }
+        }
+        const indexedDbCount = (await indexedDB.databases()).length;
+        const cachesCount = (await caches.keys()).length;
+        const storageBucketCount =(await (navigator.storageBuckets.keys())).length
+        const totalSize=(await navigator.storage.estimate()).usage
+        alert(`数据准确度一般 仅供参考 部分项目仅计算从网络加载的内容数量
+---- PAGE 1/2 ----
+script元素数:${scriptElementCount} style元素数:${styleElementCount}
+CSS文件:${resCounts.cssCount} CSS引用数据:${resCounts.cssRefCount} JavaScript文件:${resCounts.jsCount}
+音频:${resCounts.audioCount} 图片:${resCounts.networkCount}\ 视频:${resCounts.videoCount}
+其他网络请求:${resCounts.networkCount} 信标请求:${resCounts.beaconCount}`)
+        alert(`---- PAGE 2/2 ----
+本地存储条目:${localStorage.length} 会话存储条目:${sessionStorage.length}
+IndexedDb数据库:${indexedDbCount} 缓存:${cachesCount} 存储桶:${storageBucketCount}
+资源总占用:${totalSize?parseFileSize(totalSize):"计算失败"}`)
+    },
 }
