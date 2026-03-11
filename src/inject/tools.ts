@@ -830,7 +830,7 @@ export const Tools: { [key: string]: () => void } = {
                     break;
                 case "beacon":
                     resCounts.beaconCount++;
-                    return
+                    break
                 case "fetch":
                 case "xmlhttprequest":
                     resCounts.networkCount++;
@@ -858,6 +858,6 @@ CSS文件:${resCounts.cssCount} CSS引用数据:${resCounts.cssRefCount} JavaScr
         alert(`---- PAGE 2/2 ----
 本地存储条目:${localStorage.length} 会话存储条目:${sessionStorage.length}
 IndexedDb数据库:${indexedDbCount} 缓存:${cachesCount} 存储桶:${storageBucketCount}
-资源总占用:${totalSize?parseFileSize(totalSize):"计算失败"}`)
+资源总占用:${totalSize?parseFileSize(totalSize):"由于未知原因 计算失败"}`)
     },
 }
