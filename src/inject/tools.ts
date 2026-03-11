@@ -750,27 +750,43 @@ export const Tools: { [key: string]: () => void } = {
     },
     "dispatchLoadEvent": () => {
         window.dispatchEvent(new Event("load"));
-        showToast("已分发load事件",750)
+        showToast("已分发load事件", 750)
     },
     "dispatchBeforeunloadEvent": () => {
         window.dispatchEvent(new Event("beforeunload"));
         // 缩短显示时间因为屏蔽sendBeacon的提示也可能弹出
-        showToast("已分发beforeunload事件",750)
+        showToast("已分发beforeunload事件", 750)
     },
     "dispatchUnloadEvent": () => {
         window.dispatchEvent(new Event("unload"));
-        showToast("已分发unload事件",750)
+        showToast("已分发unload事件", 750)
     },
-    "dispatchCustomEvent":()=>{
-        const eventName=prompt("请输入事件名","pagehide");
-        if (!eventName||eventName==="") return
+    "dispatchCustomEvent": () => {
+        const eventName = prompt("请输入事件名", "pagehide");
+        if (!eventName || eventName === "") return
         window.dispatchEvent(new CustomEvent(eventName));
-        showToast(`分发自定义事件:${eventName}`,750)
+        showToast(`分发自定义事件:${eventName}`, 750)
     },
-    "closePageConfirm":()=>{
-        window.addEventListener("beforeunload",(event)=>{
+    "closePageConfirm": () => {
+        window.addEventListener("beforeunload", (event) => {
             event.preventDefault();
         });
         showToast("执行成功")
+    },
+    "logBase64Operation": () => {
+        if (Hooker.isModifiedMethodOrObject(window.btoa ?? {})) {
+            return showToast("该功能已执行过")
+        }
+        const atobHook = Hooker.hookMethod<any>(window, "atob", "window.atob", {
+            afterMethodInvoke(_args,tempMethodResult) {
+                OriginObjects.console.log("Base64 decode:", tempMethodResult.current)
+            },
+        });
+        const parseHook = Hooker.hookMethod<string>(window, "btoa", "window.btoa", {
+            afterMethodInvoke(args) {
+                OriginObjects.console.log("Base64 encode:", args[0])
+            },
+        });
+        showToast(atobHook && parseHook ? "执行成功" : "执行失败 详见控制台")
     }
 }

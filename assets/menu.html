@@ -41,6 +41,7 @@
         <button class="itemButton toolButton" tool="forcePropertyRW" tooltip="强制修改设置属性时的\nwritable和configurable为true">强制可配置</button>
         <button class="itemButton toolButton" tool="blockOpen" tooltip="屏蔽所有open调用\n不能完全作为阻止重定向使用">屏蔽open</button>
         <button class="itemButton toolButton" tool="logJsonOperation" tooltip="将页面所有JSON操作打印至控制台\n(即stringify和parse调用)">打印JSON操作</button>
+        <button class="itemButton toolButton" tool="logBase64Operation" tooltip="将页面所有base64操作打印至控制台\n(即atob和btoa调用)">打印base64操作</button>
         <button class="itemButton toolButton" tool="blockConsole" tooltip="阻止调用console进行日志输出">屏蔽日志</button>
         <button class="itemButton toolButton" tool="blockSendBeacon" tooltip="阻止调用navigator.sendBeacon并打印其调用参数\n通常用于离开页面前上报数据">屏蔽sendBeacon</button>
         <button class="itemButton toolButton" tool="dispatchLoadEvent" tooltip="触发load事件监听器\n用于调试页面初始化">伪造load</button>
@@ -78,6 +79,7 @@
         <button class="itemButton helpButton" helpText="移除后具体如何数据处理取决于网页本身代码\n且异常的数据大概率被后端拦截">移除输入限制</button>
         <button class="itemButton helpButton" helpText="显示所有被隐藏的元素\n该功能可能破坏页面布局!">显示隐藏元素</button>
         <button class="itemButton helpButton" helpText="部分页面会非常频繁的调用这两个方法 某些情况下会造成性能问题 多清空日志即可\n如果发现打印了奇怪的对象 可能是某些polyfill库在探测API实现 通常不必理会">打印JSON操作</button>
+        <button class="itemButton helpButton" helpText="由于一些特性 对btoa方法的打印输出可能为乱码">打印base64操作</button>
         <button class="itemButton helpButton" helpText="由于实现原理是直接复制DOM 画中画页面会有各种问题\n且该功能本身限制较多 在该场景下实用性只能说一般">转为画中画</button>
         <button class="itemButton helpButton" helpText="用于简单录制一些表格 页游等使用Canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况\n带音频录制为实验性功能">录制canvas</button>
         <button class="itemButton helpButton" helpText="该功能还能顺便解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
