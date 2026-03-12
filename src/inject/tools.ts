@@ -848,7 +848,7 @@ export const Tools: { [key: string]: () => void } = {
         const indexedDbCount = (await indexedDB.databases()).length;
         const cachesCount = (await caches.keys()).length;
         const storageBucketCount =(await (navigator.storageBuckets.keys())).length
-        const totalSize=(await navigator.storage.estimate()).usage
+        const totalSize=(await navigator.storage.estimate()).usage??null
         alert(`数据准确度一般 仅供参考 部分项目仅计算从网络加载的内容数量
 ---- PAGE 1/2 ----
 script元素数:${scriptElementCount} style元素数:${styleElementCount}
@@ -858,6 +858,6 @@ CSS文件:${resCounts.cssCount} CSS引用数据:${resCounts.cssRefCount} JavaScr
         alert(`---- PAGE 2/2 ----
 本地存储条目:${localStorage.length} 会话存储条目:${sessionStorage.length}
 IndexedDb数据库:${indexedDbCount} 缓存:${cachesCount} 存储桶:${storageBucketCount}
-资源总占用:${totalSize?parseFileSize(totalSize):"由于未知原因 计算失败"}`)
+资源总占用:${totalSize!==null?parseFileSize(totalSize):"由于未知原因 计算失败"}`)
     },
 }
