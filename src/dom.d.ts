@@ -10,6 +10,10 @@ declare function showOpenFilePicker():Promise<FileSystemFileHandle[]>
 declare function showSaveFilePicker(options?:{suggestedName:string}):Promise<FileSystemFileHandle>
 declare interface Performance{
     getEntriesByType(type:"resource"):PerformanceResourceTiming[]
+    memory:{
+        jsHeapSizeLimit:number
+        totalJSHeapSize:number
+    }
 }
 declare interface NavigatorStorage{
     storageBuckets:{
