@@ -867,5 +867,16 @@ Cookie(非HttpOnly):${cookieCount} 存储桶:${storageBucketCount}
 UserAgent:${navigator.userAgent}
 语言:${navigator.language} 支持语言:${navigator.languages.length}
 屏幕尺寸:${window.screen.width}x${window.screen.height}`)
+    },
+    "logRandomUuid": () => {
+        if (Hooker.isModifiedMethodOrObject(crypto.randomUUID ?? {})) {
+            return showToast("该功能已执行过")
+        }
+        Hooker.hookMethod<string>(crypto, "randomUUID", "crypto.randomUUID", {
+            afterMethodInvoke(_args,tempMethodResult) {
+                OriginObjects.console.log("生成UUID:", tempMethodResult.current)
+            },
+        });
+        showToast("执行成功")
     }
 }
