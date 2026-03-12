@@ -20,6 +20,7 @@ function initDom(shadow: ShadowRoot) {
     const tooltip = shadow.getElementById("tooltip") as HTMLSpanElement;
     // 阻止操作穿透
     {
+        let easterEggActivated = false;
         root.addEventListener("click", event => {
             event.stopPropagation();
             event.preventDefault();
@@ -28,6 +29,19 @@ function initDom(shadow: ShadowRoot) {
             event.stopPropagation();
             event.preventDefault();
         });
+        titleBar.addEventListener("mousedown",event=>{
+            //屏蔽鼠标中键
+            if(event.button===1){
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                //算是彩蛋吧
+                if(!easterEggActivated){
+                    easterEggActivated = true;
+                    const textElement=shadow.getElementById("titleText")!
+                    textElement.innerText = `${textElement.innerText} - 只能说我输了`
+                }
+            }
+        })
     }
     //拖动
     {
@@ -142,6 +156,14 @@ function initDom(shadow: ShadowRoot) {
             event.preventDefault();
             event.stopImmediatePropagation();
         });
+    }
+    //没毛用小动画
+    {
+        let titleTextIsBlack = true;
+        setInterval(() => {
+            titleTextIsBlack = !titleTextIsBlack;
+            titleBar.style.color = titleTextIsBlack ? "black" : "white";
+        }, 450);
     }
 }
 init();

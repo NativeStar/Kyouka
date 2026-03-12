@@ -32,7 +32,7 @@ function init() {
 function initDom(dom: Document) {
     //带自动获取版本号的标题
     {
-        dom.getElementById("menuTitleBar")!.insertAdjacentText("afterbegin", `Kyouka-${chrome.runtime.getManifest().version}`);
+        dom.getElementById("titleText")!.insertAdjacentText("afterbegin", `Kyouka-${chrome.runtime.getManifest().version}`);
     }
     // 注入js
     const root: HTMLDialogElement = dom.getElementById("root") as HTMLDialogElement;
