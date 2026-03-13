@@ -50,6 +50,7 @@
         <button class="itemButton toolButton" tool="dispatchUnloadEvent" tooltip="触发unload事件监听器\n用于调试相关功能">伪造unload</button>
         <button class="itemButton toolButton" tool="dispatchCustomEvent" tooltip="在window对象上分发指定事件\n仅建议使用blur等无参数事件 否则可能导致异常">伪造自定义事件</button>
         <button class="itemButton toolButton" tool="logRandomUuid" tooltip="在控制台打印通过crypto.randomUUID生成的UUID\n该方法可能使用的并不算多">打印UUID</button>
+        <button class="itemButton toolButton" tool="blockWriteClipboard" tooltip="阻止页面写入剪切板并将欲写入数据打印至控制台\n(读取已经被浏览器限制了 不需要进行屏蔽)">屏蔽剪切板写入</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
         <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS(插入元素)</button>
