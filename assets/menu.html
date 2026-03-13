@@ -62,6 +62,7 @@
         <button class="itemButton toolButton" tool="recordCanvas" tooltip="60帧录制canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas</button>
         <button class="itemButton toolButton" tool="screenRecorder" tooltip="执行录屏并保存至本地\n类似于录屏软件">录制屏幕</button>
         <button class="itemButton toolButton" tool="recordCanvasWithAudio" tooltip="60帧录制canvas渲染内容并保存至本地\n同时申请录音应对游戏录制等情况\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas并录音</button>
+        <button class="itemButton toolButton" tool="dumpCache" tooltip="导出页面主动缓存的数据">转储缓存</button>
       </div>
       <div class="toolList" type="joy" style="display: none;"> 
         <button class="itemButton toolButton" tool="playAudio" tooltip="选择本地音频文件播放\n除刷新或关闭页面外无法中断播放">播放音频</button>
@@ -90,6 +91,7 @@
         <button class="itemButton helpButton" helpText="该功能还能顺便解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
         <button class="itemButton helpButton" helpText="移除所有忽略指针事件且带zIndex参数的元素\n增强功能会在执行移除前Hook相关方法阻止符合规则的元素被追加\n该功能不易维护且难以避免漏(误)判 如问题过多后续可能删除">移除水印</button>
         <button class="itemButton helpButton" helpText="方便调试页面的事件监听器\n自定义事件仅支持不带参数的事件(如pagehide blur等)\n注意某些扩展的监听器也会被触发且可能发生异常 (毕竟正常不会有多次load之类事件)\n且此类由脚本创建的事件可能被页面忽略">伪造事件</button>
+        <button class="itemButton helpButton" helpText="将页面通过caches API存储的数据导出至指定文件夹下\n会在选择的目录下创建网站域名文件夹\n并将文件写入与存储桶同名的子文件夹内\n暂时没考虑优化 速度会很慢">转储缓存</button>
       </div>
     </div>
   </dialog>

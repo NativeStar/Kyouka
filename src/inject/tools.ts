@@ -1,7 +1,7 @@
 ///<reference path="../dom.d.ts" />
 import { Hooker } from "./hook/hooker";
 import { OriginObjects } from "./hook/originObjects";
-import { parseFileSize, showToast } from "./util";
+import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
 function wheelRemoveElementEventListener(event: MouseEvent) {
@@ -873,10 +873,55 @@ UserAgent:${navigator.userAgent}
             return showToast("该功能已执行过")
         }
         Hooker.hookMethod<string>(crypto, "randomUUID", "crypto.randomUUID", {
-            afterMethodInvoke(_args,tempMethodResult) {
+            afterMethodInvoke(_args, tempMethodResult) {
                 OriginObjects.console.log("生成UUID:", tempMethodResult.current)
             },
         });
         showToast("执行成功")
+    },
+    "dumpCache": async () => {
+        if (!("showDirectoryPicker" in window)) {
+            showToast("当前浏览器不支持showDirectoryPicker")
+            return
+        }
+        const cacheKeys = await caches.keys()
+        if (cacheKeys.length <= 0) {
+            showToast("当前页面没有主动缓存数据")
+            return
+        }
+        if (!confirm(`发现${cacheKeys.length}个缓存仓库 确认导出?`)) return
+        let currentRepoIndex = 0;
+        let currentCacheItemIndex = 0;
+        showDirectoryPicker({ mode: "readwrite" }).then(async (fs) => {
+            showToast("正在导出 请勿关闭页面...")
+            try {
+                const rootDirHandle = await fs.getDirectoryHandle(replaceWindowsFileNameInvalidChars(`CacheDump-${location.hostname}`), { create: true })
+                for (const cacheRepoName of cacheKeys) {
+                    currentRepoIndex++
+                    const cacheRepoInstance = await caches.open(cacheRepoName);
+                    const dirHandle = await rootDirHandle.getDirectoryHandle(replaceWindowsFileNameInvalidChars(`${location.hostname}/${cacheRepoName}`), { create: true })
+                    const cacheFilesList = await cacheRepoInstance.keys();
+                    for (const originCacheRequest of cacheFilesList) {
+                        currentCacheItemIndex++
+                        showProgressToast(`导出第${currentRepoIndex}/${cacheKeys.length}个仓库的第${currentCacheItemIndex}/${cacheFilesList.length}个文件`, true)
+                        const cacheItemResponse = await cacheRepoInstance.match(originCacheRequest)!;
+                        if (!cacheItemResponse) {
+                            OriginObjects.console.log(`Missing cache data:${originCacheRequest.url}`);
+                            continue
+                        }
+                        const url = new URL(originCacheRequest.url);
+                        const targetFileHandle = await dirHandle.getFileHandle(`${Date.now()}-${replaceWindowsFileNameInvalidChars(url.pathname)}`, { create: true })
+                        const targetFileOutputStream = await targetFileHandle.createWritable();
+                        await cacheItemResponse.body?.pipeTo(targetFileOutputStream);
+                    }
+                }
+                showProgressToast(null, false);
+                showToast("导出完成");
+            } catch (error) {
+                showProgressToast(null, false);
+                console.error(error);
+                showToast("导出失败 详见控制台")
+            }
+        }).catch(() => { })
     }
 }
