@@ -931,16 +931,27 @@ UserAgent:${navigator.userAgent}
         Hooker.hookAsyncMethod(navigator.clipboard, "writeText", "navigator.clipboard.writeText", {
             beforeMethodInvoke(args, abortController) {
                 OriginObjects.console.log(`Blocked write clipboard text: ${args[0]}`);
-                showToast("阻止一次剪切板操作",800);
+                showToast("阻止一次剪切板操作", 800);
                 abortController.abort();
             }
         });
         Hooker.hookAsyncMethod(navigator.clipboard, "write", "navigator.clipboard.write", {
             beforeMethodInvoke(args, abortController) {
                 OriginObjects.console.log(`Blocked write clipboard data: ${args[0]}`);
-                showToast("阻止一次剪切板操作",800);
+                showToast("阻止一次剪切板操作", 800);
                 abortController.abort();
             }
+        });
+        showToast("执行成功")
+    },
+    "logMathRandom": () => {
+        if (Hooker.isModifiedMethodOrObject(Math.random)) {
+            return showToast("该功能已执行过")
+        }
+        Hooker.hookMethod<number>(Math, "random", "Math.random", {
+            afterMethodInvoke(_args, tempMethodResult) {
+                OriginObjects.console.log("生成随机数:", tempMethodResult.current)
+            },
         });
         showToast("执行成功")
     }
