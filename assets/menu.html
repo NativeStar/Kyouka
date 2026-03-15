@@ -80,10 +80,11 @@
       </div>
       <div class="toolList" type="about" style="display: none;">
         <button class="itemButton toolButton" tool="openRepository">项目链接</button>
+        <button class="itemButton toolButton" id="openSettingPage">打开设置面板</button>
         <button class="itemButton helpButton" helpText="该项目主要用于开发调试和辅助工具 请勿用于页面逆向\n由于使用了大量较新的API外加懒得适配 项目可能无法在移动端浏览器上正常工作">使用须知</button>
         <button class="itemButton helpButton" helpText="Alt+M显示/关闭菜单\nAlt+Shift+M重置菜单位置并显示/关闭">快捷键</button>
         <button class="itemButton helpButton" helpText="选择本地JavaScript文件并注入页面\n两种方式暂未发现明显区别 且注入可能被CSP阻止 如果一种方式注入无效可尝试另一种">注入JS</button>
-        <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能\n目前只对Ant Design的input做出适配">DOM操作提醒</button>
+        <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能\n目前只对Ant Design的input做出适配">DOM操作相关</button>
         <button class="itemButton helpButton" helpText="移除后具体如何数据处理取决于网页本身代码\n且异常的数据大概率被后端拦截">移除输入限制</button>
         <button class="itemButton helpButton" helpText="显示所有被隐藏的元素\n该功能可能破坏页面布局!">显示隐藏元素</button>
         <button class="itemButton helpButton" helpText="部分页面会非常频繁的调用这两个方法 某些情况下会造成性能问题 多清空日志即可\n如果发现打印了奇怪的对象 可能是某些polyfill库在探测API实现 通常不必理会">打印JSON操作</button>

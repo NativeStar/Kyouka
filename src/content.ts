@@ -78,6 +78,12 @@ function initDom(dom: Document) {
         })
     }
     {
+        //打开设置页
+        dom.getElementById("openSettingPage")?.addEventListener("click",()=>{
+            chrome.runtime.sendMessage({type:"openSettingPage"})
+        })
+    }
+    {
         // action打开
         chrome.runtime.onMessage.addListener((message, sender) => {
             if (chrome.runtime.id !== sender.id) return

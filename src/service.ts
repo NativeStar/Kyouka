@@ -56,6 +56,9 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender) => {
                 }
             })
             break
+        case "openSettingPage":
+            chrome.runtime.openOptionsPage();
+            break
         default:
             break;
     }
@@ -94,7 +97,7 @@ function onSendMessageError(errorInstance: Error, currentTab: chrome.tabs.Tab) {
             func: () => {
                 if (window.confirm("扩展已更新 需刷新页面才能生效\n点击'确定'将执行刷新")) window.location.reload()
             }
-        })
+        }).catch(e=>console.log(e))
     } else {
         //其他超出预期的东西
         console.error(errorInstance);
@@ -123,7 +126,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, change, tab) => {
     }
     chrome.scripting.executeScript({
         target: {
-            allFrames: true,
             tabId: tabId
         },
         world: chrome.scripting.ExecutionWorld.MAIN,
@@ -140,5 +142,5 @@ chrome.tabs.onUpdated.addListener(async (tabId, change, tab) => {
             })
         },
         args: [config as ExtensionConfig]
-    })
+    }).catch(e => console.log(e))
 })

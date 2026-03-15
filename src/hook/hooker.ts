@@ -31,6 +31,10 @@ interface MethodHookMapItem {
 const hookedMethodKeyMap: Map<string, MethodHookMapItem> = new Map();
 export const hookSymbol = Symbol();
 export class Hooker {
+    private static originObjectSource=OriginObjects;
+    static setOriginObjectSource(source:typeof OriginObjects){
+        this.originObjectSource=source;
+    }
     static hookMethod<T = any>(parent: any, methodName: string, key: string, hookOption: MethodHookOption<T>): boolean {
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -44,7 +48,7 @@ export class Hooker {
             }
             const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : Reflect.get(parent, methodName);
             originMethod.toString = createBypassToStringMethod(methodName);
-            const hookEntryProxy = new OriginObjects.Proxy(originMethod, {
+            const hookEntryProxy = new this.originObjectSource.Proxy(originMethod, {
                 apply(_target, thisArg, args) {
                     const hookItem = hookedMethodKeyMap.get(key);
                     if (!hookItem) {
@@ -54,7 +58,7 @@ export class Hooker {
                     const tempResult: TempMethodResultWrapper<T> = {
                         current: null as T
                     }
-                    const abortController = new OriginObjects.AbortController();
+                    const abortController = new Hooker.originObjectSource.AbortController();
                     for (const currentHookOption of hookItem.option) {
                         currentHookOption.beforeMethodInvoke?.(args, abortController, thisArg, tempResult);
                     }
@@ -98,10 +102,11 @@ export class Hooker {
             }
             return false;
         } catch (error) {
-            OriginObjects.console.warn("Error on hooking method:", error);
+            this.originObjectSource.console.warn("Error on hooking method:", error);
             return false;
         }
     }
+    //TODO 功能大改 要改帮助页和README
     static hookAsyncMethod<T = any>(parent: any, methodName: string, key: string, hookOption: MethodHookOption<T>): boolean {
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -117,9 +122,9 @@ export class Hooker {
             try {
                 originMethod.toString = createBypassToStringMethod(methodName);
             } catch (error) {
-                OriginObjects.console.warn("Error on create bypass toString detect method:", error);
+                this.originObjectSource.console.warn("Error on create bypass toString detect method:", error);
             }
-            const hookEntry = new Proxy(originMethod, {
+            const hookEntry = new this.originObjectSource.Proxy(originMethod, {
                 apply(_target, thisArg, args) {
                     return new Promise<T>(async (resolve, reject) => {
                         const hookItem = hookedMethodKeyMap.get(key);
@@ -131,7 +136,7 @@ export class Hooker {
                         const tempResult: TempMethodResultWrapper<T> = {
                             current: undefined as T
                         }
-                        const abortController = new AbortController();
+                        const abortController = new Hooker.originObjectSource.AbortController();
                         for (const currentHookOption of hookItem.option) {
                             currentHookOption.beforeMethodInvoke?.(args, abortController, thisArg, tempResult);
                         }
@@ -177,13 +182,13 @@ export class Hooker {
             }
             return false;
         } catch (error) {
-            OriginObjects.console.warn("Error on hooking async method:", error);
+            this.originObjectSource.console.warn("Error on hooking async method:", error);
             return false;
         }
     }
     static createProxyObject<T extends object>(target: T, handler: ProxyHandler<T>, targetName: string): T {
         target.toString = createBypassToStringMethod(targetName);
-        const proxyTarget = new OriginObjects.Proxy(target, handler);
+        const proxyTarget = new this.originObjectSource.Proxy(target, handler);
         return proxyTarget;
     }
     static unhookMethod(id: string) {
@@ -201,6 +206,6 @@ export class Hooker {
         }
     }
     static isModifiedMethodOrObject(method: any) {
-        return OriginObjects.Reflect.has(method, hookSymbol);
+        return this.originObjectSource.Reflect.has(method, hookSymbol);
     }
 }

@@ -4,6 +4,7 @@ import { OriginObjects } from "../hook/originObjects";
 import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
+let originObjectReference:typeof OriginObjects=OriginObjects;
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -19,7 +20,7 @@ function wheelRemoveElementEventListener(event: MouseEvent) {
                 event.target.remove();
             }
         } catch (error) {
-            OriginObjects.console.warn("Error on remove element:", error);
+            originObjectReference.console.warn("Error on remove element:", error);
             showToast("执行时发生异常 已尝试强制移除");
             (event.target as HTMLElement).remove();
         }
@@ -33,6 +34,24 @@ function stopMediaRecorderKeyEventListener(event: KeyboardEvent) {
 }
 const toolState = {
     wheelRemoveElement: false
+}
+export async function waitOriginObject() {
+    for (let index = 0; index < 150; index++) {
+        if (!Reflect.has(window, "kyouka-backup-object")) {
+            await new Promise(resolve => setTimeout(resolve, 20));
+            continue
+        }
+        break
+    }
+    const originObjects = Reflect.get(window, "kyouka-backup-object") as typeof OriginObjects;
+    if (!originObjects) {
+        showToast("获取原始对象引用失败 功能可能出现异常")
+        return
+    }
+    Hooker.setOriginObjectSource(originObjects);
+    originObjectReference = originObjects;
+    //unmount
+    Reflect.deleteProperty(window, "kyouka-backup-object");
 }
 export const Tools: { [key: string]: () => void } = {
     "injectScript": () => {
@@ -50,7 +69,7 @@ export const Tools: { [key: string]: () => void } = {
                     document.body.appendChild(script);
                 } catch (e) {
                     alert("执行失败 详见控制台")
-                    OriginObjects.console.log(e);
+                    originObjectReference.console.log(e);
                 } finally {
                     URL.revokeObjectURL(url);
                 }
@@ -251,7 +270,7 @@ export const Tools: { [key: string]: () => void } = {
                     const audio = new Audio(blobUrl);
                     audio.addEventListener("error", (e) => {
                         alert("播放异常 可能是格式不支持")
-                        OriginObjects.console.log(e);
+                        originObjectReference.console.log(e);
                     })
                     audio.addEventListener("ended", () => {
                         requestIdleCallback(() => {
@@ -263,7 +282,7 @@ export const Tools: { [key: string]: () => void } = {
                     showToast("执行成功")
                 } catch (error) {
                     showToast("播放异常 可能是格式不支持")
-                    OriginObjects.console.log(error);
+                    originObjectReference.console.log(error);
                 }
             }).catch(() => { })
         })
@@ -286,7 +305,7 @@ export const Tools: { [key: string]: () => void } = {
                     showToast("执行成功");
                 } catch (e) {
                     showToast("执行时发生异常 详见控制台")
-                    OriginObjects.console.log(e);
+                    originObjectReference.console.log(e);
                 }
             })
         }).catch(() => { });
@@ -341,12 +360,12 @@ export const Tools: { [key: string]: () => void } = {
         }
         const stringifyHook = Hooker.hookMethod<string>(window.JSON, "stringify", "window.JSON.stringify", {
             afterMethodInvoke(args) {
-                OriginObjects.console.log("JSON Stringify:", args[0])
+                originObjectReference.console.log("JSON Stringify:", args[0])
             },
         });
         const parseHook = Hooker.hookMethod<object>(window.JSON, "parse", "window.JSON.parse", {
             afterMethodInvoke(_args, tempMethodResult) {
-                OriginObjects.console.log("JSON Parse:", tempMethodResult.current)
+                originObjectReference.console.log("JSON Parse:", tempMethodResult.current)
             },
         });
         showToast(stringifyHook && parseHook ? "执行成功" : "执行失败 详见控制台")
@@ -499,7 +518,7 @@ export const Tools: { [key: string]: () => void } = {
             beforeMethodInvoke(args, abortController) {
                 // 顺便看看有多少网站用了这个API
                 showToast("已阻止一次sendBeacon调用")
-                OriginObjects.console.log(args)
+                originObjectReference.console.log(args)
                 abortController.abort();
             }
         });
@@ -531,7 +550,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "openRepository": () => {
         // 防止使用屏蔽open后把自己给坑了
-        OriginObjects.open.call(window, "https://github.com/NativeStar/Kyouka")
+        originObjectReference.open.call(window, "https://github.com/NativeStar/Kyouka")
     },
     "screenRecorder": () => {
         if (!("showSaveFilePicker" in window)) {
@@ -581,7 +600,7 @@ export const Tools: { [key: string]: () => void } = {
             document.body.appendChild(script);
         } catch (error) {
             alert("执行失败 详见控制台")
-            OriginObjects.console.log(error);
+            originObjectReference.console.log(error);
         }
     },
     "injectOnlineCss": () => {
@@ -594,7 +613,7 @@ export const Tools: { [key: string]: () => void } = {
             document.head.appendChild(link);
         } catch (error) {
             alert("执行失败 详见控制台")
-            OriginObjects.console.log(error);
+            originObjectReference.console.log(error);
         }
     },
     "changePageIconOnline": () => {
@@ -685,7 +704,7 @@ export const Tools: { [key: string]: () => void } = {
                 alert("使用Alt+P快捷键停止录制\n点击'确定'开始录制")
                 recorder.start();
             } catch (error) {
-                OriginObjects.console.log(error)
+                originObjectReference.console.log(error)
                 showToast("用户未授权或发生异常\n由于API限制 请手动删除空录屏文件", 5000)
             }
         }).catch(() => { })
@@ -779,12 +798,12 @@ export const Tools: { [key: string]: () => void } = {
         }
         const atobHook = Hooker.hookMethod<any>(window, "atob", "window.atob", {
             afterMethodInvoke(_args, tempMethodResult) {
-                OriginObjects.console.log("Base64 decode:", tempMethodResult.current)
+                originObjectReference.console.log("Base64 decode:", tempMethodResult.current)
             },
         });
         const parseHook = Hooker.hookMethod<string>(window, "btoa", "window.btoa", {
             afterMethodInvoke(args) {
-                OriginObjects.console.log("Base64 encode:", args[0])
+                originObjectReference.console.log("Base64 encode:", args[0])
             },
         });
         showToast(atobHook && parseHook ? "执行成功" : "执行失败 详见控制台")
@@ -874,7 +893,7 @@ UserAgent:${navigator.userAgent}
         }
         Hooker.hookMethod<string>(crypto, "randomUUID", "crypto.randomUUID", {
             afterMethodInvoke(_args, tempMethodResult) {
-                OriginObjects.console.log("生成UUID:", tempMethodResult.current)
+                originObjectReference.console.log("生成UUID:", tempMethodResult.current)
             },
         });
         showToast("执行成功")
@@ -906,7 +925,7 @@ UserAgent:${navigator.userAgent}
                         showProgressToast(`导出第${currentRepoIndex}/${cacheKeys.length}个仓库的第${currentCacheItemIndex}/${cacheFilesList.length}个文件`, true)
                         const cacheItemResponse = await cacheRepoInstance.match(originCacheRequest)!;
                         if (!cacheItemResponse) {
-                            OriginObjects.console.log(`Missing cache data:${originCacheRequest.url}`);
+                            originObjectReference.console.log(`Missing cache data:${originCacheRequest.url}`);
                             continue
                         }
                         const url = new URL(originCacheRequest.url);
@@ -919,7 +938,7 @@ UserAgent:${navigator.userAgent}
                 showToast("导出完成");
             } catch (error) {
                 showProgressToast(null, false);
-                console.error(error);
+                originObjectReference.console.error(error);
                 showToast("导出失败 详见控制台")
             }
         }).catch(() => { })
@@ -930,14 +949,14 @@ UserAgent:${navigator.userAgent}
         }
         Hooker.hookAsyncMethod(navigator.clipboard, "writeText", "navigator.clipboard.writeText", {
             beforeMethodInvoke(args, abortController) {
-                OriginObjects.console.log(`Blocked write clipboard text: ${args[0]}`);
+                originObjectReference.console.log(`Blocked write clipboard text: ${args[0]}`);
                 showToast("阻止一次剪切板操作", 800);
                 abortController.abort();
             }
         });
         Hooker.hookAsyncMethod(navigator.clipboard, "write", "navigator.clipboard.write", {
             beforeMethodInvoke(args, abortController) {
-                OriginObjects.console.log(`Blocked write clipboard data: ${args[0]}`);
+                originObjectReference.console.log(`Blocked write clipboard data: ${args[0]}`);
                 showToast("阻止一次剪切板操作", 800);
                 abortController.abort();
             }
@@ -950,7 +969,7 @@ UserAgent:${navigator.userAgent}
         }
         Hooker.hookMethod<number>(Math, "random", "Math.random", {
             afterMethodInvoke(_args, tempMethodResult) {
-                OriginObjects.console.log("生成随机数:", tempMethodResult.current)
+                originObjectReference.console.log("生成随机数:", tempMethodResult.current)
             },
         });
         showToast("执行成功")

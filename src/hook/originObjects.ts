@@ -14,7 +14,8 @@ export const OriginObjects={
     },
     console:{
         log:console.log,
-        warn:console.warn
+        warn:console.warn,
+        error:console.error
     },
     open
 }

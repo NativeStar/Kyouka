@@ -1,6 +1,7 @@
 import { Hooker } from "../hook/hooker";
 import { initConsoleDetectBypass } from "./tools/consoleDetectBypass";
 import { type IpcObject ,type ExtensionConfig} from '../types';
+import { OriginObjects } from "../hook/originObjects";
 let config:ExtensionConfig|{}={};
 //提前hook部分可能用到的方法避免页面保存方法引用导致hook失效
 function preHook() {
@@ -33,12 +34,18 @@ async function init() {
     }
     //unmount ipc
     Reflect.deleteProperty(window, "kyouka-ipc");
-    //TODO 备份各种原始函数并设置全局对象转给gui用 避免冲突
+    //利用自身来得早优势 将原始方法引用设置到window以便gui调用
+    //不然gui就得吃已经挨过hook的函数了
+    Reflect.defineProperty(window, "kyouka-backup-object", {
+        enumerable: false,
+        configurable:true,
+        writable: false,
+        value: OriginObjects
+    });
     config=ipc.getConfig();
     initConfig();
 
 }
-//preHook尽快调用
 preHook();
 init();
 function initConfig(){

@@ -1,4 +1,4 @@
-import { Tools } from "./tools"
+import { Tools, waitOriginObject } from "./tools"
 async function init() {
     const shadowDomDiv = document.getElementById("kyouka-menu");
     if (!shadowDomDiv) {
@@ -13,6 +13,8 @@ async function init() {
     shadowDomDiv.removeAttribute("id");
     initDom(menuShadowRoot);
     menuShadowRoot.getElementById("injectScript")?.remove();
+    //等待preload设置干净的OriginObject
+    waitOriginObject();
 }
 function initDom(shadow: ShadowRoot) {
     const titleBar = shadow.getElementById("menuTitleBar") as HTMLDivElement;
@@ -29,15 +31,15 @@ function initDom(shadow: ShadowRoot) {
             event.stopPropagation();
             event.preventDefault();
         });
-        titleBar.addEventListener("mousedown",event=>{
+        titleBar.addEventListener("mousedown", event => {
             //屏蔽鼠标中键
-            if(event.button===1){
+            if (event.button === 1) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 //算是彩蛋吧
-                if(!easterEggActivated){
+                if (!easterEggActivated) {
                     easterEggActivated = true;
-                    const textElement=shadow.getElementById("titleText")!
+                    const textElement = shadow.getElementById("titleText")!
                     textElement.innerText = `${textElement.innerText} - 只能说我输了`
                 }
             }
@@ -113,7 +115,7 @@ function initDom(shadow: ShadowRoot) {
                 if (!toolName) return
                 if (toolName in Tools) {
                     Tools[toolName]();
-                }else{
+                } else {
                     alert(`Error: Tool not found:${toolName}`)
                 }
             });
@@ -139,15 +141,15 @@ function initDom(shadow: ShadowRoot) {
     {
         const helpButtons = root.getElementsByClassName("helpButton") as HTMLCollectionOf<HTMLButtonElement>
         for (const button of helpButtons) {
-                button.addEventListener("click", (event) => {
-                    event.stopPropagation();
-                    const help = button.getAttribute("helpText");
-                    if (!help) {
-                        alert("Error: Help text not found")
-                        return
-                    }
-                    alert(help.replaceAll("\\n", "\n"));
-                });
+            button.addEventListener("click", (event) => {
+                event.stopPropagation();
+                const help = button.getAttribute("helpText");
+                if (!help) {
+                    alert("Error: Help text not found")
+                    return
+                }
+                alert(help.replaceAll("\\n", "\n"));
+            });
         }
     }
     //禁用右键
