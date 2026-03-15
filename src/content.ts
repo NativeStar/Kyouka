@@ -1,5 +1,5 @@
 /// <reference path="./dom.d.ts" />
-async function inject() {
+async function injectGuiScript() {
     const menuContainer = document.createElement("div");
     menuContainer.id = "kyouka-menu";
     const menuShadowRoot = menuContainer.attachShadow({ mode: "open" });
@@ -18,13 +18,13 @@ async function inject() {
 }
 function init() {
     if (document.body) {
-        inject();
+        injectGuiScript();
         return
     }
     const observer = new MutationObserver(() => {
         if (document.body) {
             observer.disconnect();
-            inject();
+            injectGuiScript();
         }
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });

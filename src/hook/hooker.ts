@@ -1,5 +1,5 @@
 import { OriginObjects } from "./originObjects";
-import { createBypassToStringMethod, filterErrorStack} from "../util";
+import { createBypassToStringMethod, filterErrorStack} from "./util";
 
 export interface TempMethodResultWrapper<T = any> {
     current: T;

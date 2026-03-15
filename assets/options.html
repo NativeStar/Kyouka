@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyouka Settings</title>
+</head>
+<body>
+    <div style="display: flex;flex-direction: column;">
+        <option-checkbox settingKey="removeCsp" description="移除CSP限制(严重破坏安全性 建议仅在必要时启用)"></option-checkbox>
+        <option-checkbox settingKey="bypassConsoleDetect" description="绕过控制台检测"></option-checkbox>
+    </div>
+</body>
+<script src="options.js"></script>
+<style>
+    option-checkbox{
+        display: flex;
+        flex-direction: row;
+    }
+    *{
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+</style>
+</html>

@@ -1,6 +1,6 @@
 ///<reference path="../dom.d.ts" />
-import { Hooker } from "./hook/hooker";
-import { OriginObjects } from "./hook/originObjects";
+import { Hooker } from "../hook/hooker";
+import { OriginObjects } from "../hook/originObjects";
 import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
@@ -956,3 +956,4 @@ UserAgent:${navigator.userAgent}
         showToast("执行成功")
     }
 }
+//TODO 添加移除设置CSP限制的html元素功能 即某个head 也可能集成到preload中

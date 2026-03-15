@@ -6,7 +6,9 @@
   "permissions": [
     "scripting",
     "activeTab",
-    "cookies"
+    "cookies",
+    "storage",
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -18,6 +20,11 @@
   "background": {
     "service_worker": "service.js",
     "type": "module"
+  },
+  "homepage_url": "https://github.com/NativeStar/Kyouka",
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
   },
   "web_accessible_resources": [
     {
@@ -38,13 +45,23 @@
         "http://*/*",
         "https://*/*"
       ],
-      "all_frames": true,
-      "match_about_blank": true,
       "js": [
         "content.js"
       ],
       "type": "module",
       "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "preload.js"
+      ],
+      "type": "module",
+      "run_at": "document_start",
+      "world": "MAIN"
     }
   ],
   "commands": {
@@ -52,9 +69,18 @@
       "suggested_key": "Alt+M",
       "description": "开关控制面板"
     },
-    "openWithResetPosition":{
+    "openWithResetPosition": {
       "suggested_key": "Alt+Shift+M",
       "description": "重置位置并开关控制面板"
     }
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "removeCsp",
+        "enabled": false,
+        "path": "removeCsp.json"
+      }
+    ]
   }
 }
