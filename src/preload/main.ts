@@ -5,6 +5,7 @@ import { OriginObjects } from "../hook/originObjects";
 import initBlockClipboardWrite from "./tools/blockClipboardWrite";
 import initBlockConsoleOutput from "./tools/blockConsoleOutput";
 import { processErrorEvent } from "./util";
+import initBlockEvalExecute from "./tools/blockEvalExecute";
 let config: ExtensionConfig | {} = {};
 //提前hook部分可能用到的方法避免页面保存方法引用导致hook失效
 function preHook() {
@@ -20,6 +21,7 @@ function preHook() {
     Hooker.hookMethod(document, "execCommand", "document.execCommand", { id: "pre#document.execCommand" });
     Hooker.hookAsyncMethod(navigator.clipboard, "write", "navigator.clipboard.write", { id: "pre#navigator.clipboard.write" });
     Hooker.hookAsyncMethod(navigator.clipboard, "writeText", "navigator.clipboard.writeText", { id: "pre#navigator.clipboard.writeText" });
+    Hooker.hookMethod(window, "eval", "window.eval", { id: "pre#window.eval" });
     //提前监听error
     window.addEventListener("error", (event) => processErrorEvent(config as ExtensionConfig, event));
     window.addEventListener("unhandledrejection", (event) => processErrorEvent(config as ExtensionConfig, event));
@@ -76,13 +78,16 @@ function initConfig() {
     if (typedConfig.blockError) {
         const eventHandlerDescriptor: PropertyDescriptor = {
             configurable: false,
-            set() {},
+            set() { },
             get() {
                 return () => true
             }
         }
-        Reflect.defineProperty(window, "onerror",eventHandlerDescriptor);
-        Reflect.defineProperty(window, "onunhandledrejection",eventHandlerDescriptor);
-        Reflect.defineProperty(window, "onrejectionhandled",eventHandlerDescriptor);
+        Reflect.defineProperty(window, "onerror", eventHandlerDescriptor);
+        Reflect.defineProperty(window, "onunhandledrejection", eventHandlerDescriptor);
+        Reflect.defineProperty(window, "onrejectionhandled", eventHandlerDescriptor);
+    }
+    if (typedConfig.blockEval) {
+        initBlockEvalExecute();
     }
 }
