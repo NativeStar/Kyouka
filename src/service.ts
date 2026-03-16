@@ -107,7 +107,7 @@ chrome.storage.local.onChanged.addListener(change => {
 });
 //为所有页面注入ipc
 chrome.webNavigation.onCommitted.addListener(async (details) => {
-    if (details.frameId!==0||details.url.startsWith("chrome")) return
+    if (details.frameId!==0||details.url.startsWith("chrome")||details.url==="about:blank") return
     // 如果配置为空 则加载
     if (Reflect.ownKeys(config).length === 0) {
         config = await chrome.storage.local.get(null);
@@ -132,5 +132,4 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
         },
         args: [config as ExtensionConfig]
     }).catch(e => console.log(e))
-
 })

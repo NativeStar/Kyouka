@@ -550,10 +550,6 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(`已移除${elements.length}个元素的拼写检查`)
     },
-    "openRepository": () => {
-        // 防止使用屏蔽open后把自己给坑了
-        originObjectReference.open.call(window, "https://github.com/NativeStar/Kyouka")
-    },
     "injectOnlineScript": () => {
         const url = prompt("输入目标脚本URL");
         if (!url) return;
@@ -958,4 +954,3 @@ UserAgent:${navigator.userAgent}
         showToast("执行成功")
     }
 }
-//TODO 导出页面资源?(控制台显示的那些)
