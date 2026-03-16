@@ -31,7 +31,7 @@ async function init() {
     //等待ipc
     for (let index = 0; index < 250; index++) {
         if (!Reflect.has(window, "kyouka-ipc")) {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new OriginObjects.Promise(resolve => setTimeout(resolve, 20));
             continue
         }
         break

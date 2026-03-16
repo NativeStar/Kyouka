@@ -8,7 +8,8 @@ const leakedStackFeature = [
     "proxy",
     "at new Promise (<anonymous>)",
     "at <anonymous>:",
-    "at Object.construct (<anonymous>:"
+    "at Object.construct (<anonymous>:",
+    "chrome-extension://"
 ]
 export function needDeleteStack(stack: string): boolean {
     for (const leakStr of leakedStackFeature) {

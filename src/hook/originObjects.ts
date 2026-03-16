@@ -1,6 +1,7 @@
 export const OriginObjects={
     AbortController,
     TypeError,
+    Promise,
     Object:{
         freeze:Object.freeze,
     },

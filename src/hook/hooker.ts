@@ -126,7 +126,7 @@ export class Hooker {
             }
             const hookEntry = new this.originObjectSource.Proxy(originMethod, {
                 apply(_target, thisArg, args) {
-                    return new Promise<T>(async (resolve, reject) => {
+                    return new Hooker.originObjectSource.Promise<T>(async (resolve, reject) => {
                         const hookItem = hookedMethodKeyMap.get(key);
                         if (!hookItem) {
                             //没有hook

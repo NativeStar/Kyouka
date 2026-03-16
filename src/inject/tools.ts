@@ -38,7 +38,7 @@ const toolState = {
 export async function waitOriginObject() {
     for (let index = 0; index < 200; index++) {
         if (!Reflect.has(window, "kyouka-backup-object")) {
-            await new Promise(resolve => setTimeout(resolve, 25));
+            await new originObjectReference.Promise(resolve => setTimeout(resolve, 25));
             continue
         }
         break
