@@ -47,22 +47,20 @@
         <button class="itemButton toolButton" tool="blockSendBeacon" tooltip="阻止调用navigator.sendBeacon并打印其调用参数\n通常用于离开页面前上报数据">屏蔽sendBeacon</button>
         <button class="itemButton toolButton" tool="dispatchLoadEvent" tooltip="触发load事件监听器\n用于调试页面初始化">伪造load</button>
         <button class="itemButton toolButton" tool="dispatchBeforeunloadEvent" tooltip="触发beforeunload事件监听器\n用于调试相关功能">伪造beforeunload</button>
-        <button class="itemButton toolButton" tool="dispatchUnloadEvent" tooltip="触发unload事件监听器\n用于调试相关功能">伪造unload</button>
+        <button class="itemButton toolButton" tool="blockClose" tooltip="屏蔽close函数调用\n阻止页面关闭自身 但可能无法阻止主动关闭子窗口">屏蔽close</button>
         <button class="itemButton toolButton" tool="dispatchCustomEvent" tooltip="在window对象上分发指定事件\n仅建议使用blur等无参数事件 否则可能导致异常">伪造自定义事件</button>
         <button class="itemButton toolButton" tool="logRandomUuid" tooltip="在控制台打印通过crypto.randomUUID生成的UUID\n该方法可能使用的并不算多">打印UUID</button>
         <button class="itemButton toolButton" tool="blockWriteClipboard" tooltip="阻止页面写入剪切板并将欲写入数据打印至控制台\n(读取已经被浏览器限制了 不需要进行屏蔽)">屏蔽剪切板写入</button>
         <button class="itemButton toolButton" tool="logMathRandom" tooltip="在控制台打印通过Math.random生成的随机数">打印随机数</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
-        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS(插入元素)</button>
-        <button class="itemButton toolButton" id="execJavascriptByExtension" tooltip="读取内容后通过chrome.scripting.executeScript执行">注入本地JS(扩展执行)</button>
+        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS</button>
         <button class="itemButton toolButton" tool="injectOnlineScript" tooltip="加载指定URL的代码后执行\n可能被跨域政策或CSP阻止加载">注入网络JS</button>
         <button class="itemButton toolButton" id="injectCssByExtension" tooltip="读取内容后通过chrome.scripting.insertCSS执行">注入本地CSS</button>
         <button class="itemButton toolButton" tool="injectOnlineCss" tooltip="加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入网络CSS</button>
         <button class="itemButton toolButton" tool="openEyeDropper" tooltip="获取选中像素的颜色RGB值">屏幕取色</button>
         <button class="itemButton toolButton" tool="becomeDocumentPictureInPicture" tooltip="将页面使用文档画中画显示\n可能会有很多问题">转为画中画</button>
         <button class="itemButton toolButton" tool="recordCanvas" tooltip="60帧录制canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas</button>
-        <button class="itemButton toolButton" tool="screenRecorder" tooltip="执行录屏并保存至本地\n类似于录屏软件">录制屏幕</button>
         <button class="itemButton toolButton" tool="recordCanvasWithAudio" tooltip="60帧录制canvas渲染内容并保存至本地\n同时申请录音应对游戏录制等情况\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas并录音</button>
         <button class="itemButton toolButton" tool="dumpCache" tooltip="导出页面主动缓存的数据">转储缓存</button>
       </div>
@@ -83,7 +81,7 @@
         <button class="itemButton toolButton" id="openSettingPage">打开设置面板</button>
         <button class="itemButton helpButton" helpText="该项目主要用于开发调试和辅助工具 请勿用于页面逆向\n由于使用了大量较新的API外加懒得适配 项目可能无法在移动端浏览器上正常工作">使用须知</button>
         <button class="itemButton helpButton" helpText="Alt+M显示/关闭菜单\nAlt+Shift+M重置菜单位置并显示/关闭">快捷键</button>
-        <button class="itemButton helpButton" helpText="选择本地JavaScript文件并注入页面\n两种方式暂未发现明显区别 且注入可能被CSP阻止 如果一种方式注入无效可尝试另一种">注入JS</button>
+        <button class="itemButton helpButton" helpText="选择本地JavaScript文件并注入页面\n如被CSP阻止导致注入失败可在扩展设置页开启'移除CSP限制'功能">注入JS</button>
         <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能\n目前只对Ant Design的input做出适配">DOM操作相关</button>
         <button class="itemButton helpButton" helpText="移除后具体如何数据处理取决于网页本身代码\n且异常的数据大概率被后端拦截">移除输入限制</button>
         <button class="itemButton helpButton" helpText="显示所有被隐藏的元素\n该功能可能破坏页面布局!">显示隐藏元素</button>

@@ -4,7 +4,7 @@ import { OriginObjects } from "../hook/originObjects";
 import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
-let originObjectReference:typeof OriginObjects=OriginObjects;
+let originObjectReference: typeof OriginObjects = OriginObjects;
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -36,16 +36,18 @@ const toolState = {
     wheelRemoveElement: false
 }
 export async function waitOriginObject() {
-    for (let index = 0; index < 150; index++) {
+    for (let index = 0; index < 200; index++) {
         if (!Reflect.has(window, "kyouka-backup-object")) {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise(resolve => setTimeout(resolve, 25));
             continue
         }
         break
     }
     const originObjects = Reflect.get(window, "kyouka-backup-object") as typeof OriginObjects;
     if (!originObjects) {
-        showToast("获取原始对象引用失败 功能可能出现异常")
+        if (!location.href.includes("chrome/newtab")) {
+            showToast("获取原始对象引用失败 功能可能出现异常")
+        }
         return
     }
     Hooker.setOriginObjectSource(originObjects);
@@ -316,7 +318,7 @@ export const Tools: { [key: string]: () => void } = {
                 const dropper = new EyeDropper();
                 dropper.open().then(res => {
                     if (confirm(`所选像素颜色值为:${res.sRGBHex}\n点击确定将复制到剪切板`)) {
-                        navigator.clipboard.writeText(res.sRGBHex);
+                        originObjectReference.navigator.clipboard.writeText(res.sRGBHex);
                     }
                 }).catch(() => { });
             } catch (error) {
@@ -552,44 +554,6 @@ export const Tools: { [key: string]: () => void } = {
         // 防止使用屏蔽open后把自己给坑了
         originObjectReference.open.call(window, "https://github.com/NativeStar/Kyouka")
     },
-    "screenRecorder": () => {
-        if (!("showSaveFilePicker" in window)) {
-            showToast("当前浏览器不支持showSaveFilePicker")
-            return
-        }
-        if (recorder) {
-            if (confirm("停止正在进行的录制?")) {
-                recorder?.stop();
-            }
-            return
-        }
-        // 检查api支持
-        showSaveFilePicker({ suggestedName: `ScreenRecorder-${Date.now()}.webm` }).then(async (fd) => {
-            try {
-                const displayMedia = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
-                recorder = new MediaRecorder(displayMedia, { mimeType: "video/webm" });
-                const writeStream = await fd.createWritable();
-                recorder.addEventListener("dataavailable", (event) => {
-                    writeStream.write(event.data);
-                });
-                recorder.addEventListener("stop", () => {
-                    writeStream.close();
-                    showToast("已停止录制")
-                    displayMedia.getTracks().forEach(track => track.stop());
-                    document.removeEventListener("keydown", stopMediaRecorderKeyEventListener);
-                    recorder = null;
-                });
-                displayMedia.addEventListener("inactive", () => {
-                    recorder?.stop();
-                })
-                document.addEventListener("keydown", stopMediaRecorderKeyEventListener);
-                alert("使用Alt+P快捷键停止录制\n点击'确定'开始录制")
-                recorder.start();
-            } catch (error) {
-                showToast("用户未授权或发生异常\n由于API限制 请手动删除空录屏文件", 5000)
-            }
-        }).catch(() => { })
-    },
     "injectOnlineScript": () => {
         const url = prompt("输入目标脚本URL");
         if (!url) return;
@@ -757,14 +721,14 @@ export const Tools: { [key: string]: () => void } = {
     "copyPageIconUrl": () => {
         const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
         if (linkElement) {
-            navigator.clipboard.writeText(linkElement.href);
+            originObjectReference.navigator.clipboard.writeText(linkElement.href);
             showToast("已复制图标URL")
         } else {
             showToast("该网页未设置图标")
         }
     },
     "copyTitle": () => {
-        navigator.clipboard.writeText(document.title);
+        originObjectReference.navigator.clipboard.writeText(document.title);
         showToast("已复制页面标题")
     },
     "dispatchLoadEvent": () => {
@@ -775,10 +739,6 @@ export const Tools: { [key: string]: () => void } = {
         window.dispatchEvent(new Event("beforeunload"));
         // 缩短显示时间因为屏蔽sendBeacon的提示也可能弹出
         showToast("已分发beforeunload事件", 750)
-    },
-    "dispatchUnloadEvent": () => {
-        window.dispatchEvent(new Event("unload"));
-        showToast("已分发unload事件", 750)
     },
     "dispatchCustomEvent": () => {
         const eventName = prompt("请输入事件名", "pagehide");
@@ -961,6 +921,17 @@ UserAgent:${navigator.userAgent}
                 abortController.abort();
             }
         });
+        //居然还有人用这种方法
+        Hooker.hookMethod(document,"execCommand","document.execCommand",{
+            beforeMethodInvoke(args, abortController, _thisArg, tempMethodResult) {
+                if (args[0] === "copy") {
+                    originObjectReference.console.log("Blocked execCommand copy");
+                    showToast("阻止一次剪切板操作", 800);
+                    tempMethodResult.current = true;
+                    abortController.abort();
+                }
+            },
+        })
         showToast("执行成功")
     },
     "logMathRandom": () => {
@@ -973,6 +944,18 @@ UserAgent:${navigator.userAgent}
             },
         });
         showToast("执行成功")
+    },
+    "blockClose": () => {
+        if (Hooker.isModifiedMethodOrObject(window.close)) {
+            return showToast("该功能已执行过")
+        }
+        Hooker.hookMethod(window, "close", "window.close", {
+            beforeMethodInvoke(_args, abortController) {
+                showToast("阻止一次close调用", 800);
+                abortController.abort();
+            }
+        });
+        showToast("执行成功")
     }
 }
-//TODO 添加移除设置CSP限制的html元素功能 即某个head 也可能集成到preload中
+//TODO 导出页面资源?(控制台显示的那些)

@@ -10,18 +10,6 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender) => {
     const tabId = sender.tab?.id;
     if (!tabId) return
     switch (msg.type) {
-        case "execScript":
-            chrome.scripting.executeScript({
-                target: {
-                    tabId
-                },
-                world: chrome.scripting.ExecutionWorld.MAIN,
-                func: (code: string) => {
-                    eval(code);
-                },
-                args: [msg.code]
-            })
-            break;
         case "injectCss":
             chrome.scripting.insertCSS({
                 target: {
@@ -97,7 +85,7 @@ function onSendMessageError(errorInstance: Error, currentTab: chrome.tabs.Tab) {
             func: () => {
                 if (window.confirm("扩展已更新 需刷新页面才能生效\n点击'确定'将执行刷新")) window.location.reload()
             }
-        }).catch(e=>console.log(e))
+        }).catch(e => console.log(e))
     } else {
         //其他超出预期的东西
         console.error(errorInstance);
@@ -113,26 +101,27 @@ chrome.storage.local.onChanged.addListener(change => {
     if (Reflect.has(change, "removeCsp")) {
         const removeCsp = change.removeCsp!.newValue as boolean;
         chrome.declarativeNetRequest.updateEnabledRulesets({
-            [removeCsp?"enableRulesetIds": "disableRulesetIds"]:["removeCsp"]
+            [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
         })
     }
 });
 //为所有页面注入ipc
-chrome.tabs.onUpdated.addListener(async (tabId, change, tab) => {
-    if (!tab.url || tab.url.startsWith("chrome") || change.status !== "loading") return
+chrome.webNavigation.onCommitted.addListener(async (details) => {
+    if (details.frameId!==0||details.url.startsWith("chrome")) return
     // 如果配置为空 则加载
     if (Reflect.ownKeys(config).length === 0) {
         config = await chrome.storage.local.get(null);
     }
     chrome.scripting.executeScript({
         target: {
-            tabId: tabId
+            tabId: details.tabId
         },
+        injectImmediately: true,
         world: chrome.scripting.ExecutionWorld.MAIN,
         func: (config: ExtensionConfig) => {
             Reflect.defineProperty(window, "kyouka-ipc", {
                 enumerable: false,
-                configurable:true,
+                configurable: true,
                 writable: false,
                 value: {
                     getConfig() {
@@ -143,4 +132,5 @@ chrome.tabs.onUpdated.addListener(async (tabId, change, tab) => {
         },
         args: [config as ExtensionConfig]
     }).catch(e => console.log(e))
+
 })

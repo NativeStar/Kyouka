@@ -26,3 +26,4 @@ async function getChromeConfig<T=any>(key: string,defaultValue:T):Promise<T>{
     }
 }
 customElements.define("option-checkbox",OptionCheckBox);
+addEventListener("contextmenu",e=>e.preventDefault())

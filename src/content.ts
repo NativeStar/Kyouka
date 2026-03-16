@@ -34,28 +34,7 @@ function initDom(dom: Document) {
     {
         dom.getElementById("titleText")!.insertAdjacentText("afterbegin", `Kyouka-${chrome.runtime.getManifest().version}`);
     }
-    // 注入js
     const root: HTMLDialogElement = dom.getElementById("root") as HTMLDialogElement;
-    {
-        dom.getElementById("execJavascriptByExtension")?.addEventListener("click", () => {
-            if (!("showOpenFilePicker" in window)) {
-                alert("当前浏览器不支持showOpenFilePicker")
-                return
-            }
-            showOpenFilePicker().then(files => {
-                const targetFile = files[0];
-                if (!targetFile) return
-                targetFile.getFile().then(fileInstance => {
-                    fileInstance.text().then(code => {
-                        chrome.runtime.sendMessage({
-                            type: "execScript",
-                            code
-                        })
-                    })
-                })
-            }).catch(() => { });
-        });
-    }
     //注入css
     {
         dom.getElementById("injectCssByExtension")?.addEventListener("click", () => {

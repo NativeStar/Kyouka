@@ -17,6 +17,12 @@ export const OriginObjects={
         warn:console.warn,
         error:console.error
     },
-    open
+    open,
+    navigator:{
+        clipboard:{
+            writeText:navigator.clipboard.writeText.bind(navigator.clipboard),
+            write:navigator.clipboard.write.bind(navigator.clipboard),
+        }
+    }
 }
 OriginObjects.Object.freeze(OriginObjects);

@@ -1,25 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kyouka Settings</title>
 </head>
+
 <body>
     <div style="display: flex;flex-direction: column;">
+        <span>建议在扩展设置页中关闭'收集各项错误'选项 避免误判影响使用</span>
         <option-checkbox settingKey="removeCsp" description="移除CSP限制(严重破坏安全性 建议仅在必要时启用)"></option-checkbox>
         <option-checkbox settingKey="bypassConsoleDetect" description="绕过控制台检测"></option-checkbox>
+        <option-checkbox settingKey="blockClipboardWrite" description="屏蔽剪切板写入(打开页面自动生效且不发出提醒)"></option-checkbox>
+        <option-checkbox settingKey="blockConsole" description="阻止控制台输出(可能绕过部分控制台检测)"></option-checkbox>
+        <option-checkbox settingKey="blockError" description="屏蔽未捕获异常监听"></option-checkbox>
+        <a href="https://github.com/NativeStar/Kyouka" target="_blank">项目仓库</a>
     </div>
 </body>
 <script src="options.js"></script>
 <style>
-    option-checkbox{
+    option-checkbox {
         display: flex;
         flex-direction: row;
     }
-    *{
+
+    * {
         user-select: none;
         -webkit-user-drag: none;
     }
+    a{
+        cursor: pointer;
+        color: blue;
+        text-decoration: none;
+    }
 </style>
+
 </html>
