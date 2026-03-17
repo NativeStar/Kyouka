@@ -11,12 +11,14 @@
     <div style="display: flex;flex-direction: column;">
         <span>建议在扩展设置页中关闭'收集各项错误'选项 避免误判影响使用</span>
         <span>如果网页发生异常 尝试关闭此页面所有功能</span>
+        <option-checkbox settingKey="enableGui" description="注入扩展GUI(不影响此设置页的功能)"></option-checkbox>
         <option-checkbox settingKey="removeCsp" description="移除CSP限制(严重破坏安全性 建议仅在必要时启用)"></option-checkbox>
         <option-checkbox settingKey="bypassConsoleDetect" description="绕过控制台检测"></option-checkbox>
         <option-checkbox settingKey="stringDetectBypass" description="尝试绕过基于字符串的Hook检测(测试功能 可能造成异常)"></option-checkbox>
         <option-checkbox settingKey="blockClipboardWrite" description="屏蔽剪切板写入(打开页面自动生效且不发出提醒)"></option-checkbox>
         <option-checkbox settingKey="blockConsole" description="阻止控制台输出(可能绕过部分控制台检测)"></option-checkbox>
         <option-checkbox settingKey="blockError" description="屏蔽未捕获异常监听"></option-checkbox>
+        <!-- TODO 改成屏蔽所有基于字符串的动态代码执行 -->
         <option-checkbox settingKey="blockEval" description="屏蔽eval函数执行"></option-checkbox>
         <a href="https://github.com/NativeStar/Kyouka" target="_blank">项目仓库</a>
     </div>

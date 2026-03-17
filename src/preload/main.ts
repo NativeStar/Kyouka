@@ -2,7 +2,7 @@ import { type IpcObject, type ExtensionConfig } from '../types';
 import { OriginObjects } from "../hook/originObjects";
 import { ToolManager } from "./manager/toolsManager";
 let config: ExtensionConfig | {} = {};
-const toolManager=new ToolManager();
+const toolManager = new ToolManager();
 async function init() {
     //等待ipc
     for (let index = 0; index < 250; index++) {
@@ -23,16 +23,17 @@ async function init() {
     config = ipc.getConfig();
     //unmount ipc
     Reflect.deleteProperty(window, "kyouka-ipc");
-    //利用自身来得早优势 将原始方法引用设置到window以便gui调用
-    //不然gui就得吃已经挨过hook的函数了
-    Reflect.defineProperty(window, "kyouka-backup-object", {
-        enumerable: false,
-        configurable: true,
-        writable: false,
-        value: OriginObjects
-    });
+    //利用自身来得早优势 将原始方法引用设置到window以便gui调用 不然gui就得吃已经挨过hook的函数了
+    //检测gui是否启用
+    if ((config as ExtensionConfig).enableGui) {
+        Reflect.defineProperty(window, "kyouka-backup-object", {
+            enumerable: false,
+            configurable: true,
+            writable: false,
+            value: OriginObjects
+        });
+    }
     initConfig();
-
 }
 init();
 function initConfig() {

@@ -47,17 +47,6 @@
         "https://*/*"
       ],
       "js": [
-        "content.js"
-      ],
-      "type": "module",
-      "run_at": "document_start"
-    },
-    {
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
-      "js": [
         "preload.js"
       ],
       "type": "module",

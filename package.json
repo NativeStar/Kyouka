@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node ./script/build.js && tsc && esbuild ./src/inject/main.ts --bundle --minify --keep-names --outfile=./dist/inject.js && esbuild ./src/preload/main.ts --bundle --minify --keep-names --outfile=./dist/preload.js"
+    "build": "node ./script/build.js && tsc && esbuild ./src/inject/main.ts --bundle --minify --keep-names --charset=utf8 --outfile=./dist/inject.js && esbuild ./src/preload/main.ts --bundle --minify --keep-names --charset=utf8 --outfile=./dist/preload.js"
   },
   "keywords": [],
   "author": "",

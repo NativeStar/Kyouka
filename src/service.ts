@@ -56,18 +56,59 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
     if (detail.reason === "update" || detail.reason === "install") {
         const currentConfig: ExtensionConfig = await chrome.storage.local.get(null);
         chrome.storage.local.set({ ...DefaultExtensionConfig, ...currentConfig });
+        //更新上来的不会有这个键值
+        if (!Reflect.has(currentConfig, "enableGui")) {
+            //默认启用gui
+            chrome.scripting.registerContentScripts([
+                {
+                    id: "guiScript",
+                    allFrames: false,
+                    matches: ["http://*/*", "https://*/*"],
+                    js: ["content.js"],
+                    runAt: "document_start"
+                }
+            ]).catch(e => console.log(e))
+        }
     }
 });
 // action
-chrome.action.onClicked.addListener((tab) => {
+chrome.action.onClicked.addListener(async (tab) => {
     //chrome内部标签页无法访问
     //同时包括chrome://和chrome-extension://
     if (tab.url?.startsWith("chrome")) return
+    if (Reflect.ownKeys(config).length === 0) {
+        config = await chrome.storage.local.get(null);
+    }
+    if (!(config as ExtensionConfig).enableGui) {
+        tab.id && chrome.scripting.executeScript({
+            target: {
+                tabId: tab.id
+            },
+            func: () => {
+                window.alert("Kyouka:请在设置中开启注入GUI并刷新页面")
+            }
+        }).catch(e => console.log(e))
+        return
+    }
     chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
 });
 //快捷键
-chrome.commands.onCommand.addListener((command, tab) => {
+chrome.commands.onCommand.addListener(async (command, tab) => {
     if (!tab || tab.url?.startsWith("chrome://")) return
+    if (Reflect.ownKeys(config).length === 0) {
+        config = await chrome.storage.local.get(null);
+    }
+    if (!(config as ExtensionConfig).enableGui) {
+        tab.id && chrome.scripting.executeScript({
+            target: {
+                tabId: tab.id
+            },
+            func: () => {
+                window.alert("Kyouka:请在设置中开启注入GUI并刷新页面")
+            }
+        }).catch(e => console.log(e))
+        return
+    }
     if (command === "openPanelHotkey") {
         chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
     } else if (command === "openWithResetPosition") {
@@ -83,7 +124,7 @@ function onSendMessageError(errorInstance: Error, currentTab: chrome.tabs.Tab) {
                 tabId
             },
             func: () => {
-                if (window.confirm("扩展已更新 需刷新页面才能生效\n点击'确定'将执行刷新")) window.location.reload()
+                if (window.confirm("扩展状态发生变更 需要刷新页面确保正常工作\n点击'确定'将执行刷新")) window.location.reload()
             }
         }).catch(e => console.log(e))
     } else {
@@ -104,10 +145,26 @@ chrome.storage.local.onChanged.addListener(change => {
             [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
         })
     }
+    if (Reflect.has(change, "enableGui")) {
+        //开关gui
+        if (change.enableGui!.newValue as boolean) {
+            chrome.scripting.registerContentScripts([
+                {
+                    id: "guiScript",
+                    allFrames: false,
+                    matches: ["http://*/*", "https://*/*"],
+                    js: ["content.js"],
+                    runAt: "document_start"
+                }
+            ]).catch((e) => console.log(e));
+        } else {
+            chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
+        }
+    }
 });
 //为所有页面注入ipc
 chrome.webNavigation.onCommitted.addListener(async (details) => {
-    if (details.frameId!==0||details.url.startsWith("chrome")||details.url==="about:blank") return
+    if (details.frameId !== 0 || details.url.startsWith("chrome") || details.url === "about:blank") return
     // 如果配置为空 则加载
     if (Reflect.ownKeys(config).length === 0) {
         config = await chrome.storage.local.get(null);
