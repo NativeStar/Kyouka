@@ -4,6 +4,15 @@ type Message = {
     [key: string]: any
 }
 let config: ExtensionConfig | {} = {};
+const guiContentScriptList:chrome.scripting.RegisteredContentScript[] = [
+    {
+        id: "guiScript",
+        allFrames: false,
+        matches: ["http://*/*", "https://*/*"],
+        js: ["content.js"],
+        runAt: "document_start"
+    }
+]
 // 消息事件
 chrome.runtime.onMessage.addListener(async (msg: Message, sender) => {
     if (sender.id !== chrome.runtime.id) return;
@@ -59,17 +68,20 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
         //更新上来的不会有这个键值
         if (!Reflect.has(currentConfig, "enableGui")) {
             //默认启用gui
-            chrome.scripting.registerContentScripts([
-                {
-                    id: "guiScript",
-                    allFrames: false,
-                    matches: ["http://*/*", "https://*/*"],
-                    js: ["content.js"],
-                    runAt: "document_start"
-                }
-            ]).catch(e => console.log(e))
+            chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
         }
     }
+});
+//兜底 避免某些情况状态不一致
+chrome.runtime.onStartup.addListener(() => {
+    chrome.storage.local.get(null).then(async (value) => {
+        const isRegisteredGuiScript = (await chrome.scripting.getRegisteredContentScripts({ ids: ["guiScript"] })).length > 0;
+        if ((value as ExtensionConfig).enableGui) {
+            !isRegisteredGuiScript && chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
+        } else {
+            isRegisteredGuiScript && chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
+        }
+    })
 });
 // action
 chrome.action.onClicked.addListener(async (tab) => {
@@ -124,7 +136,7 @@ function onSendMessageError(errorInstance: Error, currentTab: chrome.tabs.Tab) {
                 tabId
             },
             func: () => {
-                if (window.confirm("扩展状态发生变更 需要刷新页面确保正常工作\n点击'确定'将执行刷新")) window.location.reload()
+                if (window.confirm("扩展状态发生变更 需要刷新页面确保正常工作\n点击'确定'将执行刷新\n如多次刷新无效请重启浏览器")) window.location.reload()
             }
         }).catch(e => console.log(e))
     } else {
@@ -148,15 +160,7 @@ chrome.storage.local.onChanged.addListener(change => {
     if (Reflect.has(change, "enableGui")) {
         //开关gui
         if (change.enableGui!.newValue as boolean) {
-            chrome.scripting.registerContentScripts([
-                {
-                    id: "guiScript",
-                    allFrames: false,
-                    matches: ["http://*/*", "https://*/*"],
-                    js: ["content.js"],
-                    runAt: "document_start"
-                }
-            ]).catch((e) => console.log(e));
+            chrome.scripting.registerContentScripts(guiContentScriptList).catch((e) => console.log(e));
         } else {
             chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
         }

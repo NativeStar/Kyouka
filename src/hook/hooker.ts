@@ -111,7 +111,6 @@ export class Hooker {
             return false;
         }
     }
-    //TODO 功能大改 要改帮助页和README
     static hookAsyncMethod<T = any>(parent: any, methodName: string, key: string, hookOption: MethodHookOption<T>): boolean {
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
