@@ -4,7 +4,8 @@ export const DefaultExtensionConfig = {
     blockClipboardWrite: false,
     blockConsole: false,
     blockError: false,
-    blockEval: false
+    blockEval: false,
+    stringDetectBypass:false
 } as const;
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {

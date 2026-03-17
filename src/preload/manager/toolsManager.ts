@@ -6,6 +6,7 @@ import { BlockConsoleOutput } from "../tools/blockConsoleOutput";
 import { BlockError } from "../tools/blockError";
 import { BlockEvalExecute } from "../tools/blockEvalExecute";
 import { ConsoleDetectBypass } from "../tools/consoleDetectBypass";
+import { StringDetectBypass } from "../tools/stringDetectBypass";
 
 export class ToolManager {
     private toolsConfigList = {
@@ -14,6 +15,7 @@ export class ToolManager {
         blockConsole: new BlockConsoleOutput(),
         blockError: new BlockError(),
         blockEval: new BlockEvalExecute(),
+        stringDetectBypass:new StringDetectBypass(),
     } as const;
     private preHooksMethodList: PreHookOption[];
     constructor() {
