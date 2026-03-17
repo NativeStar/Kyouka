@@ -1,43 +1,104 @@
 import { Hooker } from "../../hook/hooker";
-
-function rejectAllInvoke(args: any[], abortController: AbortController) {
-    abortController.abort();
-}
-export default function initBlockConsoleOutput() {
-    Hooker.hookMethod(console, "table", "console.table", {
-        id: "console.table:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    });
-    Hooker.hookMethod(console, "debug", "console.debug", {
-        id: "console.debug:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    })
-    Hooker.hookMethod(console, "log", "console.log", {
-        id: "console.log:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    });
-    Hooker.hookMethod(console, "info", "console.info", {
-        id: "console.info:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    });
-    Hooker.hookMethod(console, "warn", "console.warn", {
-        id: "console.warn:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    });
-    Hooker.hookMethod(console, "error", "console.error", {
-        id: "console.error:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    });
-    Hooker.hookMethod(console, "dir", "console.dir", {
-        id: "console.dir:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    });
-    Hooker.hookMethod(console, "dirxml", "console.dirxml", {
-        id: "console.dirxml:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    });
-    Hooker.hookMethod(console, "clear", "console.clear", {
-        id: "console.clear:bypassReject",
-        beforeMethodInvoke: rejectAllInvoke
-    })
+import { type PreHookOption } from "../../types";
+import { AbstractTool } from "../classes/abstractTool";
+export class BlockConsoleOutput extends AbstractTool {
+    private rejectAllInvoke(_args: any[], abortController: AbortController) {
+        abortController.abort();
+    }
+    onMount(): void {
+        Hooker.hookMethod(console, "table", "console.table", {
+            id: "console.table:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        });
+        Hooker.hookMethod(console, "debug", "console.debug", {
+            id: "console.debug:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        })
+        Hooker.hookMethod(console, "log", "console.log", {
+            id: "console.log:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        });
+        Hooker.hookMethod(console, "info", "console.info", {
+            id: "console.info:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        });
+        Hooker.hookMethod(console, "warn", "console.warn", {
+            id: "console.warn:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        });
+        Hooker.hookMethod(console, "error", "console.error", {
+            id: "console.error:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        });
+        Hooker.hookMethod(console, "dir", "console.dir", {
+            id: "console.dir:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        });
+        Hooker.hookMethod(console, "dirxml", "console.dirxml", {
+            id: "console.dirxml:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        });
+        Hooker.hookMethod(console, "clear", "console.clear", {
+            id: "console.clear:bypassReject",
+            beforeMethodInvoke: this.rejectAllInvoke
+        })
+    }
+    get preHookMethodList(): PreHookOption[] {
+        return [
+            {
+                parent: console,
+                methodName: "table",
+                key: "console.table",
+                id: "pre#console.table"
+            },
+            {
+                parent: console,
+                methodName: "debug",
+                key: "console.debug",
+                id: "pre#console.debug"
+            },
+            {
+                parent: console,
+                methodName: "log",
+                key: "console.log",
+                id: "pre#console.log"
+            },
+            {
+                parent: console,
+                methodName: "info",
+                key: "console.info",
+                id: "pre#console.info"
+            },
+            {
+                parent: console,
+                methodName: "warn",
+                key: "console.warn",
+                id: "pre#console.warn"
+            },
+            {
+                parent: console,
+                methodName: "error",
+                key: "console.error",
+                id: "pre#console.error"
+            },
+            {
+                parent: console,
+                methodName: "dir",
+                key: "console.dir",
+                id: "pre#console.dir"
+            },
+            {
+                parent: console,
+                methodName: "dirxml",
+                key: "console.dirxml",
+                id: "pre#console.dirxml"
+            },
+            {
+                parent: console,
+                methodName: "clear",
+                key: "console.clear",
+                id: "pre#console.clear"
+            }
+        ]
+    }
 }

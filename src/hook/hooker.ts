@@ -42,6 +42,11 @@ export class Hooker {
             }
             if (hookedMethodKeyMap.has(key)) {
                 const currentHookMethodItem = hookedMethodKeyMap.get(key)!;
+                //判断id是否重复
+                if (hookOption.id && currentHookMethodItem.option.some(item => item.id === hookOption.id)) {
+                    this.originObjectSource.console.warn(`already has hook id:${hookOption.id}`);
+                    return false
+                }
                 currentHookMethodItem.option.push(hookOption);
                 hookedMethodKeyMap.set(key, currentHookMethodItem);
                 return true
