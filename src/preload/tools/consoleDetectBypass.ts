@@ -20,46 +20,37 @@ export class ConsoleDetectBypass extends AbstractTool {
     }
     onMount(): void {
         Hooker.hookMethod(console, "table", "console.table", {
-            id: "console.table:bypass",
             beforeMethodInvoke(_args, abortController) {
                 // 正常极少用+性能太差 直接屏蔽
                 abortController.abort();
             },
         });
         Hooker.hookMethod(console, "debug", "console.debug", {
-            id: "console.debug:bypass",
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         })
         Hooker.hookMethod(console, "log", "console.log", {
-            id: "console.log:bypass",
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
         Hooker.hookMethod(console, "info", "console.info", {
-            id: "console.info:bypass",
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
         Hooker.hookMethod(console, "warn", "console.warn", {
-            id: "console.warn:bypass",
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
         Hooker.hookMethod(console, "error", "console.error", {
-            id: "console.error:bypass",
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
         Hooker.hookMethod(console, "dir", "console.dir", {
-            id: "console.dir:bypass",
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
         });
         Hooker.hookMethod(console, "dirxml", "console.dirxml", {
-            id: "console.dirxml:bypass",
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             }
         });
         Hooker.hookMethod(console, "clear", "console.clear", {
-            id: "console.clear:bypass",
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             }

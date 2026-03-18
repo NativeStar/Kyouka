@@ -1,3 +1,4 @@
+///<reference path="../dom.d.ts" />
 import { type IpcObject, type ExtensionConfig } from '../types';
 import { OriginObjects } from "../hook/originObjects";
 import { ToolManager } from "./manager/toolsManager";

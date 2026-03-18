@@ -6,7 +6,8 @@ export const DefaultExtensionConfig = {
     blockError: false,
     blockEval: false,
     stringDetectBypass:false,
-    enableGui:true
+    enableGui:true,
+    printStackInLogs:false
 } as const;
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {

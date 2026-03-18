@@ -7,39 +7,30 @@ export class BlockConsoleOutput extends AbstractTool {
     }
     onMount(): void {
         Hooker.hookMethod(console, "table", "console.table", {
-            id: "console.table:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         });
         Hooker.hookMethod(console, "debug", "console.debug", {
-            id: "console.debug:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         })
         Hooker.hookMethod(console, "log", "console.log", {
-            id: "console.log:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         });
         Hooker.hookMethod(console, "info", "console.info", {
-            id: "console.info:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         });
         Hooker.hookMethod(console, "warn", "console.warn", {
-            id: "console.warn:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         });
         Hooker.hookMethod(console, "error", "console.error", {
-            id: "console.error:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         });
         Hooker.hookMethod(console, "dir", "console.dir", {
-            id: "console.dir:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         });
         Hooker.hookMethod(console, "dirxml", "console.dirxml", {
-            id: "console.dirxml:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         });
         Hooker.hookMethod(console, "clear", "console.clear", {
-            id: "console.clear:bypassReject",
             beforeMethodInvoke: this.rejectAllInvoke
         })
     }
