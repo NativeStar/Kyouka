@@ -1,9 +1,6 @@
 import { Hooker } from "../../hook/hooker";
 import { PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
-function appendStackItem() {
-
-}
 export class PrintLogStack extends AbstractTool {
     private appendStackItem(args: any[]){
         const obj={stack:null}

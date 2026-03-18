@@ -11,7 +11,7 @@ class OptionCheckBox extends HTMLElement {
         boxLabelElement.textContent = this.getAttribute("description")!;
         checkboxElement.addEventListener("change", () => {
             chrome.storage.local.set({ [targetSettingKey]: checkboxElement.checked });
-            playButtonCheckChangeAudio();
+            playButtonCheckChangeAudio(checkboxElement.checked);
         });
         this.append(checkboxElement, boxLabelElement);
         getChromeConfig<boolean>(targetSettingKey, false).then(result => {
@@ -19,19 +19,25 @@ class OptionCheckBox extends HTMLElement {
         });
     }
 }
-async function playButtonCheckChangeAudio() {
+async function playButtonCheckChangeAudio(isEnable:boolean) {
     if (audioContext.state === 'suspended') {
         await audioContext.resume();
     }
-    const oscillator = audioContext.createOscillator();
+    const firstOscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    oscillator.type = 'triangle';
-    oscillator.frequency.value = 880;
-    oscillator.connect(gainNode);
+    firstOscillator.type = 'triangle';
+    firstOscillator.frequency.value = isEnable?550:920;
+    firstOscillator.connect(gainNode);
+    const lastOscillator = audioContext.createOscillator();
+    lastOscillator.type = 'triangle';
+    lastOscillator.frequency.value = isEnable?920:550;
+    lastOscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.11);
+    firstOscillator.start();
+    lastOscillator.start(audioContext.currentTime + 0.08);
+    firstOscillator.stop(audioContext.currentTime + 0.08);
+    lastOscillator.stop(audioContext.currentTime + 0.16);
 }
 async function getChromeConfig<T = any>(key: string, defaultValue: T): Promise<T> {
     const result = await chrome.storage.local.get(key);

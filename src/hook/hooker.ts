@@ -35,7 +35,8 @@ export class Hooker {
     static setOriginObjectSource(source:typeof OriginObjects){
         this.originObjectSource=source;
     }
-    static hookMethod<T = any>(parent: any, methodName: string, key: string, hookOption: MethodHookOption<T>): boolean {
+    static hookMethod<T = any>(parent: any, target: string|Function, key: string, hookOption: MethodHookOption<T>): boolean {
+        const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
                 return false;
@@ -111,7 +112,8 @@ export class Hooker {
             return false;
         }
     }
-    static hookAsyncMethod<T = any>(parent: any, methodName: string, key: string, hookOption: MethodHookOption<T>): boolean {
+    static hookAsyncMethod<T = any>(parent: any, target: string|Function, key: string, hookOption: MethodHookOption<T>): boolean {
+        const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
                 return false;
