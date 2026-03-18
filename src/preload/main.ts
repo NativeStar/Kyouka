@@ -2,6 +2,7 @@
 import { type IpcObject, type ExtensionConfig } from '../types';
 import { OriginObjects } from "../hook/originObjects";
 import { ToolManager } from "./manager/toolsManager";
+import { Hooker } from '../hook/hooker';
 let config: ExtensionConfig | {} = {};
 const toolManager = new ToolManager();
 async function init() {

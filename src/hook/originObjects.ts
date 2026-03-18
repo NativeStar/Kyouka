@@ -18,6 +18,9 @@ export const OriginObjects={
         warn:console.warn,
         error:console.error
     },
+    document:{
+        createElement:document.createElement.bind(document),
+    },
     open,
     navigator:{
         clipboard:{

@@ -4,7 +4,7 @@ import { AbstractTool } from "../classes/abstractTool";
 import { BlockClipboardWrite } from "../tools/blockClipboardWrite";
 import { BlockConsoleOutput } from "../tools/blockConsoleOutput";
 import { BlockError } from "../tools/blockError";
-import { BlockEvalExecute } from "../tools/blockEvalExecute";
+import { BlockStringCodeExecute } from "../tools/blockStringCodeExecute";
 import { ConsoleDetectBypass } from "../tools/consoleDetectBypass";
 import { PrintLogStack } from "../tools/printLogStack";
 import { StringDetectBypass } from "../tools/stringDetectBypass";
@@ -15,7 +15,7 @@ export class ToolManager {
         blockClipboardWrite: new BlockClipboardWrite(),
         blockConsole: new BlockConsoleOutput(),
         blockError: new BlockError(),
-        blockEval: new BlockEvalExecute(),
+        blockStringCodeExecute: new BlockStringCodeExecute(),
         stringDetectBypass:new StringDetectBypass(),
         printStackInLogs:new PrintLogStack(),
     } as const;

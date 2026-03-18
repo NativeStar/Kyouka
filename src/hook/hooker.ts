@@ -204,6 +204,13 @@ export class Hooker {
             })
         }
     }
+    /**
+     * 在对象hook完善前手动获取这个打标记
+     * @returns 
+     */
+    static getHookSymbol(){
+        return hookSymbol;
+    }
     static unhookMethods(id:string[]){
         for (const idItem of id) {
             this.unhookMethod(idItem);

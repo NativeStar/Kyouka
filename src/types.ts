@@ -4,7 +4,7 @@ export const DefaultExtensionConfig = {
     blockClipboardWrite: false,
     blockConsole: false,
     blockError: false,
-    blockEval: false,
+    blockStringCodeExecute: false,
     stringDetectBypass:false,
     enableGui:true,
     printStackInLogs:false
