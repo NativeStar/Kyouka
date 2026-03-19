@@ -7,6 +7,9 @@ export const OriginObjects={
     },
     Reflect:{
         has:Reflect.has,
+        get:Reflect.get,
+        set:Reflect.set,
+        defineProperty:Reflect.defineProperty,
     },
     Proxy,
     String:{

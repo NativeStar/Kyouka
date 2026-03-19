@@ -64,10 +64,10 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender) => {
 chrome.runtime.onInstalled.addListener(async (detail) => {
     if (detail.reason === "update" || detail.reason === "install") {
         const currentConfig: ExtensionConfig = await chrome.storage.local.get(null);
-        chrome.storage.local.set({ ...DefaultExtensionConfig, ...currentConfig });
-        //更新上来的不会有这个键值
-        if (!Reflect.has(currentConfig, "enableGui")) {
-            //默认启用gui
+        const mergedConfig = { ...DefaultExtensionConfig, ...currentConfig };
+        chrome.storage.local.set(mergedConfig);
+        //更新后会清空动态注册脚本 根据配置恢复注册
+        if (mergedConfig.enableGui) {
             chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
         }
     }

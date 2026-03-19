@@ -1,5 +1,5 @@
 import { OriginObjects } from "./originObjects";
-import { createBypassToStringMethod, filterErrorStack} from "./util";
+import { createBypassToStringMethod, filterErrorStack } from "./util";
 
 export interface TempMethodResultWrapper<T = any> {
     current: T;
@@ -31,11 +31,11 @@ interface MethodHookMapItem {
 const hookedMethodKeyMap: Map<string, MethodHookMapItem> = new Map();
 export const hookSymbol = Symbol();
 export class Hooker {
-    private static originObjectSource=OriginObjects;
-    static setOriginObjectSource(source:typeof OriginObjects){
-        this.originObjectSource=source;
+    private static originObjectSource = OriginObjects;
+    static setOriginObjectSource(source: typeof OriginObjects) {
+        this.originObjectSource = source;
     }
-    static hookMethod<T = any>(parent: any, target: string|Function, key: string, hookOption: MethodHookOption<T>): boolean {
+    static hookMethod<T = any>(parent: any, target: string | Function, key: string, hookOption: MethodHookOption<T>): boolean {
         const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -52,8 +52,14 @@ export class Hooker {
                 hookedMethodKeyMap.set(key, currentHookMethodItem);
                 return true
             }
-            const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : Reflect.get(parent, methodName);
-            originMethod.toString = createBypassToStringMethod(methodName);
+            const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : this.originObjectSource.Reflect.get(parent, methodName);
+            // 屏蔽枚举和重写
+            this.originObjectSource.Reflect.defineProperty(originMethod, 'toString', {
+                value: createBypassToStringMethod(methodName),
+                writable: false,
+                enumerable: false,
+                configurable: true,
+            });
             const hookEntryProxy = new this.originObjectSource.Proxy(originMethod, {
                 apply(_target, thisArg, args) {
                     const hookItem = hookedMethodKeyMap.get(key);
@@ -88,11 +94,11 @@ export class Hooker {
                     if (p === hookSymbol) {
                         return true;
                     }
-                    return Reflect.has(target, p);
+                    return Hooker.originObjectSource.Reflect.has(target, p);
                 },
             });
             // 下面三个属性只有第一个hook的可以生效
-            const hookDefineResult = Reflect.defineProperty(parent, methodName, {
+            const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntryProxy,
                 writable: hookOption.descriptor?.writable ?? true,
                 enumerable: hookOption.descriptor?.enumerable ?? true,
@@ -112,7 +118,7 @@ export class Hooker {
             return false;
         }
     }
-    static hookAsyncMethod<T = any>(parent: any, target: string|Function, key: string, hookOption: MethodHookOption<T>): boolean {
+    static hookAsyncMethod<T = any>(parent: any, target: string | Function, key: string, hookOption: MethodHookOption<T>): boolean {
         const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -124,9 +130,14 @@ export class Hooker {
                 hookedMethodKeyMap.set(key, currentHookMethodItem);
                 return true
             }
-            const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : Reflect.get(parent, methodName);
+            const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : this.originObjectSource.Reflect.get(parent, methodName);
             try {
-                originMethod.toString = createBypassToStringMethod(methodName);
+                this.originObjectSource.Reflect.defineProperty(originMethod, 'toString', {
+                    value: createBypassToStringMethod(methodName),
+                    writable: false,
+                    enumerable: false,
+                    configurable: true,
+                });
             } catch (error) {
                 this.originObjectSource.console.warn("Error on create bypass toString detect method:", error);
             }
@@ -169,10 +180,10 @@ export class Hooker {
                     if (p === hookSymbol) {
                         return true;
                     }
-                    return Reflect.has(target, p);
+                    return Hooker.originObjectSource.Reflect.has(target, p);
                 },
             })
-            const hookDefineResult = Reflect.defineProperty(parent, methodName, {
+            const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntry,
                 writable: hookOption.descriptor?.writable ?? true,
                 enumerable: hookOption.descriptor?.enumerable ?? true,
@@ -193,6 +204,7 @@ export class Hooker {
         }
     }
     static createProxyObject<T extends object>(target: T, handler: ProxyHandler<T>, targetName: string): T {
+        //这个没必要屏蔽枚举
         target.toString = createBypassToStringMethod(targetName);
         const proxyTarget = new this.originObjectSource.Proxy(target, handler);
         return proxyTarget;
@@ -210,10 +222,10 @@ export class Hooker {
      * 在对象hook完善前手动获取这个打标记
      * @returns 
      */
-    static getHookSymbol(){
+    static getHookSymbol() {
         return hookSymbol;
     }
-    static unhookMethods(id:string[]){
+    static unhookMethods(id: string[]) {
         for (const idItem of id) {
             this.unhookMethod(idItem);
         }
