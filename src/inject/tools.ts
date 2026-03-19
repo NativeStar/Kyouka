@@ -58,7 +58,7 @@ export async function waitOriginObject() {
 export const Tools: { [key: string]: () => void } = {
     "injectScript": () => {
         if (!("showOpenFilePicker" in window)) {
-            showToast("当前浏览器不支持showOpenFilePicker")
+            showToast("浏览器不支持showOpenFilePicker")
             return
         }
         showOpenFilePicker().then(files => {
@@ -169,7 +169,7 @@ export const Tools: { [key: string]: () => void } = {
         for (const element of allSelectElements) {
             element.removeAttribute('required');
         }
-        showToast(`执行完成`);
+        showToast(`执行成功`);
     },
     "showHiddenElements": () => {
         const hiddenElements = document.querySelectorAll('[hidden]');
@@ -195,7 +195,7 @@ export const Tools: { [key: string]: () => void } = {
                 element.style.display = "block";
             }
         }
-        showToast("操作完成")
+        showToast("执行成功")
     },
     "forceTranslate": () => {
         const translateElements = document.querySelectorAll('[translate]');
@@ -217,7 +217,7 @@ export const Tools: { [key: string]: () => void } = {
                 abortController.abort();
             },
         });
-        showToast(result ? "执行成功" : "执行失败 详见控制台")
+        showToast(result ? "执行成功" : "执行失败")
     },
     "forcePropertyRW": () => {
         if (Hooker.isModifiedMethodOrObject(Object.defineProperty)) {
@@ -246,7 +246,7 @@ export const Tools: { [key: string]: () => void } = {
                 descriptor.configurable = true;
             },
         });
-        showToast(definePropertiesHook && definePropertyHook && reflectDefinePropertyHook ? "执行成功" : "执行失败 详见控制台")
+        showToast(definePropertiesHook && definePropertyHook && reflectDefinePropertyHook ? "执行成功" : "执行失败")
     },
     "wheelRemoveElement": () => {
         if (toolState.wheelRemoveElement) {
@@ -370,7 +370,12 @@ export const Tools: { [key: string]: () => void } = {
                 originObjectReference.console.log("JSON Parse:", tempMethodResult.current)
             },
         });
-        showToast(stringifyHook && parseHook ? "执行成功" : "执行失败 详见控制台")
+        const rawJsonHook = Hooker.hookMethod<object>(window.JSON, "rawJSON", "window.JSON.rawJSON", {
+            afterMethodInvoke(_args, tempMethodResult) {
+                originObjectReference.console.log("JSON Raw:", tempMethodResult.current)
+            },
+        });
+        showToast(stringifyHook && parseHook && rawJsonHook ? "执行成功" : "执行失败")
     },
     "changePageIcon": () => {
         if (!("showOpenFilePicker" in window)) {
@@ -473,7 +478,7 @@ export const Tools: { [key: string]: () => void } = {
                 abortController.abort();
             }
         });
-        showToast(result ? "执行成功" : "执行失败 详见控制台")
+        showToast(result ? "执行成功" : "执行失败")
     },
     "blockConsole": () => {
         //两个典型
@@ -510,7 +515,7 @@ export const Tools: { [key: string]: () => void } = {
         const clearHook = Hooker.hookMethod(console, "clear", "console.clear", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? "执行成功" : "执行失败 详见控制台")
+        showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? "执行成功" : "执行失败")
     },
     "blockSendBeacon": () => {
         if (Hooker.isModifiedMethodOrObject(navigator.sendBeacon)) {
@@ -524,7 +529,7 @@ export const Tools: { [key: string]: () => void } = {
                 abortController.abort();
             }
         });
-        showToast(result ? "执行成功" : "执行失败 详见控制台")
+        showToast(result ? "执行成功" : "执行失败")
     },
     "forceRTL": () => {
         if (document.dir === "rtl") {
@@ -762,7 +767,7 @@ export const Tools: { [key: string]: () => void } = {
                 originObjectReference.console.log("Base64 encode:", args[0])
             },
         });
-        showToast(atobHook && parseHook ? "执行成功" : "执行失败 详见控制台")
+        showToast(atobHook && parseHook ? "执行成功" : "执行失败")
     },
     "pageInfo": async () => {
         showToast("统计中...")
@@ -918,7 +923,7 @@ UserAgent:${navigator.userAgent}
             }
         });
         //居然还有人用这种方法
-        Hooker.hookMethod(document,"execCommand","document.execCommand",{
+        Hooker.hookMethod(document, "execCommand", "document.execCommand", {
             beforeMethodInvoke(args, abortController, _thisArg, tempMethodResult) {
                 if (args[0] === "copy") {
                     originObjectReference.console.log("Blocked execCommand copy");
