@@ -50,9 +50,10 @@ export class BlockStringCodeExecute extends AbstractTool {
                 },
             });
         }
-        Hooker.hookGetterAndSetter<string>(HTMLScriptElement.prototype, "src", "HTMLScriptElement.prototype.src", {
+        Hooker.hookGetterAndSetter<string|TrustedScriptURL>(HTMLScriptElement.prototype, "src", "HTMLScriptElement.prototype.src", {
             beforeSetterInvoke(arg, abortController) {
-                if (arg.startsWith("blob:") || arg.startsWith("data:")) {
+                const srcString=arg instanceof TrustedScriptURL ? arg.toString() : arg;
+                if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
                     abortController.abort();
                 }
             },
@@ -65,7 +66,8 @@ export class BlockStringCodeExecute extends AbstractTool {
                     return
                 }
                 if (args[0] === "src") {
-                    if (args[1].startsWith("blob:") || args[1].startsWith("data:")) {
+                    const srcString:string=args[1] instanceof TrustedScriptURL ? args[1].toString() : args[1];
+                    if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
                         abortController.abort();
                     }
                 }
