@@ -1,8 +1,8 @@
 import { Hooker } from "../../hook/hooker";
-import { OriginObjects } from "../../hook/originObjects";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 export class BlockStringCodeExecute extends AbstractTool {
+    private static abortInvokeTargetAttrs: string[] = ["innerText", "innerHTML", "text", "textContent"]
     onMount(): void {
         const hookedTagSymbol = Hooker.getHookSymbol();
         Hooker.hookMethod(window, "eval", "window.eval", {
@@ -40,6 +40,45 @@ export class BlockStringCodeExecute extends AbstractTool {
                 if (typeof args[0] === "string") {
                     abortController.abort();
                 }
+            },
+        });
+        //script标签相关
+        for (const keyword of BlockStringCodeExecute.abortInvokeTargetAttrs) {
+            Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, keyword, `HTMLScriptElement.prototype.${keyword}`, {
+                beforeSetterInvoke(_arg, abortController) {
+                    abortController.abort();
+                },
+            });
+        }
+        Hooker.hookGetterAndSetter<string>(HTMLScriptElement.prototype, "src", "HTMLScriptElement.prototype.src", {
+            beforeSetterInvoke(arg, abortController) {
+                if (arg.startsWith("blob:") || arg.startsWith("data:")) {
+                    abortController.abort();
+                }
+            },
+        });
+        //attr相关
+        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setAttribute, "HTMLScriptElement.prototype.setAttribute", {
+            beforeMethodInvoke(args, abortController) {
+                if (BlockStringCodeExecute.abortInvokeTargetAttrs.includes(args[0])) {
+                    abortController.abort();
+                    return
+                }
+                if (args[0] === "src") {
+                    if (args[1].startsWith("blob:") || args[1].startsWith("data:")) {
+                        abortController.abort();
+                    }
+                }
+            },
+        })
+        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setHTMLUnsafe, "HTMLScriptElement.prototype.setHTMLUnsafe", {
+            beforeMethodInvoke(_args, abortController) {
+                abortController.abort();
+            },
+        });
+        Hooker.hookMethod(HTMLScriptElement.prototype, "setHTML", "HTMLScriptElement.prototype.setHTML", {
+            beforeMethodInvoke(_args, abortController) {
+                abortController.abort();
             },
         });
     }

@@ -28,7 +28,7 @@ interface GetterAndSetterHookOption<T = any> {
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value" | "writable">;
     beforeGetterInvoke?: (abortController: AbortController, thisArg: any, tempMethodResult: TempHookResultWrapper<T>) => void;
     afterGetterInvoke?: (tempMethodResult: TempHookResultWrapper<T>, thisArg: any) => void;
-    beforeSetterInvoke?: (arg: any, abortController: AbortController, thisArg: any) => void;
+    beforeSetterInvoke?: (arg: T, abortController: AbortController, thisArg: any) => void;
 }
 interface MethodHookMapItem {
     originMethod: Function;
