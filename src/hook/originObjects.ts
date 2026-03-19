@@ -31,6 +31,9 @@ export const OriginObjects={
             writeText:navigator.clipboard.writeText.bind(navigator.clipboard),
             write:navigator.clipboard.write.bind(navigator.clipboard),
         }
+    },
+    Error:{
+        captureStackTrace:Error.captureStackTrace
     }
 }
 OriginObjects.Object.freeze(OriginObjects);
