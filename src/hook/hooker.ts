@@ -1,7 +1,7 @@
 import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
 
-export interface TempMethodResultWrapper<T = any> {
+export interface TempHookResultWrapper<T = any> {
     current: T;
 }
 interface MethodHookOption<T = any> {
@@ -16,19 +16,31 @@ interface MethodHookOption<T = any> {
      * @param thisArg this指向
      * @param tempMethodResult 可修改返回值 注意这里的返回值设置仅在中断执行时生效 
      */
-    beforeMethodInvoke?: (args: any[], abortController: AbortController, thisArg: any, tempMethodResult: TempMethodResultWrapper<T>) => void;
+    beforeMethodInvoke?: (args: any[], abortController: AbortController, thisArg: any, tempMethodResult: TempHookResultWrapper<T>) => void;
     /**
      * @param args 方法参数
      * @param tempMethodResult 可修改返回值
      * @param thisArg this指向
      */
-    afterMethodInvoke?: (args: any[], tempMethodResult: TempMethodResultWrapper<T>, thisArg: any) => void;
+    afterMethodInvoke?: (args: any[], tempMethodResult: TempHookResultWrapper<T>, thisArg: any) => void;
+}
+interface GetterAndSetterHookOption<T = any> {
+    descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value" | "writable">;
+    beforeGetterInvoke?: (abortController: AbortController, thisArg: any, tempMethodResult: TempHookResultWrapper<T>) => void;
+    afterGetterInvoke?: (tempMethodResult: TempHookResultWrapper<T>, thisArg: any) => void;
+    beforeSetterInvoke?: (arg: any, abortController: AbortController, thisArg: any) => void;
 }
 interface MethodHookMapItem {
     originMethod: Function;
     option: MethodHookOption[];
 }
+interface GetterAndSetterHookMapItem<T = any> {
+    originGetter: (() => T) | null;
+    originSetter: ((value: T) => void) | null;
+    option: GetterAndSetterHookOption[];
+}
 const hookedMethodKeyMap: Map<string, MethodHookMapItem> = new Map();
+const hookedGetterAndSetterKeyMap: Map<string, GetterAndSetterHookMapItem> = new Map();
 export const hookSymbol = Symbol();
 export class Hooker {
     private static originObjectSource = OriginObjects;
@@ -52,7 +64,7 @@ export class Hooker {
                 hookedMethodKeyMap.set(key, currentHookMethodItem);
                 return true
             }
-            const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : this.originObjectSource.Reflect.get(parent, methodName);
+            const originMethod: Function = this.originObjectSource.Reflect.get(parent, methodName);
             // 屏蔽枚举和重写
             this.originObjectSource.Reflect.defineProperty(originMethod, 'toString', {
                 value: createBypassToStringMethod(methodName),
@@ -67,7 +79,7 @@ export class Hooker {
                         //没有hook
                         return originMethod.apply(thisArg, args);
                     }
-                    const tempResult: TempMethodResultWrapper<T> = {
+                    const tempResult: TempHookResultWrapper<T> = {
                         current: null as T
                     }
                     const abortController = new Hooker.originObjectSource.AbortController();
@@ -130,7 +142,7 @@ export class Hooker {
                 hookedMethodKeyMap.set(key, currentHookMethodItem);
                 return true
             }
-            const originMethod: Function = hookedMethodKeyMap.has(key) ? hookedMethodKeyMap.get(key)!.originMethod : this.originObjectSource.Reflect.get(parent, methodName);
+            const originMethod: Function = this.originObjectSource.Reflect.get(parent, methodName);
             try {
                 this.originObjectSource.Reflect.defineProperty(originMethod, 'toString', {
                     value: createBypassToStringMethod(methodName),
@@ -150,7 +162,7 @@ export class Hooker {
                             resolve(await originMethod.apply(thisArg, args))
                             return
                         }
-                        const tempResult: TempMethodResultWrapper<T> = {
+                        const tempResult: TempHookResultWrapper<T> = {
                             current: undefined as T
                         }
                         const abortController = new Hooker.originObjectSource.AbortController();
@@ -200,6 +212,123 @@ export class Hooker {
             return false;
         } catch (error) {
             this.originObjectSource.console.warn("Error on hooking async method:", error);
+            return false;
+        }
+    }
+    static hookGetterAndSetter<T = any>(parent: any, target: string, key: string, hookOption: GetterAndSetterHookOption<T>) {
+        if (!parent) return false
+        if (hookedGetterAndSetterKeyMap.has(key)) {
+            const currentHookGetterAndSetterItem = hookedGetterAndSetterKeyMap.get(key)!;
+            currentHookGetterAndSetterItem.option.push(hookOption);
+            hookedGetterAndSetterKeyMap.set(key, currentHookGetterAndSetterItem);
+            return true
+        }
+        const originDescriptor = this.originObjectSource.Reflect.getOwnPropertyDescriptor(parent, target);
+        // 拿不到描述符
+        if (!originDescriptor) return false;
+        const originGetter: (() => T) | undefined = originDescriptor.get;
+        const originSetter: ((value: T) => void) | undefined = originDescriptor.set;
+        // 啥都没有...
+        if (!originGetter && !originSetter) return false
+        const tempHookEntry: { getter: (() => T) | undefined, setter: ((value: T) => void) | undefined } = { getter: originGetter, setter: originSetter }
+        if (originGetter) {
+            this.originObjectSource.Reflect.defineProperty(originGetter, 'toString', {
+                value: createBypassToStringMethod(target, "get"),
+                writable: false,
+                enumerable: true,
+                configurable: true,
+            });
+            tempHookEntry.getter = new this.originObjectSource.Proxy(originGetter, {
+                apply(_target, thisArg) {
+                    const hookItem = hookedGetterAndSetterKeyMap.get(key);
+                    if (!hookItem) {
+                        //没有hook
+                        return originGetter.apply(thisArg);
+                    }
+                    const tempResult: TempHookResultWrapper<T> = {
+                        current: null as T
+                    }
+                    const abortController = new Hooker.originObjectSource.AbortController();
+                    for (const currentHookOption of hookItem.option) {
+                        currentHookOption.beforeGetterInvoke?.(abortController, thisArg, tempResult);
+                    }
+                    if (abortController.signal.aborted) {
+                        return tempResult.current ?? undefined;
+                    }
+                    try {
+                        tempResult.current = originGetter.apply(thisArg);
+                    } catch (error: any) {
+                        if (error.stack) {
+                            error.stack = filterErrorStack(error.stack);
+                        }
+                        throw error;
+                    }
+                    for (const currentHookOption of hookItem.option) {
+                        currentHookOption.afterGetterInvoke?.(tempResult, thisArg);
+                    }
+                    return tempResult.current;
+                },
+                has(target, p) {
+                    if (p === hookSymbol) {
+                        return true;
+                    }
+                    return Hooker.originObjectSource.Reflect.has(target, p);
+                },
+            });
+            if (originSetter) {
+                this.originObjectSource.Reflect.defineProperty(originSetter, 'toString', {
+                    value: createBypassToStringMethod(target, "set"),
+                    writable: false,
+                    enumerable: true,
+                    configurable: true,
+                });
+                tempHookEntry.setter = new this.originObjectSource.Proxy(originSetter, {
+                    apply(_target, thisArg, arg:[any]) {
+                        const hookItem = hookedGetterAndSetterKeyMap.get(key);
+                        if (!hookItem) {
+                            //没有hook
+                            return originSetter.apply(thisArg, arg);
+                        }
+                        const abortController = new Hooker.originObjectSource.AbortController();
+                        for (const currentHookOption of hookItem.option) {
+                            currentHookOption.beforeSetterInvoke?.(arg[0], abortController, thisArg);
+                        }
+                        if (abortController.signal.aborted) {
+                            return
+                        }
+                        try {
+                            originSetter.apply(thisArg, arg);
+                        } catch (error: any) {
+                            if (error.stack) {
+                                error.stack = filterErrorStack(error.stack);
+                            }
+                            throw error;
+                        }
+                        return
+                    },
+                    has(target, p) {
+                        if (p === hookSymbol) {
+                            return true;
+                        }
+                        return Hooker.originObjectSource.Reflect.has(target, p);
+                    },
+                });
+            }
+            const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, target, {
+                get: tempHookEntry.getter,
+                set: tempHookEntry.setter,
+                enumerable: hookOption.descriptor?.enumerable ?? true,
+                configurable: hookOption.descriptor?.configurable ?? true,
+            });
+            if (hookDefineResult) {
+                const hookItem: GetterAndSetterHookMapItem = {
+                    originGetter: originGetter ?? null,
+                    originSetter: originSetter ?? null,
+                    option: [hookOption]
+                }
+                hookedGetterAndSetterKeyMap.set(key, hookItem);
+                return true;
+            }
             return false;
         }
     }

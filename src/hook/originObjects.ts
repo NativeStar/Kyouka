@@ -10,6 +10,7 @@ export const OriginObjects={
         get:Reflect.get,
         set:Reflect.set,
         defineProperty:Reflect.defineProperty,
+        getOwnPropertyDescriptor:Reflect.getOwnPropertyDescriptor
     },
     Proxy,
     String:{

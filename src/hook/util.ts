@@ -24,14 +24,14 @@ export function filterErrorStack(stack: string) {
     const filteredStack = splitStack.filter(line => needDeleteStack(line))
     return filteredStack.join("\n");
 }
-export function createBypassToStringMethod(methodName: string): () => string {
+export function createBypassToStringMethod(methodName: string,targetType:"normal"|"get"|"set"="normal"): () => string {
     const toString = function (this: any) {
         if (!(this instanceof Function)) {
             const error = new TypeError("Function.prototype.toString requires that 'this' be a Function");
             error.stack = filterErrorStack((error.stack) as string);
             throw error;
         }
-        return `function ${methodName}() { [native code] }`;
+        return `function ${targetType==="normal"?"":`${targetType} `}${methodName}() { [native code] }`;
     }
     toString.toString = getFakeNativeToString();
     toString.toString.toString = getFakeNativeToString();
