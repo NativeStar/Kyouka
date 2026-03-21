@@ -1,10 +1,12 @@
-///<reference path="../dom.d.ts" />
 import { Hooker } from "../hook/hooker";
 import { OriginObjects } from "../hook/originObjects";
 import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
 let originObjectReference: typeof OriginObjects = OriginObjects;
+const successText="执行成功";
+const failedText="执行失败";
+const executedText="该功能已执行过"
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -93,13 +95,13 @@ export const Tools: { [key: string]: () => void } = {
         showToast(`已为${mediaList.length}个多媒体元素解除限制`, 2250)
     },
     "editPage": () => {
-        if (document.body.hasAttribute("contenteditable")) {
+        const editable=document.body.hasAttribute("contenteditable");
+        if (editable) {
             document.body.removeAttribute("contenteditable");
-            showToast("已退出自由编辑")
         } else {
             document.body.setAttribute("contenteditable", "");
-            showToast("已进入自由编辑")
         }
+        showToast(`已${editable ? "退出" : "进入"}自由编辑`)
     },
     "enableAllElement": () => {
         const targetElements = document.querySelectorAll('[disabled]');
@@ -169,7 +171,7 @@ export const Tools: { [key: string]: () => void } = {
         for (const element of allSelectElements) {
             element.removeAttribute('required');
         }
-        showToast(`执行成功`);
+        showToast(successText);
     },
     "showHiddenElements": () => {
         const hiddenElements = document.querySelectorAll('[hidden]');
@@ -195,7 +197,7 @@ export const Tools: { [key: string]: () => void } = {
                 element.style.display = "block";
             }
         }
-        showToast("执行成功")
+        showToast(successText)
     },
     "forceTranslate": () => {
         const translateElements = document.querySelectorAll('[translate]');
@@ -210,18 +212,18 @@ export const Tools: { [key: string]: () => void } = {
     },
     "blockEval": () => {
         if (Hooker.isModifiedMethodOrObject(eval)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         const result = Hooker.hookMethod(window, "eval", "window.eval", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
         });
-        showToast(result ? "执行成功" : "执行失败")
+        showToast(result ? successText : failedText)
     },
     "forcePropertyRW": () => {
         if (Hooker.isModifiedMethodOrObject(Object.defineProperty)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         const definePropertyHook = Hooker.hookMethod(Object, "defineProperty", "Object.defineProperty", {
             beforeMethodInvoke(args) {
@@ -246,7 +248,7 @@ export const Tools: { [key: string]: () => void } = {
                 descriptor.configurable = true;
             },
         });
-        showToast(definePropertiesHook && definePropertyHook && reflectDefinePropertyHook ? "执行成功" : "执行失败")
+        showToast(definePropertiesHook && definePropertyHook && reflectDefinePropertyHook ? successText : failedText)
     },
     "wheelRemoveElement": () => {
         if (toolState.wheelRemoveElement) {
@@ -281,7 +283,7 @@ export const Tools: { [key: string]: () => void } = {
                         })
                     });
                     audio.play();
-                    showToast("执行成功")
+                    showToast(successText)
                 } catch (error) {
                     showToast("播放异常 可能是格式不支持")
                     originObjectReference.console.log(error);
@@ -304,7 +306,7 @@ export const Tools: { [key: string]: () => void } = {
                     document.body.style.backgroundRepeat = "no-repeat";
                     document.body.style.backgroundSize = "cover";
                     document.body.style.backgroundPosition = "center";
-                    showToast("执行成功");
+                    showToast(successText);
                 } catch (e) {
                     showToast("执行时发生异常 详见控制台")
                     originObjectReference.console.log(e);
@@ -358,7 +360,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "logJsonOperation": () => {
         if (Hooker.isModifiedMethodOrObject(JSON?.stringify ?? {})) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         const stringifyHook = Hooker.hookMethod<string>(window.JSON, "stringify", "window.JSON.stringify", {
             afterMethodInvoke(args) {
@@ -375,7 +377,7 @@ export const Tools: { [key: string]: () => void } = {
                 originObjectReference.console.log("JSON Raw:", tempMethodResult.current)
             },
         });
-        showToast(stringifyHook && parseHook && rawJsonHook ? "执行成功" : "执行失败")
+        showToast(stringifyHook && parseHook && rawJsonHook ? successText : failedText)
     },
     "changePageIcon": () => {
         if (!("showOpenFilePicker" in window)) {
@@ -397,7 +399,7 @@ export const Tools: { [key: string]: () => void } = {
                         newLinkElement.href = url;
                         document.head.appendChild(newLinkElement);
                     }
-                    showToast("执行成功")
+                    showToast(successText)
                 })
             })
 
@@ -470,7 +472,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "blockOpen": () => {
         if (Hooker.isModifiedMethodOrObject(window.open)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         const result = Hooker.hookMethod(window, "open", "window.open", {
             beforeMethodInvoke(_args, abortController) {
@@ -478,12 +480,12 @@ export const Tools: { [key: string]: () => void } = {
                 abortController.abort();
             }
         });
-        showToast(result ? "执行成功" : "执行失败")
+        showToast(result ? successText : failedText)
     },
     "blockConsole": () => {
         //两个典型
         if (Hooker.isModifiedMethodOrObject(console.table) && Hooker.isModifiedMethodOrObject(console.log)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
             abortController.abort();
@@ -515,11 +517,11 @@ export const Tools: { [key: string]: () => void } = {
         const clearHook = Hooker.hookMethod(console, "clear", "console.clear", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? "执行成功" : "执行失败")
+        showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? successText : failedText)
     },
     "blockSendBeacon": () => {
         if (Hooker.isModifiedMethodOrObject(navigator.sendBeacon)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         const result = Hooker.hookMethod(navigator, "sendBeacon", "navigator.sendBeacon", {
             beforeMethodInvoke(args, abortController) {
@@ -529,7 +531,7 @@ export const Tools: { [key: string]: () => void } = {
                 abortController.abort();
             }
         });
-        showToast(result ? "执行成功" : "执行失败")
+        showToast(result ? successText: failedText)
     },
     "forceRTL": () => {
         if (document.dir === "rtl") {
@@ -541,8 +543,10 @@ export const Tools: { [key: string]: () => void } = {
     },
     "changeTitle": () => {
         const newTitle = prompt("输入新标题", document.title);
-        if (newTitle) document.title = newTitle;
-        showToast(newTitle ? "执行成功" : "操作被取消")
+        if (newTitle){
+            document.title = newTitle;
+            showToast(successText)
+        }
     },
     "disableSpellCheck": () => {
         const elements = document.querySelectorAll("[spellcheck]");
@@ -594,7 +598,7 @@ export const Tools: { [key: string]: () => void } = {
             newLinkElement.href = url;
             document.head.appendChild(newLinkElement);
         }
-        showToast("执行成功")
+        showToast(successText)
     },
     "recordCanvasWithAudio": () => {
         if (!("showSaveFilePicker" in window)) {
@@ -751,11 +755,11 @@ export const Tools: { [key: string]: () => void } = {
         window.addEventListener("beforeunload", (event) => {
             event.preventDefault();
         });
-        showToast("执行成功")
+        showToast(successText)
     },
     "logBase64Operation": () => {
         if (Hooker.isModifiedMethodOrObject(window.btoa ?? {})) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         const atobHook = Hooker.hookMethod<any>(window, "atob", "window.atob", {
             afterMethodInvoke(_args, tempMethodResult) {
@@ -767,7 +771,7 @@ export const Tools: { [key: string]: () => void } = {
                 originObjectReference.console.log("Base64 encode:", args[0])
             },
         });
-        showToast(atobHook && parseHook ? "执行成功" : "执行失败")
+        showToast(atobHook && parseHook ? successText : failedText)
     },
     "pageInfo": async () => {
         showToast("统计中...")
@@ -850,14 +854,14 @@ UserAgent:${navigator.userAgent}
     },
     "logRandomUuid": () => {
         if (Hooker.isModifiedMethodOrObject(crypto.randomUUID ?? {})) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         Hooker.hookMethod<string>(crypto, "randomUUID", "crypto.randomUUID", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成UUID:", tempMethodResult.current)
             },
         });
-        showToast("执行成功")
+        showToast(successText)
     },
     "dumpCache": async () => {
         if (!("showDirectoryPicker" in window)) {
@@ -906,7 +910,7 @@ UserAgent:${navigator.userAgent}
     },
     "blockWriteClipboard": () => {
         if (Hooker.isModifiedMethodOrObject(navigator.clipboard.writeText)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         Hooker.hookAsyncMethod(navigator.clipboard, "writeText", "navigator.clipboard.writeText", {
             beforeMethodInvoke(args, abortController) {
@@ -933,22 +937,22 @@ UserAgent:${navigator.userAgent}
                 }
             },
         })
-        showToast("执行成功")
+        showToast(successText)
     },
     "logMathRandom": () => {
         if (Hooker.isModifiedMethodOrObject(Math.random)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         Hooker.hookMethod<number>(Math, "random", "Math.random", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成随机数:", tempMethodResult.current)
             },
         });
-        showToast("执行成功")
+        showToast(successText)
     },
     "blockClose": () => {
         if (Hooker.isModifiedMethodOrObject(window.close)) {
-            return showToast("该功能已执行过")
+            return showToast(executedText)
         }
         Hooker.hookMethod(window, "close", "window.close", {
             beforeMethodInvoke(_args, abortController) {
@@ -956,6 +960,6 @@ UserAgent:${navigator.userAgent}
                 abortController.abort();
             }
         });
-        showToast("执行成功")
+        showToast(successText)
     }
 }
