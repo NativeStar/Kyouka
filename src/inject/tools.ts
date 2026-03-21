@@ -62,7 +62,7 @@ export const Tools: { [key: string]: () => void } = {
             return
         }
         showOpenFilePicker().then(files => {
-            files[0].getFile().then(fileInstance => {
+            files[0]&&files[0].getFile().then(fileInstance => {
                 const url = URL.createObjectURL(fileInstance);
                 try {
                     const script = document.createElement("script");
@@ -234,8 +234,8 @@ export const Tools: { [key: string]: () => void } = {
             beforeMethodInvoke(args) {
                 const [_target, descriptors] = args as [object, PropertyDescriptorMap & ThisType<any>];
                 for (const property in descriptors) {
-                    descriptors[property].writable = true;
-                    descriptors[property].configurable = true;
+                    descriptors[property]!.writable = true;
+                    descriptors[property]!.configurable = true;
                 }
             },
         });
@@ -383,7 +383,7 @@ export const Tools: { [key: string]: () => void } = {
             return
         }
         showOpenFilePicker().then(fileHandles => {
-            fileHandles[0].getFile().then(file => {
+            fileHandles[0]&&fileHandles[0].getFile().then(file => {
                 file.arrayBuffer().then(buffer => {
                     const blob = new Blob([buffer], { type: "image/png" });
                     const url = URL.createObjectURL(blob);
@@ -717,7 +717,7 @@ export const Tools: { [key: string]: () => void } = {
             }
         }
         //之后调用旧的移除水印即可
-        Tools["removeWatermark"]();
+        Tools["removeWatermark"]!();
     },
     "copyPageIconUrl": () => {
         const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
