@@ -919,6 +919,18 @@ UserAgent:${navigator.userAgent}
         });
         showToast(result ? successText : executedText)
     },
+    "logPostMessage":()=>{
+        if (Hooker.isModifiedMethodOrObject(window.postMessage)) {
+            return showToast(executedText)
+        }
+        const result=Hooker.hookMethod<void>(window, "postMessage", "window.postMessage", {
+            afterMethodInvoke(args) {
+                const arg0Data=args[0] instanceof Object ? JSON.stringify(args[0]) : args[0]
+                originObjectReference.console.log(`推送消息:${arg0Data}\n目标:${args[1]??"unset"}`)
+            },
+        });
+        showToast(result ? successText : executedText)
+    },
     "logMathRandom": () => {
         if (Hooker.isModifiedMethodOrObject(Math.random)) {
             return showToast(executedText)
