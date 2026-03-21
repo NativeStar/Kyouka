@@ -1,15 +1,18 @@
 import { Hooker } from "../../hook/hooker";
+import { OriginObjects } from "../../hook/originObjects";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 export class BlockClipboardWrite extends AbstractTool {
     onMount(): void {
         Hooker.hookAsyncMethod(navigator.clipboard, "writeText", "navigator.clipboard.writeText", {
-            beforeMethodInvoke(_args, abortController) {
+            beforeMethodInvoke(args, abortController) {
+                OriginObjects.console.log(`Blocked write clipboard text: ${args[0]}`)
                 abortController.abort();
             }
         });
         Hooker.hookAsyncMethod(navigator.clipboard, "write", "navigator.clipboard.write", {
-            beforeMethodInvoke(_args, abortController) {
+            beforeMethodInvoke(args, abortController) {
+                OriginObjects.console.log(`Blocked write clipboard: ${args[0]}`)
                 abortController.abort();
             }
         });

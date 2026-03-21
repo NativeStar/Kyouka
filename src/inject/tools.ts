@@ -4,9 +4,9 @@ import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, s
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
 let originObjectReference: typeof OriginObjects = OriginObjects;
-const successText="执行成功";
-const failedText="执行失败";
-const executedText="该功能已执行过"
+const successText = "执行成功";
+const failedText = "执行失败";
+const executedText = "该功能已执行过"
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -64,7 +64,7 @@ export const Tools: { [key: string]: () => void } = {
             return
         }
         showOpenFilePicker().then(files => {
-            files[0]&&files[0].getFile().then(fileInstance => {
+            files[0] && files[0].getFile().then(fileInstance => {
                 const url = URL.createObjectURL(fileInstance);
                 try {
                     const script = document.createElement("script");
@@ -95,7 +95,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(`已为${mediaList.length}个多媒体元素解除限制`, 2250)
     },
     "editPage": () => {
-        const editable=document.body.hasAttribute("contenteditable");
+        const editable = document.body.hasAttribute("contenteditable");
         if (editable) {
             document.body.removeAttribute("contenteditable");
         } else {
@@ -385,7 +385,7 @@ export const Tools: { [key: string]: () => void } = {
             return
         }
         showOpenFilePicker().then(fileHandles => {
-            fileHandles[0]&&fileHandles[0].getFile().then(file => {
+            fileHandles[0] && fileHandles[0].getFile().then(file => {
                 file.arrayBuffer().then(buffer => {
                     const blob = new Blob([buffer], { type: "image/png" });
                     const url = URL.createObjectURL(blob);
@@ -531,7 +531,7 @@ export const Tools: { [key: string]: () => void } = {
                 abortController.abort();
             }
         });
-        showToast(result ? successText: failedText)
+        showToast(result ? successText : failedText)
     },
     "forceRTL": () => {
         if (document.dir === "rtl") {
@@ -543,7 +543,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "changeTitle": () => {
         const newTitle = prompt("输入新标题", document.title);
-        if (newTitle){
+        if (newTitle) {
             document.title = newTitle;
             showToast(successText)
         }
@@ -908,36 +908,16 @@ UserAgent:${navigator.userAgent}
             }
         }).catch(() => { })
     },
-    "blockWriteClipboard": () => {
-        if (Hooker.isModifiedMethodOrObject(navigator.clipboard.writeText)) {
+    "logCreateObjectURL": () => {
+        if (Hooker.isModifiedMethodOrObject(URL.createObjectURL)) {
             return showToast(executedText)
         }
-        Hooker.hookAsyncMethod(navigator.clipboard, "writeText", "navigator.clipboard.writeText", {
-            beforeMethodInvoke(args, abortController) {
-                originObjectReference.console.log(`Blocked write clipboard text: ${args[0]}`);
-                showToast("阻止一次剪切板操作", 800);
-                abortController.abort();
-            }
-        });
-        Hooker.hookAsyncMethod(navigator.clipboard, "write", "navigator.clipboard.write", {
-            beforeMethodInvoke(args, abortController) {
-                originObjectReference.console.log(`Blocked write clipboard data: ${args[0]}`);
-                showToast("阻止一次剪切板操作", 800);
-                abortController.abort();
-            }
-        });
-        //居然还有人用这种方法
-        Hooker.hookMethod(document, "execCommand", "document.execCommand", {
-            beforeMethodInvoke(args, abortController, _thisArg, tempMethodResult) {
-                if (args[0] === "copy") {
-                    originObjectReference.console.log("Blocked execCommand copy");
-                    showToast("阻止一次剪切板操作", 800);
-                    tempMethodResult.current = true;
-                    abortController.abort();
-                }
+        const result=Hooker.hookMethod<string>(URL, "createObjectURL", "URL.createObjectURL", {
+            afterMethodInvoke(_args, tempMethodResult) {
+                originObjectReference.console.log("生成对象URL:",`'${tempMethodResult.current}'`)
             },
-        })
-        showToast(successText)
+        });
+        showToast(result ? successText : executedText)
     },
     "logMathRandom": () => {
         if (Hooker.isModifiedMethodOrObject(Math.random)) {

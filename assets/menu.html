@@ -49,7 +49,7 @@
         <button class="itemButton toolButton" tool="blockClose" tooltip="屏蔽close函数调用\n阻止页面关闭自身 但可能无法阻止主动关闭子窗口">屏蔽close</button>
         <button class="itemButton toolButton" tool="dispatchCustomEvent" tooltip="在window对象上分发指定事件\n仅建议使用blur等无参数事件 否则可能导致异常">伪造自定义事件</button>
         <button class="itemButton toolButton" tool="logRandomUuid" tooltip="在控制台打印通过crypto.randomUUID生成的UUID\n该方法可能使用的并不算多">打印UUID</button>
-        <button class="itemButton toolButton" tool="blockWriteClipboard" tooltip="阻止页面写入剪切板并将欲写入数据打印至控制台\n(读取已经被浏览器限制了 不需要进行屏蔽)">屏蔽剪切板写入</button>
+        <button class="itemButton toolButton" tool="logCreateObjectURL" tooltip="在控制台打印通过createObjectURL方法生成的对象URL\n可在控制台点击直接查看内容">打印对象URL</button>
         <button class="itemButton toolButton" tool="logMathRandom" tooltip="在控制台打印通过Math.random生成的随机数">打印随机数</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
