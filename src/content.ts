@@ -1,4 +1,3 @@
-/// <reference path="./dom.d.ts" />
 async function injectGuiScript() {
     const menuContainer = document.createElement("div");
     menuContainer.id = "kyouka-menu";

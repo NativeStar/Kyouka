@@ -109,12 +109,17 @@ export class Hooker {
                     return Hooker.originObjectSource.Reflect.has(target, p);
                 },
             });
+            const originDescriptor = this.originObjectSource.Reflect.getOwnPropertyDescriptor(parent, methodName) ?? {
+                configurable: true,
+                writable: true,
+                enumerable: true,
+            }
             // 下面三个属性只有第一个hook的可以生效
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntryProxy,
-                writable: hookOption.descriptor?.writable ?? true,
-                enumerable: hookOption.descriptor?.enumerable ?? true,
-                configurable: hookOption.descriptor?.configurable ?? true,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable,
             });
             if (hookDefineResult) {
                 const hookItem: MethodHookMapItem = {
@@ -195,11 +200,16 @@ export class Hooker {
                     return Hooker.originObjectSource.Reflect.has(target, p);
                 },
             })
+            const originDescriptor = this.originObjectSource.Reflect.getOwnPropertyDescriptor(parent, methodName) ?? {
+                configurable: true,
+                writable: true,
+                enumerable: true,
+            }
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntry,
-                writable: hookOption.descriptor?.writable ?? true,
-                enumerable: hookOption.descriptor?.enumerable ?? true,
-                configurable: hookOption.descriptor?.configurable ?? true,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable,
             });
             if (hookDefineResult) {
                 const hookItem: MethodHookMapItem = {
@@ -283,7 +293,7 @@ export class Hooker {
                     configurable: true,
                 });
                 tempHookEntry.setter = new this.originObjectSource.Proxy(originSetter, {
-                    apply(_target, thisArg, arg:[any]) {
+                    apply(_target, thisArg, arg: [any]) {
                         const hookItem = hookedGetterAndSetterKeyMap.get(key);
                         if (!hookItem) {
                             //没有hook

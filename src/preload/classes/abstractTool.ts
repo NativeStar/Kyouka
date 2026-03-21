@@ -1,4 +1,4 @@
-import { ExtensionConfig, type PreHookOption } from "../../types";
+import type { ExtensionConfig, PreHookOption } from "../../types";
 // 天知道为啥不把这个拆出来esbuild会崩
 export abstract class AbstractTool {
     /**

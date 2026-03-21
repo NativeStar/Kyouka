@@ -114,7 +114,7 @@ function initDom(shadow: ShadowRoot) {
                 //由contentScript负责
                 if (!toolName) return
                 if (toolName in Tools) {
-                    Tools[toolName]();
+                    Tools[toolName]!();
                 } else {
                     alert(`Error: Tool not found:${toolName}`)
                 }

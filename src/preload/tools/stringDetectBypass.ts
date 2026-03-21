@@ -1,5 +1,5 @@
 import { Hooker } from "../../hook/hooker";
-import { PreHookOption } from "../../types";
+import type { PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 
 export class StringDetectBypass extends AbstractTool {

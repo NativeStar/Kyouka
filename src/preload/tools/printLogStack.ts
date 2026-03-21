@@ -1,6 +1,6 @@
 import { Hooker } from "../../hook/hooker";
 import { OriginObjects } from "../../hook/originObjects";
-import { PreHookOption } from "../../types";
+import type { PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 export class PrintLogStack extends AbstractTool {
     private appendStackItem(args: any[]){

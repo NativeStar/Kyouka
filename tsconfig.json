@@ -25,7 +25,7 @@
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "removeComments": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
 
     // Style Options
     // "noImplicitReturns": true,
@@ -44,8 +44,6 @@
     "skipLibCheck": true,
   },
   "include": [
-    "src/content.ts",
-    "src/service.ts",
-    "src/options.ts"
+    "src/**/*"
   ]
 }
