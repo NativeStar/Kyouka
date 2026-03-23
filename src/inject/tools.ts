@@ -912,21 +912,21 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(URL.createObjectURL)) {
             return showToast(executedText)
         }
-        const result=Hooker.hookMethod<string>(URL, "createObjectURL", "URL.createObjectURL", {
+        const result = Hooker.hookMethod<string>(URL, "createObjectURL", "URL.createObjectURL", {
             afterMethodInvoke(_args, tempMethodResult) {
-                originObjectReference.console.log("生成对象URL:",`'${tempMethodResult.current}'`)
+                originObjectReference.console.log("生成对象URL:", `'${tempMethodResult.current}'`)
             },
         });
         showToast(result ? successText : executedText)
     },
-    "logPostMessage":()=>{
+    "logPostMessage": () => {
         if (Hooker.isModifiedMethodOrObject(window.postMessage)) {
             return showToast(executedText)
         }
-        const result=Hooker.hookMethod<void>(window, "postMessage", "window.postMessage", {
+        const result = Hooker.hookMethod<void>(window, "postMessage", "window.postMessage", {
             afterMethodInvoke(args) {
-                const arg0Data=args[0] instanceof Object ? JSON.stringify(args[0]) : args[0]
-                originObjectReference.console.log(`推送消息:${arg0Data}\n目标:${args[1]??"unset"}`)
+                const arg0Data = args[0] instanceof Object ? JSON.stringify(args[0]) : args[0]
+                originObjectReference.console.log(`推送消息:${arg0Data}\n目标:${args[1] ?? "unset"}`)
             },
         });
         showToast(result ? successText : executedText)
@@ -953,5 +953,13 @@ UserAgent:${navigator.userAgent}
             }
         });
         showToast(successText)
+    },
+    "removeElement": () => {
+        const input = prompt("欲删除元素名 如input", "");
+        if (!input) return
+        for (const element of document.querySelectorAll(input)) {
+            element.remove();
+        }
+        showToast(successText);
     }
 }
