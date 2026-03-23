@@ -44,10 +44,4 @@ function initConfig() {
         return
     }
     toolManager.initWithConfig(config as ExtensionConfig);
-    Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, "textContent", "HTMLScriptElement.prototype.textContent", {
-        beforeSetterInvoke(arg, abortController, thisArg) {
-            console.log(arg,thisArg);
-            // abortController.abort();
-        },
-    });
 }
