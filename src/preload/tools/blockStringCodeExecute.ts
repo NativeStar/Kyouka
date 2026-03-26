@@ -88,12 +88,6 @@ export class BlockStringCodeExecute extends AbstractTool {
         return [
             {
                 parent: window,
-                methodName: "eval",
-                key: "window.eval",
-                id: "pre#window.eval"
-            },
-            {
-                parent: window,
                 methodName: "setTimeout",
                 key: "window.setTimeout",
                 id: "pre#window.setTimeout"
