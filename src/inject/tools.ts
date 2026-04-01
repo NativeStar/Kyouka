@@ -961,5 +961,17 @@ UserAgent:${navigator.userAgent}
             element.remove();
         }
         showToast(successText);
+    },
+    "speakText":()=>{
+        if (!("SpeechSynthesisUtterance" in window)||!("speechSynthesis" in window)) {
+            showToast("当前浏览器不支持文本转语音")
+            return
+        }
+        const text=prompt("需要朗读的文本")
+        if (!text) return
+        const speech=new SpeechSynthesisUtterance(text);
+        speech.lang="zh-CN";
+        speechSynthesis.speak(speech);
+        showToast(successText);
     }
 }

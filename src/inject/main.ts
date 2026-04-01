@@ -22,7 +22,6 @@ function initDom(shadow: ShadowRoot) {
     const tooltip = shadow.getElementById("tooltip") as HTMLSpanElement;
     // 阻止操作穿透
     {
-        let easterEggActivated = false;
         root.addEventListener("click", event => {
             event.stopPropagation();
             event.preventDefault();
@@ -36,12 +35,6 @@ function initDom(shadow: ShadowRoot) {
             if (event.button === 1) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
-                //算是彩蛋吧
-                if (!easterEggActivated) {
-                    easterEggActivated = true;
-                    const textElement = shadow.getElementById("titleText")!
-                    textElement.innerText = `${textElement.innerText} - 只能说我输了`
-                }
             }
         })
     }
