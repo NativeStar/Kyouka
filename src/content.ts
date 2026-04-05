@@ -74,5 +74,14 @@ function initDom(dom: Document) {
             }
         })
     }
+    {
+        //持久化cookie
+        dom.getElementById("persistCookieByExtension")?.addEventListener("click", () => {
+            chrome.runtime.sendMessage({
+                type: "persistCookie"
+            });
+            alert("执行完成");
+        })
+    }
 }
 init();
