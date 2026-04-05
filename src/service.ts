@@ -14,7 +14,7 @@ const guiContentScriptList: chrome.scripting.RegisteredContentScript[] = [
     }
 ]
 // 消息事件
-chrome.runtime.onMessage.addListener(async (msg: Message, sender) => {
+chrome.runtime.onMessage.addListener(async (msg: Message, sender,sendResponse) => {
     if (sender.id !== chrome.runtime.id) return;
     const tabId = sender.tab?.id;
     if (!tabId) return
@@ -56,6 +56,8 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender) => {
         case "openSettingPage":
             chrome.runtime.openOptionsPage();
             break
+        case "getAllCookie":
+            return chrome.cookies.getAll({ url: sender.url})
         default:
             break;
     }

@@ -57,8 +57,8 @@ function initDom(dom: Document) {
     }
     {
         //打开设置页
-        dom.getElementById("openSettingPage")?.addEventListener("click",()=>{
-            chrome.runtime.sendMessage({type:"openSettingPage"})
+        dom.getElementById("openSettingPage")?.addEventListener("click", () => {
+            chrome.runtime.sendMessage({ type: "openSettingPage" })
         })
     }
     {
@@ -81,7 +81,49 @@ function initDom(dom: Document) {
                 type: "persistCookie"
             });
             alert("执行完成");
-        })
+        });
+    }
+    {
+        //导出存储
+        dom.getElementById("exportStorageExtension")?.addEventListener("click", () => {
+            if (!("showSaveFilePicker" in window)) {
+                alert("当前浏览器不支持showSaveFilePicker")
+                return
+            }
+            showSaveFilePicker({ suggestedName: `ExportStorage-${Date.now()}.csv` }).then(async (fd) => {
+                try {
+                    const writeStream = await fd.createWritable();
+                    const cookieList = await chrome.runtime.sendMessage<any, chrome.cookies.Cookie[]>({ type: "getAllCookie" });
+                    //cookie
+                    writeStream.write("Cookie\nname,value,domain,path,expires,secure,httpOnly,sameSite,partitionKey")
+                    if (cookieList === null) {
+                        alert("无法获取Cookie列表!")
+                        writeStream.close().catch(() => { });
+                        return
+                    }
+                    const nowTimestamp = Date.now();
+                    for (const cookieItem of cookieList) {
+                        writeStream.write(`\n"${cookieItem.name}","${cookieItem.value}","${cookieItem.domain}","${cookieItem.path}",${cookieItem.expirationDate ? new Date(cookieItem.expirationDate + nowTimestamp).toLocaleString() : "Session"},${cookieItem.secure},${cookieItem.httpOnly},${cookieItem.sameSite},"${cookieItem.partitionKey ?? ""}"`)
+                    }
+                    //localStorage
+                    writeStream.write("\n\nLocalStorage\nname,value");
+                    for (const [name, value] of Object.entries(localStorage)) {
+                        writeStream.write(`\n"${name}","${value}"`)
+                    }
+                    //sessionStorage
+                    writeStream.write("\n\nSessionStorage\nname,value");
+                    for (const [name, value] of Object.entries(sessionStorage)) {
+                        writeStream.write(`\n"${name}","${value}"`)
+                    }
+                    //结束
+                    await writeStream.close();
+                    alert("导出完成");
+                } catch (error) {
+                    console.log(error);
+                    alert("发生异常 详见控制台")
+                }
+            }).catch(() => { });
+        });
     }
 }
 init();
