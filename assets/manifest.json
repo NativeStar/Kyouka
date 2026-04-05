@@ -1,7 +1,7 @@
 {
   "name": "Kyouka",
   "description": "魔法凝结",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "manifest_version": 3,
   "permissions": [
     "scripting",
