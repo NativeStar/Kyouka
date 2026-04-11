@@ -40,7 +40,7 @@
       <div class="toolList" type="program" style="display: none;">
         <button class="itemButton toolButton" tool="forcePropertyRW" tooltip="强制修改设置属性时的\nwritable和configurable为true">强制可配置</button>
         <button class="itemButton toolButton" tool="blockOpen" tooltip="屏蔽所有open调用\n不能完全作为阻止重定向使用">屏蔽open</button>
-        <button class="itemButton toolButton" tool="logJsonOperation" tooltip="将页面所有JSON操作打印至控制台\n(即stringify和parse调用)">打印JSON操作</button>
+        <button class="itemButton toolButton" tool="logJsonOperation" tooltip="将页面所有JSON操作打印至控制台\n(stringify parse rawJSON方法调用)">打印JSON操作</button>
         <button class="itemButton toolButton" tool="logBase64Operation" tooltip="将页面所有base64操作打印至控制台\n(即atob和btoa调用)">打印base64操作</button>
         <button class="itemButton toolButton" tool="blockConsole" tooltip="阻止调用console进行日志输出">屏蔽日志</button>
         <button class="itemButton toolButton" tool="blockSendBeacon" tooltip="阻止调用navigator.sendBeacon并打印其调用参数\n通常用于离开页面前上报数据">屏蔽sendBeacon</button>
@@ -52,6 +52,7 @@
         <button class="itemButton toolButton" tool="logCreateObjectURL" tooltip="在控制台打印通过createObjectURL方法生成的对象URL\n可在控制台点击直接查看内容">打印对象URL</button>
         <button class="itemButton toolButton" tool="logPostMessage" tooltip="打印对window.postMessage方法的调用\n(对Worker 其他window的postMessage无效)">打印postMessage</button>
         <button class="itemButton toolButton" tool="logMathRandom" tooltip="在控制台打印通过Math.random生成的随机数">打印随机数</button>
+        <button class="itemButton toolButton" tool="blockShare" tooltip="使navigator.share方法调用不触发系统分享并返回成功">屏蔽share</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
         <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS</button>

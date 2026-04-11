@@ -962,5 +962,17 @@ UserAgent:${navigator.userAgent}
         speech.lang="zh-CN";
         speechSynthesis.speak(speech);
         showToast(successText);
+    },
+    "blockShare":()=>{
+        if (Hooker.isModifiedMethodOrObject(navigator.share)) {
+            return showToast(executedText)
+        }
+        const result=Hooker.hookAsyncMethod(navigator, navigator.share, "navigator.share", {
+            beforeMethodInvoke(_args, abortController) {
+                showToast("阻止一次share调用", 800);
+                abortController.abort();
+            }
+        });
+        showToast(result ? successText : failedText)
     }
 }
