@@ -210,17 +210,6 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(`已对${translateElements.length}个元素强制启用翻译`);
     },
-    "blockEval": () => {
-        if (Hooker.isModifiedMethodOrObject(eval)) {
-            return showToast(executedText)
-        }
-        const result = Hooker.hookMethod(window, "eval", "window.eval", {
-            beforeMethodInvoke(_args, abortController) {
-                abortController.abort();
-            },
-        });
-        showToast(result ? successText : failedText)
-    },
     "forcePropertyRW": () => {
         if (Hooker.isModifiedMethodOrObject(Object.defineProperty)) {
             return showToast(executedText)
