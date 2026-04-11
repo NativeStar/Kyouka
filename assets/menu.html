@@ -48,7 +48,6 @@
         <button class="itemButton toolButton" tool="dispatchBeforeunloadEvent" tooltip="触发beforeunload事件监听器\n用于调试相关功能">伪造beforeunload</button>
         <button class="itemButton toolButton" tool="blockClose" tooltip="屏蔽close函数调用\n阻止页面关闭自身 但可能无法阻止主动关闭子窗口">屏蔽close</button>
         <button class="itemButton toolButton" tool="dispatchCustomEvent" tooltip="在window对象上分发指定事件\n仅建议使用blur等无参数事件 否则可能导致异常">伪造自定义事件</button>
-        <button class="itemButton toolButton" id="persistCookieByExtension" tooltip="将所有Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态">持久化Cookie</button>
         <button class="itemButton toolButton" tool="logRandomUuid" tooltip="在控制台打印通过crypto.randomUUID生成的UUID\n该方法可能使用的并不算多">打印UUID</button>
         <button class="itemButton toolButton" tool="logCreateObjectURL" tooltip="在控制台打印通过createObjectURL方法生成的对象URL\n可在控制台点击直接查看内容">打印对象URL</button>
         <button class="itemButton toolButton" tool="logPostMessage" tooltip="打印对window.postMessage方法的调用\n(对Worker 其他window的postMessage无效)">打印postMessage</button>
@@ -66,6 +65,7 @@
         <button class="itemButton toolButton" tool="dumpCache" tooltip="导出页面主动缓存的数据">转储缓存</button>
         <button class="itemButton toolButton" id="exportStorageExtension" tooltip="将LocalStorage SessionStorage Cookie导出为csv表格\n(Indexdb等由于支持复杂对象存储 暂无法导出)">导出存储数据</button>
         <button class="itemButton toolButton" tool="speakText" tooltip="使用浏览器TTS模块朗读输入的文本">朗读文本</button>
+        <button class="itemButton toolButton" id="persistCookieByExtension" tooltip="将所有Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态\n暂无法处理iframe cookie">持久化Cookie</button>
       </div>
       <div class="toolList" type="joy" style="display: none;"> 
         <button class="itemButton toolButton" tool="playAudio" tooltip="选择本地音频文件播放\n除刷新或关闭页面外无法中断播放">播放音频</button>
@@ -81,20 +81,21 @@
       </div>
       <div class="toolList" type="about" style="display: none;">
         <button class="itemButton toolButton" id="openSettingPage">打开设置</button>
-        <button class="itemButton helpButton" helpText="该项目主要用于开发调试和辅助工具 请勿用于页面逆向\n由于使用了较新的API外加懒得适配 项目可能无法在较老版本Chrome和移动端浏览器上正常工作\n更多功能请通过设置页操作">使用须知</button>
-        <button class="itemButton helpButton" helpText="Alt+M显示/关闭菜单\nAlt+Shift+M重置菜单位置并显示/关闭">快捷键</button>
+        <button class="itemButton helpButton" helpText="该项目主要用于开发调试和辅助工具 请勿用于页面逆向等违法工作\n由于使用了较新的API外加懒得适配 可能无法在较老版本Chrome和移动端浏览器上正常工作\n更多功能请通过设置页操作">使用须知</button>
+        <button class="itemButton helpButton" helpText="默认快捷键\nAlt+M切换显示/关闭菜单\nAlt+Shift+M重置菜单位置并切换显示/关闭">快捷键</button>
         <button class="itemButton helpButton" helpText="选择本地JavaScript文件并注入页面\n如被CSP阻止导致注入失败可在扩展设置页开启'移除CSP限制'功能">注入JS</button>
-        <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能\n目前只对Ant Design的input做出适配">DOM操作相关</button>
+        <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能">DOM操作相关</button>
         <button class="itemButton helpButton" helpText="移除后具体如何数据处理取决于网页本身代码\n且异常的数据大概率被后端拦截">移除输入限制</button>
         <button class="itemButton helpButton" helpText="显示所有被隐藏的元素\n该功能可能破坏页面布局!">显示隐藏元素</button>
         <button class="itemButton helpButton" helpText="部分页面会非常频繁的调用这两个方法 某些情况下会造成性能问题 多清空日志即可\n如果发现打印了奇怪的对象 可能是某些polyfill库在探测API实现 通常不必理会">打印JSON操作</button>
         <button class="itemButton helpButton" helpText="由于一些特性 对btoa方法的打印输出可能为乱码">打印base64操作</button>
-        <button class="itemButton helpButton" helpText="由于实现原理是直接复制DOM 画中画页面会有各种问题\n且该功能本身限制较多 在该场景下实用性只能说一般">转为画中画</button>
-        <button class="itemButton helpButton" helpText="用于简单录制一些表格 页游等使用Canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况\n带音频录制为实验性功能">录制canvas</button>
-        <button class="itemButton helpButton" helpText="该功能还能顺便解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
+        <button class="itemButton helpButton" helpText="由于实现原理是直接复制DOM 画中画页面会有各种问题\n且该功能本身限制较多 实用性一般">转为画中画</button>
+        <button class="itemButton helpButton" helpText="用于录制一些表格 页游等通过Canvas绘制的内容\n部分情况下由于页面本身功能实现差别 可能出现透明背景、丢失内容、提早结束等异常情况\n带音频录制为实验功能">录制Canvas</button>
+        <button class="itemButton helpButton" helpText="该功能还能解决某些控制台检测\n注意这并不是完全屏蔽输出 抛出异常或请求失败的错误仍会显示">屏蔽日志</button>
         <button class="itemButton helpButton" helpText="移除所有忽略指针事件且带zIndex参数的元素\n增强功能会在执行移除前Hook相关方法阻止符合规则的元素被追加\n该功能不易维护且难以避免漏(误)判 如问题过多后续可能删除">移除水印</button>
         <button class="itemButton helpButton" helpText="方便调试页面的事件监听器\n自定义事件仅支持不带参数的事件(如pagehide blur等)\n注意某些扩展的监听器也会被触发且可能发生异常 (毕竟正常不会有多次load之类事件)\n且此类由脚本创建的事件可能被页面忽略">伪造事件</button>
         <button class="itemButton helpButton" helpText="将页面通过caches API存储的数据导出至指定文件夹下\n会在选择的目录下创建网站域名文件夹\n并将文件写入与存储桶同名的子文件夹内\n暂时没考虑优化 速度会很慢">转储缓存</button>
+        <button class="itemButton helpButton" helpText="在控制台点击打印的URL可直接查看数据\n如果在查看前该URL对应资源已被释放则可能无法正常查看">打印对象URL</button>
       </div>
     </div>
   </dialog>
