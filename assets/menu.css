@@ -149,6 +149,13 @@ label:not([class*="keepCursor"]) {
     background-color: rgb(78, 78, 125);
     cursor: pointer;
 }
+
+#closeButton:focus,
+#closeButton:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
 [subTool]{
     background-color: rgba(73, 42, 91, 0.8);
 }
