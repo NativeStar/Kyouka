@@ -149,6 +149,9 @@ label:not([class*="keepCursor"]) {
     background-color: rgb(78, 78, 125);
     cursor: pointer;
 }
+[subTool]{
+    background-color: rgba(73, 42, 91, 0.8);
+}
 
 .typeButton {
     width: 90%;

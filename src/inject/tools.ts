@@ -71,6 +71,7 @@ export const Tools: { [key: string]: () => void } = {
                     script.src = url;
                     script.type = "module";
                     document.body.appendChild(script);
+                    showToast(successText)
                 } catch (e) {
                     alert("执行失败 详见控制台")
                     originObjectReference.console.log(e);
@@ -184,7 +185,7 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(`已显示${hiddenElements.length}个元素`);
     },
-    "showDisplayNoneElements": () => {
+    "sub:showHiddenElements": () => {
         const confirmResult = confirm("此操作将遍历页面所有元素 可能造成卡死(取决于页面复杂度)\n确认继续?")
         if (!confirmResult) return
         const allElements = document.querySelectorAll('*') as NodeListOf<HTMLElement>;
@@ -548,7 +549,7 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(`已移除${elements.length}个元素的拼写检查`)
     },
-    "injectOnlineScript": () => {
+    "sub:injectOnlineScript": () => {
         const url = prompt("输入目标脚本URL");
         if (!url) return;
         try {
@@ -556,12 +557,13 @@ export const Tools: { [key: string]: () => void } = {
             script.src = url;
             script.type = "module";
             document.body.appendChild(script);
+            showToast(successText)
         } catch (error) {
             alert("执行失败 详见控制台")
             originObjectReference.console.log(error);
         }
     },
-    "injectOnlineCss": () => {
+    "sub:injectOnlineCss": () => {
         const url = prompt("输入目标文件URL");
         if (!url) return;
         try {
@@ -569,12 +571,13 @@ export const Tools: { [key: string]: () => void } = {
             link.rel = "stylesheet";
             link.href = url;
             document.head.appendChild(link);
+            showToast(successText)
         } catch (error) {
             alert("执行失败 详见控制台")
             originObjectReference.console.log(error);
         }
     },
-    "changePageIconOnline": () => {
+    "sub:changePageIcon": () => {
         const linkElement: HTMLLinkElement | null = document.querySelector("link[rel='icon']");;
         const url = prompt("输入目标图片URL", linkElement?.href ?? "");
         if (!url) return;
@@ -589,7 +592,7 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(successText)
     },
-    "recordCanvasWithAudio": () => {
+    "sub:recordCanvas": () => {
         if (!("showSaveFilePicker" in window)) {
             showToast("当前浏览器不支持showSaveFilePicker")
             return
@@ -683,7 +686,7 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(removedElementCount === 0 ? "未找到符合条件的元素" : `已移除${removedElementCount}个元素`)
     },
-    "removeWatermarkEnchant": () => {
+    "sub:removeWatermark": () => {
         //hook append
         //确保没有hook相关方法
         if (!Hooker.isModifiedMethodOrObject(HTMLElement.prototype.append)) {
@@ -729,7 +732,7 @@ export const Tools: { [key: string]: () => void } = {
         window.dispatchEvent(new Event("load"));
         showToast("已分发load事件", 750)
     },
-    "dispatchBeforeunloadEvent": () => {
+    "sub:dispatchBeforeunloadEvent": () => {
         window.dispatchEvent(new Event("beforeunload"));
         // 缩短显示时间因为屏蔽sendBeacon的提示也可能弹出
         showToast("已分发beforeunload事件", 750)

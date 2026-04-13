@@ -26,15 +26,13 @@
         <button class="itemButton toolButton" tool="editPage" tooltip="像修改文本一样修改网页内容\n再次点击可关闭">自由编辑</button>
         <button class="itemButton toolButton" tool="enableAllElement" tooltip="移除所有元素的'disabled'属性">启用所有元素</button>
         <button class="itemButton toolButton" tool="removeInputLimit" tooltip="移除以下所有限制项:\n数字、日期输入框的范围和只读限制\n文本输入框的长度和只读限制\n文件上传框格式限制">移除输入限制</button>
-        <button class="itemButton toolButton" tool="showHiddenElements" tooltip="显示通过hidden属性隐藏的元素">显示隐藏元素(hidden)</button>
+        <button class="itemButton toolButton" tool="showHiddenElements" subTool="sub:showHiddenElements" tooltip="左键:显示通过hidden属性隐藏的元素\n右键:显示通过'display:none'样式隐藏的元素">显示隐藏元素</button>
         <button class="itemButton toolButton" tool="forceTranslate" tooltip="移除元素的'translate'属性\n当该属性为'no'时 元素内容不会被翻译">强制翻译</button>
-        <button class="itemButton toolButton" tool="showDisplayNoneElements" tooltip="显示通过'display:none'样式隐藏的元素">显示隐藏元素(display)</button>
         <button class="itemButton toolButton" tool="wheelRemoveElement" tooltip="通过鼠标中键(按下滚轮)移除所指的元素\n并不一定准确 错删刷新网页即可\n再次点击可关闭">中键移除</button>
         <button class="itemButton toolButton" tool="forceOpenInNewTab" tooltip="强制所有a标签超链接使用新标签页打开">强制新标签</button>
         <button class="itemButton toolButton" tool="forceRTL" tooltip="强制使用RTL(右到左)布局\n再次点击可恢复">强制RTL</button>
         <button class="itemButton toolButton" tool="disableSpellCheck" tooltip="移除所有spellcheck属性">关闭拼写检查</button>
-        <button class="itemButton toolButton" tool="removeWatermark" tooltip="实验性功能 移除符合特征的元素\n可能存在严重误判漏判">移除页面水印</button>
-        <button class="itemButton toolButton" tool="removeWatermarkEnchant" tooltip="实验性功能 移除符合特征的元素并尝试防止恢复\n可能存在严重误判漏判">增强移除水印</button>
+        <button class="itemButton toolButton" tool="removeWatermark" subTool="sub:removeWatermark" tooltip="实验性功能 移除符合特征的元素\n可能存在严重误判漏判\n右键:在移除基础上追加防止恢复">移除页面水印</button>
         <button class="itemButton toolButton" tool="removeElement" tooltip="移除页面中指定的元素">移除指定元素</button>
       </div>
       <div class="toolList" type="program" style="display: none;">
@@ -44,8 +42,7 @@
         <button class="itemButton toolButton" tool="logBase64Operation" tooltip="将页面所有base64操作打印至控制台\n(即atob和btoa调用)">打印base64操作</button>
         <button class="itemButton toolButton" tool="blockConsole" tooltip="阻止调用console进行日志输出">屏蔽日志</button>
         <button class="itemButton toolButton" tool="blockSendBeacon" tooltip="阻止调用navigator.sendBeacon并打印其调用参数\n通常用于离开页面前上报数据">屏蔽sendBeacon</button>
-        <button class="itemButton toolButton" tool="dispatchLoadEvent" tooltip="触发load事件监听器\n用于调试页面初始化">伪造load</button>
-        <button class="itemButton toolButton" tool="dispatchBeforeunloadEvent" tooltip="触发beforeunload事件监听器\n用于调试相关功能">伪造beforeunload</button>
+        <button class="itemButton toolButton" tool="dispatchLoadEvent" subTool="sub:dispatchBeforeunloadEvent" tooltip="用于调试相关功能\n左键:伪造load事件\n右键:伪造beforeunload事件">伪造(un)load事件</button>
         <button class="itemButton toolButton" tool="blockClose" tooltip="屏蔽close函数调用\n阻止页面关闭自身 但可能无法阻止主动关闭子窗口">屏蔽close</button>
         <button class="itemButton toolButton" tool="dispatchCustomEvent" tooltip="在window对象上分发指定事件\n仅建议使用blur等无参数事件 否则可能导致异常">伪造自定义事件</button>
         <button class="itemButton toolButton" tool="logRandomUuid" tooltip="在控制台打印通过crypto.randomUUID生成的UUID\n该方法可能使用的并不算多">打印UUID</button>
@@ -55,26 +52,22 @@
         <button class="itemButton toolButton" tool="blockShare" tooltip="使navigator.share方法调用不触发系统分享并返回成功">屏蔽share</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
-        <button class="itemButton toolButton" tool="injectScript" tooltip="在页面中添加新的script元素实现执行">注入本地JS</button>
-        <button class="itemButton toolButton" tool="injectOnlineScript" tooltip="加载指定URL的代码后执行\n可能被跨域政策或CSP阻止加载">注入网络JS</button>
-        <button class="itemButton toolButton" id="injectCssByExtension" tooltip="读取内容后通过chrome.scripting.insertCSS执行">注入本地CSS</button>
-        <button class="itemButton toolButton" tool="injectOnlineCss" tooltip="加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入网络CSS</button>
+        <button class="itemButton toolButton" tool="injectScript" subTool="sub:injectOnlineScript" tooltip="左键:选择本地JS文件并执行\n右键:加载指定URL的JS并执行\n可能被跨域政策或CSP阻止加载">注入JS</button>
+        <button class="itemButton toolButton" id="injectCssByExtension" subTool="sub:injectOnlineCss" tooltip="左键:选择本地CSS文件并加载\n右键:加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入CSS</button>
         <button class="itemButton toolButton" tool="openEyeDropper" tooltip="获取选中像素的颜色RGB值">屏幕取色</button>
         <button class="itemButton toolButton" tool="becomeDocumentPictureInPicture" tooltip="将页面使用文档画中画显示\n可能会有很多问题">转为画中画</button>
-        <button class="itemButton toolButton" tool="recordCanvas" tooltip="60帧录制canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas</button>
+        <button class="itemButton toolButton" tool="recordCanvas" subTool="sub:recordCanvas" tooltip="60帧录制Canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的\n右键:同时申请录音应对游戏录制等情况">录制Canvas</button>
         <button class="itemButton toolButton" id="persistCookieByExtension" tooltip="将所有Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态\n暂无法处理iframe cookie">持久化Cookie</button>
-        <button class="itemButton toolButton" tool="recordCanvasWithAudio" tooltip="60帧录制canvas渲染内容并保存至本地\n同时申请录音应对游戏录制等情况\n如果存在多个canvas将自动选择尺寸最大且可见的">录制Canvas并录音</button>
         <button class="itemButton toolButton" tool="dumpCache" tooltip="导出页面主动缓存的数据">转储缓存</button>
-        <button class="itemButton toolButton" id="exportStorageExtension" tooltip="将LocalStorage SessionStorage Cookie导出为csv表格\n(Indexdb等由于支持复杂对象存储 暂无法导出)">导出存储数据</button>
         <button class="itemButton toolButton" tool="visitRobotsTxt" tooltip="查看网站的robots.txt文件\n会先探测文件是否存在 如存在则在新窗口打开">查看Robots</button>
+        <button class="itemButton toolButton" id="exportStorageExtension" tooltip="将LocalStorage SessionStorage Cookie导出为csv表格\n(Indexdb等由于支持复杂对象存储 暂无法导出)">导出存储数据</button>
       </div>
       <div class="toolList" type="joy" style="display: none;"> 
         <button class="itemButton toolButton" tool="playAudio" tooltip="选择本地音频文件播放\n除刷新或关闭页面外无法中断播放">播放音频</button>
         <button class="itemButton toolButton" tool="webBackground" tooltip="选择本地图片文件作为当前网页背景\n可能只在部分页面有效">修改网页背景</button>
-        <button class="itemButton toolButton" tool="changePageIcon" tooltip="将网页icon改为指定的本地图片">修改网页图标</button>
+        <button class="itemButton toolButton" tool="changePageIcon" subTool="sub:changePageIcon" tooltip="左键:将网页icon改为指定的本地图片\n右键:将网页icon改为指定的网络图片\n可能被跨域政策或CSP阻止加载">修改网页图标</button>
         <button class="itemButton toolButton" tool="changeTitle" tooltip="修改标签页显示的标题">修改标题</button>
         <button class="itemButton toolButton" tool="copyPageIconUrl" tooltip="将页面图标URL复制到剪切板">复制网页图标URL</button>
-        <button class="itemButton toolButton" tool="changePageIconOnline" tooltip="将网页icon改为指定的网络图片\n可能被跨域政策或CSP阻止加载">修改网页图标(网络)</button>
         <button class="itemButton toolButton" tool="copyTitle" tooltip="修改标签页显示的标题">复制标题</button>
         <button class="itemButton toolButton" tool="speakText" tooltip="使用浏览器TTS模块朗读输入的文本">朗读文本</button>
         <button class="itemButton toolButton" tool="closePageConfirm" tooltip="离开页面时弹出二次确认\n不保证所有浏览器都能生效">离开页面确认</button>
