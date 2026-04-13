@@ -100,7 +100,7 @@ function initDom(shadow: ShadowRoot) {
     {
         const toolButtons = root.getElementsByClassName("toolButton") as HTMLCollectionOf<HTMLButtonElement>
         for (const toolButton of toolButtons) {
-            //执行
+            //主功能执行
             toolButton.addEventListener("click", (event) => {
                 event.stopPropagation();
                 const toolName = toolButton.getAttribute("tool") ?? null;
@@ -112,6 +112,20 @@ function initDom(shadow: ShadowRoot) {
                     alert(`Error: Tool not found:${toolName}`)
                 }
             });
+            //副功能执行
+            if (toolButton.hasAttribute("subTool")) {
+                toolButton.addEventListener("contextmenu",(event)=>{
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                    const subToolName = toolButton.getAttribute("subTool") ?? null;
+                    if (!subToolName) return
+                    if (subToolName in Tools) {
+                        Tools[subToolName]!();
+                    } else {
+                        alert(`Error: SubTool not found:${subToolName}`)
+                    }
+                })
+            }
             // tooltip
             if (toolButton.hasAttribute("tooltip")) {
                 toolButton.addEventListener("pointerenter", () => {

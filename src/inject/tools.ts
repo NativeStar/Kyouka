@@ -951,23 +951,23 @@ UserAgent:${navigator.userAgent}
         }
         showToast(successText);
     },
-    "speakText":()=>{
-        if (!("SpeechSynthesisUtterance" in window)||!("speechSynthesis" in window)) {
+    "speakText": () => {
+        if (!("SpeechSynthesisUtterance" in window) || !("speechSynthesis" in window)) {
             showToast("当前浏览器不支持文本转语音")
             return
         }
-        const text=prompt("需要朗读的文本")
+        const text = prompt("需要朗读的文本")
         if (!text) return
-        const speech=new SpeechSynthesisUtterance(text);
-        speech.lang="zh-CN";
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = "zh-CN";
         speechSynthesis.speak(speech);
         showToast(successText);
     },
-    "blockShare":()=>{
+    "blockShare": () => {
         if (Hooker.isModifiedMethodOrObject(navigator.share)) {
             return showToast(executedText)
         }
-        const result=Hooker.hookAsyncMethod(navigator, navigator.share, "navigator.share", {
+        const result = Hooker.hookAsyncMethod(navigator, navigator.share, "navigator.share", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("阻止一次share调用", 800);
                 abortController.abort();
@@ -975,19 +975,40 @@ UserAgent:${navigator.userAgent}
         });
         showToast(result ? successText : failedText)
     },
-    "visitRobotsTxt":async ()=>{
-        showToast("Loading...",350);
+    "visitRobotsTxt": async () => {
+        showToast("Loading...", 350);
         try {
-            const response=await fetch(`${location.origin}/robots.txt`);
+            const response = await fetch(`${location.origin}/robots.txt`);
             if (!response.ok) {
-                showToast(response.status===404?"该网站无robots.txt文件":"由于未知原因 加载robots.txt失败");
+                showToast(response.status === 404 ? "该网站无robots.txt文件" : "由于未知原因 加载robots.txt失败");
                 return
             }
             //小窗打开
-            window.open(response.url,"_blank",`width=400,height=400,noopener,noreferrer`);
+            window.open(response.url, "_blank", `width=400,height=400,noopener,noreferrer`);
         } catch (error) {
             OriginObjects.console.error(error);
             showToast("加载robots.txt失败 详见控制台")
         }
+    },
+    "sub:logCreateObjectURL": () => {
+        let [createUrlHooked, revokeUrlHooked] = [Hooker.isModifiedMethodOrObject(URL.createObjectURL), Hooker.isModifiedMethodOrObject(URL.revokeObjectURL)];
+        if (createUrlHooked && revokeUrlHooked) {
+            return showToast(executedText)
+        }
+        if (!createUrlHooked) {
+            createUrlHooked = Hooker.hookMethod<string>(URL, "createObjectURL", "URL.createObjectURL", {
+                afterMethodInvoke(_args, tempMethodResult) {
+                    originObjectReference.console.log("生成对象URL:", `'${tempMethodResult.current}'`)
+                },
+            });
+        }
+        if (!revokeUrlHooked) {
+            revokeUrlHooked = Hooker.hookMethod<void>(URL, "revokeObjectURL", "URL.revokeObjectURL", {
+                beforeMethodInvoke(_args, abortController) {
+                    abortController.abort();
+                },
+            });
+        }
+        showToast(createUrlHooked && revokeUrlHooked ? successText : failedText);
     }
 }
