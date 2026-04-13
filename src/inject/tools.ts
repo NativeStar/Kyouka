@@ -531,7 +531,7 @@ export const Tools: { [key: string]: () => void } = {
         }
         showToast(`已${document.dir === "rtl" ? "开启" : "关闭"}强制RTL`)
     },
-    "changeTitle": () => {
+    "sub:changeTitle": () => {
         const newTitle = prompt("输入新标题", document.title);
         if (newTitle) {
             document.title = newTitle;
