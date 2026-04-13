@@ -974,5 +974,20 @@ UserAgent:${navigator.userAgent}
             }
         });
         showToast(result ? successText : failedText)
+    },
+    "visitRobotsTxt":async ()=>{
+        showToast("Loading...",350);
+        try {
+            const response=await fetch(`${location.origin}/robots.txt`);
+            if (!response.ok) {
+                showToast(response.status===404?"该网站无robots.txt文件":"由于未知原因 加载robots.txt失败");
+                return
+            }
+            //小窗打开
+            window.open(response.url,"_blank",`width=400,height=400,noopener,noreferrer`);
+        } catch (error) {
+            OriginObjects.console.error(error);
+            showToast("加载robots.txt失败 详见控制台")
+        }
     }
 }
