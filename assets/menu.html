@@ -22,7 +22,7 @@
         <button class="itemButton typeButton" targetType="about">帮助</button>
       </div>
       <div class="toolList" type="document">
-        <button class="itemButton toolButton" tool="controllableAllMedia" tooltip="为所有audio和video元素恢复控制条并修复下载和(视频)画中画支持\n并不保证添加后就能正常控制 可能还要手动处理元素被隐藏、z-index过低等情况">音视频控制器</button>
+        <button class="itemButton toolButton" tool="controllableAllMedia" tooltip="为所有audio和video元素恢复控制条并修复下载和(视频)画中画支持\n并不保证添加后就能正常控制\n可能还要手动处理元素被隐藏、z-index过低等情况">音视频控制器</button>
         <button class="itemButton toolButton" tool="editPage" tooltip="像修改文本一样修改网页内容\n再次点击可关闭">自由编辑</button>
         <button class="itemButton toolButton" tool="enableAllElement" tooltip="移除所有元素的'disabled'属性">启用所有元素</button>
         <button class="itemButton toolButton" tool="removeInputLimit" tooltip="移除以下所有限制项:\n数字、日期输入框的范围和只读限制\n文本输入框的长度和只读限制\n文件上传框格式限制">移除输入限制</button>
@@ -76,6 +76,7 @@
       <div class="toolList" type="about" style="display: none;">
         <button class="itemButton toolButton" id="openSettingPage">打开设置</button>
         <button class="itemButton helpButton" helpText="该项目主要用于开发调试和辅助工具 请勿用于页面逆向等违法工作\n由于使用了较新的API外加懒得适配 可能无法在较老版本Chrome和移动端浏览器上正常工作\n更多功能请通过设置页操作">使用须知</button>
+        <button class="itemButton helpButton" helpText="淡粉色的按钮支持右键点击 意味着它们有两个功能\n如未特意标注左键功能则表示右键为额外功能\n当点击右键时它们会一起执行">右键功能</button>
         <button class="itemButton helpButton" helpText="默认快捷键\nAlt+M切换显示/关闭菜单\nAlt+Shift+M重置菜单位置并切换显示/关闭\n你可以在Chrome扩展管理页内修改快捷键">快捷键</button>
         <button class="itemButton helpButton" helpText="选择本地JavaScript文件并注入页面\n如被CSP阻止导致注入失败可在扩展设置页开启'移除CSP限制'功能">注入JS</button>
         <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能">DOM操作相关</button>
