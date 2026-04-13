@@ -14,7 +14,7 @@ const guiContentScriptList: chrome.scripting.RegisteredContentScript[] = [
     }
 ]
 // 消息事件
-chrome.runtime.onMessage.addListener(async (msg: Message, sender,sendResponse) => {
+chrome.runtime.onMessage.addListener(async (msg: Message, sender, sendResponse) => {
     if (sender.id !== chrome.runtime.id) return;
     const tabId = sender.tab?.id;
     if (!tabId) return
@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender,sendResponse) =
             break
         case "persistCookie":
             const expire = Math.floor(Date.now() / 1000) + 390 * 24 * 60 * 60;
-            chrome.cookies.getAll({ url: sender.url}).then(cookies => {
+            chrome.cookies.getAll({ url: sender.url }).then(cookies => {
                 for (const cookieItem of cookies) {
                     const host = cookieItem.domain.startsWith(".") ? cookieItem.domain.slice(1) : cookieItem.domain;
                     const scheme = cookieItem.secure ? "https://" : "http://";
@@ -57,7 +57,7 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender,sendResponse) =
             chrome.runtime.openOptionsPage();
             break
         case "getAllCookie":
-            return chrome.cookies.getAll({ url: sender.url})
+            return chrome.cookies.getAll({ url: sender.url })
         default:
             break;
     }
@@ -151,22 +151,8 @@ chrome.storage.local.onChanged.addListener(change => {
     // 同步缓存配置
     chrome.storage.local.get<ExtensionConfig>(null).then(value => {
         config = value;
-    })
-    //移除csp
-    if (Reflect.has(change, "removeCsp")) {
-        const removeCsp = change.removeCsp!.newValue as boolean;
-        chrome.declarativeNetRequest.updateEnabledRulesets({
-            [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
-        })
-    }
-    if (Reflect.has(change, "enableGui")) {
-        //开关gui
-        if (change.enableGui!.newValue as boolean) {
-            chrome.scripting.registerContentScripts(guiContentScriptList).catch((e) => console.log(e));
-        } else {
-            chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
-        }
-    }
+    });
+    onSettingChange(change)
 });
 //为所有页面注入ipc
 chrome.webNavigation.onCommitted.addListener(async (details) => {
@@ -195,4 +181,31 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
         },
         args: [config as ExtensionConfig]
     }).catch(e => console.log(e))
-})
+});
+function onSettingChange(change: { [key: string]: chrome.storage.StorageChange; }) {
+    const changeKey = Reflect.ownKeys(change)[0];
+    switch (changeKey) {
+        case "removeCsp":
+            //移除csp
+            const removeCsp = change.removeCsp!.newValue as boolean;
+            chrome.declarativeNetRequest.updateEnabledRulesets({
+                [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
+            })
+            break
+        case "enableGui":
+            //开关gui
+            if (change.enableGui!.newValue as boolean) {
+                chrome.scripting.registerContentScripts(guiContentScriptList).catch((e) => console.log(e));
+            } else {
+                chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
+            }
+            break
+        case "disableFont":
+            //禁用字体
+            const disableFont = change.disableFont!.newValue as boolean;
+            chrome.declarativeNetRequest.updateEnabledRulesets({
+                [disableFont ? "enableRulesetIds" : "disableRulesetIds"]: ["disableFont"]
+            })
+            break
+    }
+}

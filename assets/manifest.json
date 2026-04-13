@@ -70,6 +70,11 @@
         "id": "removeCsp",
         "enabled": false,
         "path": "removeCsp.json"
+      },
+      {
+        "id": "disableFont",
+        "enabled": false,
+        "path": "disableFont.json"
       }
     ]
   }
