@@ -50,7 +50,7 @@ function initDom(shadow: ShadowRoot) {
             dragging = true;
             startX = event.clientX
             startY = event.clientY
-            root.setPointerCapture(event.pointerId);
+            titleBar.setPointerCapture(event.pointerId);
         });
         document.addEventListener("pointermove", event => {
             if (dragging) {
@@ -67,7 +67,7 @@ function initDom(shadow: ShadowRoot) {
         document.addEventListener("pointerup", event => {
             event.stopPropagation();
             dragging = false;
-            root.releasePointerCapture(event.pointerId);
+            titleBar.releasePointerCapture(event.pointerId);
         });
     }
     //关闭按钮

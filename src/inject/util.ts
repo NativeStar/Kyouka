@@ -2,6 +2,7 @@ let lastProgressToast: HTMLDialogElement | null = null;
 
 export function showToast(text: string, time: number = 1500) {
     const toast = document.createElement("dialog");
+    toast.style.fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
     toast.style.border = "none";
     toast.style.borderRadius = "9px";
     toast.style.outline = "none";
@@ -28,6 +29,7 @@ export function showProgressToast(text: string | null, show: boolean) {
         return
     }
     const toast = document.createElement("dialog");
+    toast.style.fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
     toast.style.border = "none";
     toast.style.borderRadius = "9px";
     toast.style.outline = "none";
