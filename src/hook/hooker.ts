@@ -370,6 +370,7 @@ export class Hooker {
         }
     }
     static isModifiedMethodOrObject(method: any) {
+        if (!method) return false;
         return this.originObjectSource.Reflect.has(method, hookSymbol);
     }
 }

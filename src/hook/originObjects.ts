@@ -28,8 +28,8 @@ export const OriginObjects={
     open,
     navigator:{
         clipboard:{
-            writeText:navigator.clipboard.writeText.bind(navigator.clipboard),
-            write:navigator.clipboard.write.bind(navigator.clipboard),
+            writeText:navigator.clipboard?navigator.clipboard.writeText.bind(navigator.clipboard):null,
+            write:navigator.clipboard?navigator.clipboard.write.bind(navigator.clipboard):null,
         }
     },
     Error:{

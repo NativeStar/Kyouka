@@ -310,14 +310,16 @@ export const Tools: { [key: string]: () => void } = {
                 const dropper = new EyeDropper();
                 dropper.open().then(res => {
                     if (confirm(`所选像素颜色值为:${res.sRGBHex}\n点击确定将复制到剪切板`)) {
-                        originObjectReference.navigator.clipboard.writeText(res.sRGBHex);
+                        //能用这个API的情况下已经是https了
+                        originObjectReference.navigator.clipboard?.writeText?.(res.sRGBHex);
+                        return showToast(successText);
                     }
                 }).catch(() => { });
             } catch (error) {
 
             }
         } else {
-            showToast("浏览器不支持EyeDropper API!");
+            showToast(isSecureContext? "浏览器不支持EyeDropper API!":"EyeDropper API仅在HTTPS下可用");
         }
     },
     "forceOpenInNewTab": () => {
@@ -333,7 +335,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "becomeDocumentPictureInPicture": () => {
         if (!("documentPictureInPicture" in window)) {
-            showToast("浏览器不支持文档画中画!");
+            showToast(isSecureContext?"浏览器不支持文档画中画!":"文档画中画仅在HTTPS下可用");
             return
         }
         if (document.pictureInPictureElement) {
@@ -718,15 +720,21 @@ export const Tools: { [key: string]: () => void } = {
     "copyPageIconUrl": () => {
         const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
         if (linkElement) {
-            originObjectReference.navigator.clipboard.writeText(linkElement.href);
-            showToast("已复制图标URL")
+            if (originObjectReference.navigator.clipboard.writeText) {
+                originObjectReference.navigator.clipboard.writeText(linkElement.href);
+                return showToast("已复制图标URL")
+            }
+            showToast("粘贴失败 浏览器不支持剪切板操作或当前网页未使用HTTPS")
         } else {
             showToast("该网页未设置图标")
         }
     },
     "copyTitle": () => {
-        originObjectReference.navigator.clipboard.writeText(document.title);
-        showToast("已复制页面标题")
+        if (originObjectReference.navigator.clipboard.writeText) {
+            originObjectReference.navigator.clipboard.writeText(document.title);
+            return showToast("已复制页面标题")
+        }
+        showToast("粘贴失败 浏览器不支持剪切板操作或当前网页未使用HTTPS")
     },
     "dispatchLoadEvent": () => {
         window.dispatchEvent(new Event("load"));
@@ -967,6 +975,9 @@ UserAgent:${navigator.userAgent}
         showToast(successText);
     },
     "blockShare": () => {
+        if (!OriginObjects.Reflect.has(navigator,"share")) {
+            return showToast(isSecureContext?"当前浏览器不支持share API":"Share API仅在HTTPS下可用 无需屏蔽");
+        }
         if (Hooker.isModifiedMethodOrObject(navigator.share)) {
             return showToast(executedText)
         }

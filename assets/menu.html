@@ -79,6 +79,7 @@
         <button class="itemButton helpButton" helpText="淡粉色的按钮支持右键点击 意味着它们有两个功能\n如未特意标注左键功能则表示右键为额外功能\n当点击右键时它们会一起执行">右键功能</button>
         <button class="itemButton helpButton" helpText="默认快捷键\nAlt+M切换显示/关闭菜单\nAlt+Shift+M重置菜单位置并切换显示/关闭\n你可以在Chrome扩展管理页内修改快捷键">快捷键</button>
         <button class="itemButton helpButton" helpText="选择本地JavaScript文件并注入页面\n如被CSP阻止导致注入失败可在扩展设置页开启'移除CSP限制'功能">注入JS</button>
+        <button class="itemButton helpButton" helpText="部分浏览器API被限制仅限HTTPS环境下可用(如showOpenFilePicker)\n这会导致扩展在非HTTPS网站内使用时丢失部分功能\n此为浏览器限制 无法解决">安全上下文</button>
         <button class="itemButton helpButton" helpText="部分DOM相关功能(如'移除输入限制' '启用所有元素')在面对现代UI框架时可能无效\n因为它们不一定依赖HTML本身的属性实现功能">DOM操作相关</button>
         <button class="itemButton helpButton" helpText="移除后具体如何数据处理取决于网页本身代码\n且异常的数据大概率被后端拦截">移除输入限制</button>
         <button class="itemButton helpButton" helpText="显示所有被隐藏的元素\n该功能可能破坏页面布局!">显示隐藏元素</button>
@@ -90,7 +91,7 @@
         <button class="itemButton helpButton" helpText="移除所有忽略指针事件且带zIndex参数的元素\n增强功能会在执行移除前Hook相关方法阻止符合规则的元素被追加\n该功能不易维护且难以避免漏(误)判 如问题过多后续可能删除">移除水印</button>
         <button class="itemButton helpButton" helpText="方便调试页面的事件监听器\n自定义事件仅支持不带参数的事件(如pagehide blur等)\n注意某些扩展的监听器也会被触发且可能发生异常 (毕竟正常不会有多次load之类事件)\n且此类由脚本创建的事件可能被页面忽略">伪造事件</button>
         <button class="itemButton helpButton" helpText="将页面通过caches API存储的数据导出至指定文件夹下\n会在选择的目录下创建网站域名文件夹\n并将文件写入与存储桶同名的子文件夹内\n暂时没考虑优化 速度会很慢">转储缓存</button>
-        <button class="itemButton helpButton" helpText="在控制台点击打印的URL可直接查看数据\n如果在查看前该URL对应资源已被释放则可能无法正常查看">打印对象URL</button>
+        <button class="itemButton helpButton" helpText="在控制台点击打印的URL可直接查看数据\n如果在查看前该URL对应资源已被释放则可能无法正常查看\n可通过右键点击功能按键尽可能阻止资源释放">打印对象URL</button>
       </div>
     </div>
   </dialog>
