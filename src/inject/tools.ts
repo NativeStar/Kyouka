@@ -925,8 +925,7 @@ UserAgent:${navigator.userAgent}
         }
         const result = Hooker.hookMethod(window, "postMessage", "window.postMessage", {
             afterMethodInvoke(args) {
-                //TODO JSON两个主方法备份
-                const arg0Data = args[0] instanceof Object ? JSON.stringify(args[0]) : args[0]
+                const arg0Data = args[0] instanceof Object ? originObjectReference.JSON.stringify(args[0]) : args[0]
                 originObjectReference.console.log(`推送消息:${arg0Data}\n目标:${args[1] ?? "unset"}`)
             },
         });

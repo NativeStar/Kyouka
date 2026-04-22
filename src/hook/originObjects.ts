@@ -34,6 +34,9 @@ export const OriginObjects={
     },
     Error:{
         captureStackTrace:Error.captureStackTrace
+    },
+    JSON:{
+        stringify:JSON.stringify
     }
 }
 OriginObjects.Object.freeze(OriginObjects);
