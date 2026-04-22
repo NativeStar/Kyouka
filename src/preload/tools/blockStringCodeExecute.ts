@@ -2,7 +2,7 @@ import { Hooker } from "../../hook/hooker";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 export class BlockStringCodeExecute extends AbstractTool {
-    private static abortInvokeTargetAttrs: string[] = ["innerText", "innerHTML", "text", "textContent"]
+    private static readonly abortInvokeTargetAttrs: string[] = ["innerText", "innerHTML", "text", "textContent"] as const;
     onMount(): void {
         const hookedTagSymbol = Hooker.getHookSymbol();
         Hooker.hookMethod(window, "eval", "window.eval", {
@@ -44,15 +44,15 @@ export class BlockStringCodeExecute extends AbstractTool {
         });
         //script标签相关
         for (const keyword of BlockStringCodeExecute.abortInvokeTargetAttrs) {
-            Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, keyword, `HTMLScriptElement.prototype.${keyword}`, {
+            Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, keyword as keyof HTMLScriptElement, `HTMLScriptElement.prototype.${keyword}`, {
                 beforeSetterInvoke(_arg, abortController) {
                     abortController.abort();
                 },
             });
         }
-        Hooker.hookGetterAndSetter<string|TrustedScriptURL>(HTMLScriptElement.prototype, "src", "HTMLScriptElement.prototype.src", {
+        Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, "src", "HTMLScriptElement.prototype.src", {
             beforeSetterInvoke(arg, abortController) {
-                const srcString=arg instanceof TrustedScriptURL ? arg.toString() : arg;
+                const srcString=(arg as TrustedScriptURL|string) instanceof TrustedScriptURL ? arg.toString() : arg;
                 if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
                     abortController.abort();
                 }
@@ -66,7 +66,7 @@ export class BlockStringCodeExecute extends AbstractTool {
                     return
                 }
                 if (args[0] === "src") {
-                    const srcString:string=args[1] instanceof TrustedScriptURL ? args[1].toString() : args[1];
+                    const srcString:string=(args[1] as TrustedScriptURL|string) instanceof TrustedScriptURL ? args[1].toString() : args[1];
                     if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
                         abortController.abort();
                     }

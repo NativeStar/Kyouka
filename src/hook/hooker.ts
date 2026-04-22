@@ -1,10 +1,12 @@
 import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
 
-export interface TempHookResultWrapper<T = any> {
+export interface TempHookResultWrapper<T> {
     current: T;
 }
-interface MethodHookOption<T = any> {
+type AnyFunctionType = (...args: any[]) => any;
+type MethodByName<P extends object, K extends string> = K extends keyof P ? Extract<P[K], AnyFunctionType> : AnyFunctionType;
+interface MethodHookOption<F extends AnyFunctionType, R = ReturnType<F>> {
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value">;
     /**
      * 唯一标识 用于unhook
@@ -16,28 +18,28 @@ interface MethodHookOption<T = any> {
      * @param thisArg this指向
      * @param tempMethodResult 可修改返回值 注意这里的返回值设置仅在中断执行时生效 
      */
-    beforeMethodInvoke?: (args: any[], abortController: AbortController, thisArg: any, tempMethodResult: TempHookResultWrapper<T>) => void;
+    beforeMethodInvoke?: (args: Parameters<F>, abortController: AbortController, thisArg: ThisParameterType<F>, tempMethodResult: TempHookResultWrapper<R>, originMethod: F) => void;
     /**
      * @param args 方法参数
      * @param tempMethodResult 可修改返回值
      * @param thisArg this指向
      */
-    afterMethodInvoke?: (args: any[], tempMethodResult: TempHookResultWrapper<T>, thisArg: any) => void;
+    afterMethodInvoke?: (args: Parameters<F>, tempMethodResult: TempHookResultWrapper<R>, thisArg: ThisParameterType<F>) => void;
 }
-interface GetterAndSetterHookOption<T = any> {
+interface AccessorHookOption<P extends object, K extends keyof P> {
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value" | "writable">;
-    beforeGetterInvoke?: (abortController: AbortController, thisArg: any, tempMethodResult: TempHookResultWrapper<T>) => void;
-    afterGetterInvoke?: (tempMethodResult: TempHookResultWrapper<T>, thisArg: any) => void;
-    beforeSetterInvoke?: (arg: T, abortController: AbortController, thisArg: any) => void;
+    beforeGetterInvoke?: (abortController: AbortController, thisArg: P, tempMethodResult: TempHookResultWrapper<P[K]>) => void;
+    afterGetterInvoke?: (tempMethodResult: TempHookResultWrapper<P[K]>, thisArg: P) => void;
+    beforeSetterInvoke?: (arg: P[K], abortController: AbortController, thisArg: P) => void;
 }
 interface MethodHookMapItem {
-    originMethod: Function;
-    option: MethodHookOption[];
+    originMethod: AnyFunctionType;
+    option: MethodHookOption<AnyFunctionType>[];
 }
 interface GetterAndSetterHookMapItem<T = any> {
     originGetter: (() => T) | null;
     originSetter: ((value: T) => void) | null;
-    option: GetterAndSetterHookOption[];
+    option: AccessorHookOption<any, any>[];
 }
 const hookedMethodKeyMap: Map<string, MethodHookMapItem> = new Map();
 const hookedGetterAndSetterKeyMap: Map<string, GetterAndSetterHookMapItem> = new Map();
@@ -47,7 +49,10 @@ export class Hooker {
     static setOriginObjectSource(source: typeof OriginObjects) {
         this.originObjectSource = source;
     }
-    static hookMethod<T = any>(parent: any, target: string | Function, key: string, hookOption: MethodHookOption<T>): boolean {
+    static hookMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = ReturnType<F>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F>): boolean;
+    static hookMethod<F extends AnyFunctionType, T = ReturnType<F>>(parent: object, target: F, key: string, hookOption: MethodHookOption<F>): boolean;
+    static hookMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F>): boolean;
+    static hookMethod(parent: any, target: string | AnyFunctionType, key: string, hookOption: MethodHookOption<AnyFunctionType>): boolean {
         const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -64,7 +69,7 @@ export class Hooker {
                 hookedMethodKeyMap.set(key, currentHookMethodItem);
                 return true
             }
-            const originMethod: Function = this.originObjectSource.Reflect.get(parent, methodName);
+            const originMethod = this.originObjectSource.Reflect.get(parent, methodName) as AnyFunctionType;
             // 屏蔽枚举和重写
             this.originObjectSource.Reflect.defineProperty(originMethod, 'toString', {
                 value: createBypassToStringMethod(methodName),
@@ -79,15 +84,15 @@ export class Hooker {
                         //没有hook
                         return originMethod.apply(thisArg, args);
                     }
-                    const tempResult: TempHookResultWrapper<T> = {
-                        current: null as T
+                    const tempResult: TempHookResultWrapper<ReturnType<typeof originMethod>> = {
+                        current: undefined
                     }
                     const abortController = new Hooker.originObjectSource.AbortController();
                     for (const currentHookOption of hookItem.option) {
-                        currentHookOption.beforeMethodInvoke?.(args, abortController, thisArg, tempResult);
+                        currentHookOption.beforeMethodInvoke?.(args, abortController, thisArg, tempResult, originMethod);
                     }
                     if (abortController.signal.aborted) {
-                        return tempResult.current ?? undefined;
+                        return tempResult.current;
                     }
                     try {
                         tempResult.current = originMethod.apply(thisArg, args);
@@ -135,7 +140,11 @@ export class Hooker {
             return false;
         }
     }
-    static hookAsyncMethod<T = any>(parent: any, target: string | Function, key: string, hookOption: MethodHookOption<T>): boolean {
+
+    static hookAsyncMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = Awaited<ReturnType<F>>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
+    static hookAsyncMethod<F extends AnyFunctionType, T = Awaited<ReturnType<F>>>(parent: object, target: F, key: string, hookOption: MethodHookOption<F>): boolean;
+    static hookAsyncMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
+    static hookAsyncMethod(parent: Record<string, any>, target: string | AnyFunctionType, key: string, hookOption: MethodHookOption<AnyFunctionType>): boolean {
         const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -143,11 +152,15 @@ export class Hooker {
             }
             if (hookedMethodKeyMap.has(key)) {
                 const currentHookMethodItem = hookedMethodKeyMap.get(key)!;
+                if (hookOption.id && currentHookMethodItem.option.some(item => item.id === hookOption.id)) {
+                    this.originObjectSource.console.warn(`already has hook id:${hookOption.id}`);
+                    return false
+                }
                 currentHookMethodItem.option.push(hookOption);
                 hookedMethodKeyMap.set(key, currentHookMethodItem);
                 return true
             }
-            const originMethod: Function = this.originObjectSource.Reflect.get(parent, methodName);
+            const originMethod = this.originObjectSource.Reflect.get(parent, methodName) as AnyFunctionType;
             try {
                 this.originObjectSource.Reflect.defineProperty(originMethod, 'toString', {
                     value: createBypassToStringMethod(methodName),
@@ -160,19 +173,19 @@ export class Hooker {
             }
             const hookEntry = new this.originObjectSource.Proxy(originMethod, {
                 apply(_target, thisArg, args) {
-                    return new Hooker.originObjectSource.Promise<T>(async (resolve, reject) => {
+                    return new Hooker.originObjectSource.Promise<any>(async (resolve, reject) => {
                         const hookItem = hookedMethodKeyMap.get(key);
                         if (!hookItem) {
                             //没有hook
                             resolve(await originMethod.apply(thisArg, args))
                             return
                         }
-                        const tempResult: TempHookResultWrapper<T> = {
-                            current: undefined as T
+                        const tempResult: TempHookResultWrapper<Awaited<ReturnType<typeof originMethod>>> = {
+                            current: undefined
                         }
                         const abortController = new Hooker.originObjectSource.AbortController();
                         for (const currentHookOption of hookItem.option) {
-                            currentHookOption.beforeMethodInvoke?.(args, abortController, thisArg, tempResult);
+                            currentHookOption.beforeMethodInvoke?.(args, abortController, thisArg, tempResult, originMethod);
                         }
                         if (abortController.signal.aborted) {
                             resolve(tempResult.current);
@@ -225,7 +238,8 @@ export class Hooker {
             return false;
         }
     }
-    static hookGetterAndSetter<T = any>(parent: any, target: string, key: string, hookOption: GetterAndSetterHookOption<T>) {
+    static hookGetterAndSetter<P extends object, K extends keyof P>(parent: P, target: K, key: string, hookOption: AccessorHookOption<P, K>): boolean;
+    static hookGetterAndSetter(parent: any, target: string, key: string, hookOption: AccessorHookOption<any, any>) {
         if (!parent) return false
         if (hookedGetterAndSetterKeyMap.has(key)) {
             const currentHookGetterAndSetterItem = hookedGetterAndSetterKeyMap.get(key)!;
@@ -236,11 +250,11 @@ export class Hooker {
         const originDescriptor = this.originObjectSource.Reflect.getOwnPropertyDescriptor(parent, target);
         // 拿不到描述符
         if (!originDescriptor) return false;
-        const originGetter: (() => T) | undefined = originDescriptor.get;
-        const originSetter: ((value: T) => void) | undefined = originDescriptor.set;
+        const originGetter: (() => any) | undefined = originDescriptor.get;
+        const originSetter: ((value: any) => void) | undefined = originDescriptor.set;
         // 啥都没有...
         if (!originGetter && !originSetter) return false
-        const tempHookEntry: { getter: (() => T) | undefined, setter: ((value: T) => void) | undefined } = { getter: originGetter, setter: originSetter }
+        const tempHookEntry: { getter: (() => any) | undefined, setter: ((value: any) => void) | undefined } = { getter: originGetter, setter: originSetter }
         if (originGetter) {
             this.originObjectSource.Reflect.defineProperty(originGetter, 'toString', {
                 value: createBypassToStringMethod(target, "get"),
@@ -255,8 +269,8 @@ export class Hooker {
                         //没有hook
                         return originGetter.apply(thisArg);
                     }
-                    const tempResult: TempHookResultWrapper<T> = {
-                        current: null as T
+                    const tempResult: TempHookResultWrapper<ReturnType<typeof originGetter>> = {
+                        current: undefined
                     }
                     const abortController = new Hooker.originObjectSource.AbortController();
                     for (const currentHookOption of hookItem.option) {
