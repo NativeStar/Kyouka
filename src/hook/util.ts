@@ -33,6 +33,7 @@ export function createBypassToStringMethod(methodName: string,targetType:"normal
         }
         return `function ${targetType==="normal"?"":`${targetType} `}${methodName}() { [native code] }`;
     }
+    OriginObjects.Reflect.defineProperty(toString,"name",{value: "toString"})
     toString.toString = getFakeNativeToString();
     toString.toString.toString = getFakeNativeToString();
     toString.prototype = void 0;
@@ -48,6 +49,7 @@ function getFakeNativeToString() {
         }
         return "function toString() { [native code] }"
     };
+    OriginObjects.Reflect.defineProperty(toString,"name",{value: "toString"})
     toString.toString = toString;
     toString.prototype = void 0;
     return toString;

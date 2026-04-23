@@ -29,7 +29,6 @@ esbuild.buildSync({
 //预加载
 esbuild.buildSync({
     entryPoints:["./src/preload/main.ts"],
-    keepNames:true,
     bundle:true,
     outfile:"./dist/preload.js",
     minify:true,
@@ -39,7 +38,6 @@ esbuild.buildSync({
 //其他
 esbuild.buildSync({
     entryPoints:["./src/content.ts","./src/service.ts","./src/options.ts"],
-    keepNames:true,
     bundle:true,
     outdir:"./dist",
     minify:true,
