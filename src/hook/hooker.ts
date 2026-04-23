@@ -2,7 +2,7 @@ import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
 import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, GetterAndSetterHookMapItem, MethodHookMapItem } from "./constance"
 const hookedMethodMap: Map<object, Map<string, MethodHookMapItem>> = new Map();
-const hookedGetterAndSetterKeyMap: Map<string, GetterAndSetterHookMapItem> = new Map();
+const hookedGetterAndSetterKeyMap: Map<object, Map<string, GetterAndSetterHookMapItem>> = new Map();
 const HOOKED_SYMBOL = Symbol();
 const GET_ORIGIN_METHOD_SYMBOL = Symbol();
 export class Hooker {
@@ -26,7 +26,7 @@ export class Hooker {
                 const rawOrigin = this.getOriginMethod(methodExecutable);
                 if (rawOrigin !== null) originMethod = rawOrigin
             }
-            const currentHookMethodItem = this.getMethodHookItem(parent,methodName)
+            const currentHookMethodItem = this.getMethodHookItem(parent, methodName)
             if (currentHookMethodItem) {
                 //判断id是否重复
                 if (hookOption.id && currentHookMethodItem.option.some(item => item.id === hookOption.id)) {
@@ -46,7 +46,7 @@ export class Hooker {
             const hookEntryProxy = new this.originObjectSource.Proxy(originMethod, {
                 apply(_target, thisArg, args) {
                     const hookItem = Hooker.getMethodHookItem(parent, methodName);
-                    if (!hookItem||hookItem.option.length===0) {
+                    if (!hookItem || hookItem.option.length === 0) {
                         //没有hook
                         return originMethod.apply(thisArg, args);
                     }
@@ -153,8 +153,8 @@ export class Hooker {
             const hookEntry = new this.originObjectSource.Proxy(originMethod, {
                 apply(_target, thisArg, args) {
                     return new Hooker.originObjectSource.Promise<any>(async (resolve, reject) => {
-                        const hookItem = Hooker.getMethodHookItem(parent,methodName)
-                        if (!hookItem||hookItem.option.length==0) {
+                        const hookItem = Hooker.getMethodHookItem(parent, methodName)
+                        if (!hookItem || hookItem.option.length == 0) {
                             //没有hook
                             resolve(await originMethod.apply(thisArg, args))
                             return
@@ -216,7 +216,7 @@ export class Hooker {
                     methodName,
                     option: [hookOption]
                 }
-                this.setMethodHookItem(parent,methodName,hookItem);
+                this.setMethodHookItem(parent, methodName, hookItem);
                 return true;
             }
             return false;
@@ -228,19 +228,26 @@ export class Hooker {
     static hookGetterAndSetter<P extends object, K extends keyof P>(parent: P, target: K, key: string, hookOption: AccessorHookOption<P, K>): boolean;
     static hookGetterAndSetter(parent: any, target: string, key: string, hookOption: AccessorHookOption<any, any>) {
         if (!parent) return false
-        if (hookedGetterAndSetterKeyMap.has(key)) {
-            const currentHookGetterAndSetterItem = hookedGetterAndSetterKeyMap.get(key)!;
-            currentHookGetterAndSetterItem.option.push(hookOption);
-            hookedGetterAndSetterKeyMap.set(key, currentHookGetterAndSetterItem);
+        const currentHookItem = this.getAccessorHookItem(parent, target);
+        if (currentHookItem) {
+            currentHookItem.option.push(hookOption);
             return true
         }
         const originDescriptor = this.originObjectSource.Reflect.getOwnPropertyDescriptor(parent, target);
         // 拿不到描述符
         if (!originDescriptor) return false;
-        const originGetter: (() => any) | undefined = originDescriptor.get;
-        const originSetter: ((value: any) => void) | undefined = originDescriptor.set;
+        let originGetter: (() => any) | undefined = originDescriptor.get;
+        let originSetter: ((value: any) => void) | undefined = originDescriptor.set;
         // 啥都没有...
         if (!originGetter && !originSetter) return false
+        if (originGetter && this.isModifiedMethodOrObject(originGetter)) {
+            const tryGetter = this.getOriginMethod(originGetter);
+            if (tryGetter) originGetter = tryGetter;
+        }
+        if (originSetter && this.isModifiedMethodOrObject(originSetter)) {
+            const trySetter = this.getOriginMethod(originSetter);
+            if (trySetter) originSetter = trySetter;
+        }
         const tempHookEntry: { getter: (() => any) | undefined, setter: ((value: any) => void) | undefined } = { getter: originGetter, setter: originSetter }
         if (originGetter) {
             this.originObjectSource.Reflect.defineProperty(originGetter, 'toString', {
@@ -251,8 +258,8 @@ export class Hooker {
             });
             tempHookEntry.getter = new this.originObjectSource.Proxy(originGetter, {
                 apply(_target, thisArg) {
-                    const hookItem = hookedGetterAndSetterKeyMap.get(key);
-                    if (!hookItem) {
+                    const hookItem = Hooker.getAccessorHookItem(parent, target);
+                    if (!hookItem || hookItem.option.length == 0) {
                         //没有hook
                         return originGetter.apply(thisArg);
                     }
@@ -285,63 +292,75 @@ export class Hooker {
                     }
                     return Hooker.originObjectSource.Reflect.has(target, p);
                 },
+                get(target, p) {
+                    if (p === GET_ORIGIN_METHOD_SYMBOL) {
+                        return originGetter;
+                    }
+                    return Hooker.originObjectSource.Reflect.get(target, p);
+                },
             });
-            if (originSetter) {
-                this.originObjectSource.Reflect.defineProperty(originSetter, 'toString', {
-                    value: createBypassToStringMethod(target, "set"),
-                    writable: false,
-                    enumerable: true,
-                    configurable: true,
-                });
-                tempHookEntry.setter = new this.originObjectSource.Proxy(originSetter, {
-                    apply(_target, thisArg, arg: [any]) {
-                        const hookItem = hookedGetterAndSetterKeyMap.get(key);
-                        if (!hookItem) {
-                            //没有hook
-                            return originSetter.apply(thisArg, arg);
-                        }
-                        const abortController = new Hooker.originObjectSource.AbortController();
-                        for (const currentHookOption of hookItem.option) {
-                            currentHookOption.beforeSetterInvoke?.(arg[0], abortController, thisArg);
-                        }
-                        if (abortController.signal.aborted) {
-                            return
-                        }
-                        try {
-                            originSetter.apply(thisArg, arg);
-                        } catch (error: any) {
-                            if (error.stack) {
-                                error.stack = filterErrorStack(error.stack);
-                            }
-                            throw error;
-                        }
-                        return
-                    },
-                    has(target, p) {
-                        if (p === HOOKED_SYMBOL) {
-                            return true;
-                        }
-                        return Hooker.originObjectSource.Reflect.has(target, p);
-                    },
-                });
-            }
-            const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, target, {
-                get: tempHookEntry.getter,
-                set: tempHookEntry.setter,
-                enumerable: hookOption.descriptor?.enumerable ?? true,
-                configurable: hookOption.descriptor?.configurable ?? true,
-            });
-            if (hookDefineResult) {
-                const hookItem: GetterAndSetterHookMapItem = {
-                    originGetter: originGetter ?? null,
-                    originSetter: originSetter ?? null,
-                    option: [hookOption]
-                }
-                hookedGetterAndSetterKeyMap.set(key, hookItem);
-                return true;
-            }
-            return false;
         }
+        if (originSetter) {
+            this.originObjectSource.Reflect.defineProperty(originSetter, 'toString', {
+                value: createBypassToStringMethod(target, "set"),
+                writable: false,
+                enumerable: true,
+                configurable: true,
+            });
+            tempHookEntry.setter = new this.originObjectSource.Proxy(originSetter, {
+                apply(_target, thisArg, arg: [any]) {
+                    const hookItem = Hooker.getAccessorHookItem(parent, target);
+                    if (!hookItem || hookItem.option.length == 0) {
+                        //没有hook
+                        return originSetter.apply(thisArg, arg);
+                    }
+                    const abortController = new Hooker.originObjectSource.AbortController();
+                    for (const currentHookOption of hookItem.option) {
+                        currentHookOption.beforeSetterInvoke?.(arg[0], abortController, thisArg);
+                    }
+                    if (abortController.signal.aborted) {
+                        return
+                    }
+                    try {
+                        originSetter.apply(thisArg, arg);
+                    } catch (error: any) {
+                        if (error.stack) {
+                            error.stack = filterErrorStack(error.stack);
+                        }
+                        throw error;
+                    }
+                    return
+                },
+                has(target, p) {
+                    if (p === HOOKED_SYMBOL) {
+                        return true;
+                    }
+                    return Hooker.originObjectSource.Reflect.has(target, p);
+                },
+                get(target, p) {
+                    if (p === GET_ORIGIN_METHOD_SYMBOL) {
+                        return originSetter;
+                    }
+                    return Hooker.originObjectSource.Reflect.get(target, p);
+                },
+            });
+        }
+        const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, target, {
+            get: tempHookEntry.getter,
+            set: tempHookEntry.setter,
+            enumerable: hookOption.descriptor?.enumerable ?? true,
+            configurable: hookOption.descriptor?.configurable ?? true,
+        });
+        if (hookDefineResult) {
+            const hookItem: GetterAndSetterHookMapItem = {
+                originGetter: originGetter ?? null,
+                originSetter: originSetter ?? null,
+                option: [hookOption]
+            }
+            this.setAccessorHookItem(parent, target, hookItem);
+            return true;
+        }
+        return false;
     }
     static createProxyObject<T extends object>(target: T, handler: ProxyHandler<T>, targetName: string): T {
         //这个没必要屏蔽枚举
@@ -351,16 +370,6 @@ export class Hooker {
     }
     // TODO 添加根据parent等进行精确unhook的方法 这样遍历性能太低了
     static unhookMethod(id: string) {
-        // const hookItem=this.getMethodHookItem(parent,methodName);
-        // if(hookItem){
-        //     const newMapItems = hookItem.option.filter(item => item.id !== id);
-        //     this.setMethodHookItem(hookItem.originParent,hookItem.methodName, {
-        //         originMethod: hookItem.originMethod,
-        //         methodName:hookItem.methodName,
-        //         option: newMapItems,
-        //         originParent: hookItem.originParent
-        //     })
-        // }
         for (const parentItem of hookedMethodMap) {
             for (const hookMapItem of parentItem[1]) {
                 const newMapItems = hookMapItem[1].option.filter(item => item.id !== id);
@@ -371,12 +380,6 @@ export class Hooker {
                     methodName: hookMapItem[1].methodName
                 })
             }
-            // const newMapItems = mapItem[1].option.filter(item => item.id !== id);
-            // hookedMethodMap.set(mapItem[0], {
-            //     originParent: mapItem[1].originParent,
-            //     originMethod: mapItem[1].originMethod,
-            //     option: newMapItems
-            // })
         }
     }
     /**
@@ -399,6 +402,17 @@ export class Hooker {
             hookedMethodMap.set(parent, parentMap);
         }
         parentMap.set(methodName, item);
+    }
+    static getAccessorHookItem(parent: object, name: string) {
+        return hookedGetterAndSetterKeyMap.get(parent)?.get(name) ?? null;
+    }
+    private static setAccessorHookItem(parent: object, name: string, item: GetterAndSetterHookMapItem) {
+        let parentMap = hookedGetterAndSetterKeyMap.get(parent);
+        if (!parentMap) {
+            parentMap = new Map();
+            hookedGetterAndSetterKeyMap.set(parent, parentMap);
+        }
+        parentMap.set(name, item);
     }
     static unhookMethods(id: string[]) {
         for (const idItem of id) {
