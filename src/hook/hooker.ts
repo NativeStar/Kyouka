@@ -1,46 +1,6 @@
 import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
-
-export interface TempHookResultWrapper<T> {
-    current: T;
-}
-type AnyFunctionType = (...args: any[]) => any;
-type MethodByName<P extends object, K extends string> = K extends keyof P ? Extract<P[K], AnyFunctionType> : AnyFunctionType;
-interface MethodHookOption<F extends AnyFunctionType, R = ReturnType<F>> {
-    descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value">;
-    /**
-     * 唯一标识 用于unhook
-     */
-    id?: string
-    /**
-     * @param args 方法参数
-     * @param abortController 中断执行控制器
-     * @param thisArg this指向
-     * @param tempMethodResult 可修改返回值 注意这里的返回值设置仅在中断执行时生效 
-     */
-    beforeMethodInvoke?: (args: Parameters<F>, abortController: AbortController, thisArg: ThisParameterType<F>, tempMethodResult: TempHookResultWrapper<R>, originMethod: F) => void;
-    /**
-     * @param args 方法参数
-     * @param tempMethodResult 可修改返回值
-     * @param thisArg this指向
-     */
-    afterMethodInvoke?: (args: Parameters<F>, tempMethodResult: TempHookResultWrapper<R>, thisArg: ThisParameterType<F>) => void;
-}
-interface AccessorHookOption<P extends object, K extends keyof P> {
-    descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value" | "writable">;
-    beforeGetterInvoke?: (abortController: AbortController, thisArg: P, tempMethodResult: TempHookResultWrapper<P[K]>) => void;
-    afterGetterInvoke?: (tempMethodResult: TempHookResultWrapper<P[K]>, thisArg: P) => void;
-    beforeSetterInvoke?: (arg: P[K], abortController: AbortController, thisArg: P) => void;
-}
-interface MethodHookMapItem {
-    originMethod: AnyFunctionType;
-    option: MethodHookOption<AnyFunctionType>[];
-}
-interface GetterAndSetterHookMapItem<T = any> {
-    originGetter: (() => T) | null;
-    originSetter: ((value: T) => void) | null;
-    option: AccessorHookOption<any, any>[];
-}
+import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, GetterAndSetterHookMapItem, MethodHookMapItem } from "./constance"
 const hookedMethodKeyMap: Map<string, MethodHookMapItem> = new Map();
 const hookedGetterAndSetterKeyMap: Map<string, GetterAndSetterHookMapItem> = new Map();
 export const hookSymbol = Symbol();

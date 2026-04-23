@@ -28,7 +28,11 @@ export class ToolManager {
         const hookedIds = new Set<string>();
         for (const preHookOption of this.preHooksMethodList) {
             if (hookedIds.has(preHookOption.id)) continue;
-            Hooker[preHookOption.useAsyncHook ? "hookAsyncMethod" : "hookMethod"](preHookOption.parent, preHookOption.methodName, preHookOption.key, { id: preHookOption.id })
+            if (preHookOption.useAsyncHook) {
+                Hooker.hookAsyncMethod(preHookOption.parent, preHookOption.methodName, preHookOption.key, { id: preHookOption.id })
+            }else{
+                Hooker.hookMethod(preHookOption.parent, preHookOption.methodName, preHookOption.key, { id: preHookOption.id })
+            }
             hookedIds.add(preHookOption.id);
         }
         //执行自定义preload
