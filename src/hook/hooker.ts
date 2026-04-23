@@ -10,10 +10,10 @@ export class Hooker {
     static setOriginObjectSource(source: typeof OriginObjects) {
         this.originObjectSource = source;
     }
-    static hookMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = ReturnType<F>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F>): boolean;
-    static hookMethod<F extends AnyFunctionType, T = ReturnType<F>>(parent: object, target: F, key: string, hookOption: MethodHookOption<F>): boolean;
-    static hookMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F>): boolean;
-    static hookMethod(parent: any, target: string | AnyFunctionType, key: string, hookOption: MethodHookOption<AnyFunctionType>): boolean {
+    static hookMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = ReturnType<F>>(parent: P, target: K, hookOption: MethodHookOption<F>): boolean;
+    static hookMethod<F extends AnyFunctionType, T = ReturnType<F>>(parent: object, target: F, hookOption: MethodHookOption<F>): boolean;
+    static hookMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, hookOption: MethodHookOption<F>): boolean;
+    static hookMethod(parent: any, target: string | AnyFunctionType, hookOption: MethodHookOption<AnyFunctionType>): boolean {
         const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -115,10 +115,10 @@ export class Hooker {
         }
     }
 
-    static hookAsyncMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = Awaited<ReturnType<F>>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
-    static hookAsyncMethod<F extends AnyFunctionType, T = Awaited<ReturnType<F>>>(parent: object, target: F, key: string, hookOption: MethodHookOption<F>): boolean;
-    static hookAsyncMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, key: string, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
-    static hookAsyncMethod(parent: Record<string, any>, target: string | AnyFunctionType, key: string, hookOption: MethodHookOption<AnyFunctionType>): boolean {
+    static hookAsyncMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = Awaited<ReturnType<F>>>(parent: P, target: K, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
+    static hookAsyncMethod<F extends AnyFunctionType, T = Awaited<ReturnType<F>>>(parent: object, target: F, hookOption: MethodHookOption<F>): boolean;
+    static hookAsyncMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
+    static hookAsyncMethod(parent: Record<string, any>, target: string | AnyFunctionType, hookOption: MethodHookOption<AnyFunctionType>): boolean {
         const methodName = typeof target === 'string' ? target : target.name;
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
@@ -225,8 +225,8 @@ export class Hooker {
             return false;
         }
     }
-    static hookGetterAndSetter<P extends object, K extends keyof P>(parent: P, target: K, key: string, hookOption: AccessorHookOption<P, K>): boolean;
-    static hookGetterAndSetter(parent: any, target: string, key: string, hookOption: AccessorHookOption<any, any>) {
+    static hookGetterAndSetter<P extends object, K extends keyof P>(parent: P, target: K, hookOption: AccessorHookOption<P, K>): boolean;
+    static hookGetterAndSetter(parent: any, target: string, hookOption: AccessorHookOption<any, any>) {
         if (!parent) return false
         const currentHookItem = this.getAccessorHookItem(parent, target);
         if (currentHookItem) {

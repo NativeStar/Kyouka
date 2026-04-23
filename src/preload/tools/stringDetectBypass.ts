@@ -4,7 +4,7 @@ import { AbstractTool } from "../classes/abstractTool";
 
 export class StringDetectBypass extends AbstractTool {
     onMount(): void {
-        Hooker.hookMethod(Function.prototype, "toString", "Function.prototype.toString", {
+        Hooker.hookMethod(Function.prototype, "toString",{
             beforeMethodInvoke(_args, abortController, thisArg, tempMethodResult) {
                 if (thisArg instanceof Function && Hooker.isModifiedMethodOrObject(thisArg)) {
                     tempMethodResult.current = `function ${thisArg.name}() { [native code] }`
@@ -24,7 +24,6 @@ export class StringDetectBypass extends AbstractTool {
             {
                 parent: Function.prototype,
                 methodName: "toString",
-                key: "Function.prototype.toString",
                 id: "pre#Function.prototype.toString"
             }
         ]

@@ -5,20 +5,20 @@ import { AbstractTool } from "../classes/abstractTool";
 export class BlockClipboardWrite extends AbstractTool {
     onMount(): void {
         if (navigator.clipboard) {
-            Hooker.hookAsyncMethod(navigator.clipboard, "writeText", "navigator.clipboard.writeText", {
+            Hooker.hookAsyncMethod(navigator.clipboard, "writeText",{
                 beforeMethodInvoke(args, abortController) {
                     OriginObjects.console.log(`Blocked write clipboard text: ${args[0]}`)
                     abortController.abort();
                 }
             });
-            Hooker.hookAsyncMethod(navigator.clipboard, "write", "navigator.clipboard.write", {
+            Hooker.hookAsyncMethod(navigator.clipboard, "write",{
                 beforeMethodInvoke(args, abortController) {
                     OriginObjects.console.log(`Blocked write clipboard: ${args[0]}`)
                     abortController.abort();
                 }
             });
         }
-        Hooker.hookMethod(document, "execCommand", "document.execCommand", {
+        Hooker.hookMethod(document, "execCommand", {
             beforeMethodInvoke(args, abortController, _thisArg, tempMethodResult) {
                 if (args[0] === "copy") {
                     tempMethodResult.current = true;

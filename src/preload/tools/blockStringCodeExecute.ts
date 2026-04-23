@@ -5,7 +5,7 @@ export class BlockStringCodeExecute extends AbstractTool {
     private static readonly abortInvokeTargetAttrs: string[] = ["innerText", "innerHTML", "text", "textContent"] as const;
     onMount(): void {
         const hookedTagSymbol = Hooker.getHookSymbol();
-        Hooker.hookMethod(window, "eval", "window.eval", {
+        Hooker.hookMethod(window, "eval", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
@@ -28,14 +28,14 @@ export class BlockStringCodeExecute extends AbstractTool {
             configurable: true,
             writable: true,
         });
-        Hooker.hookMethod(window, "setTimeout", "window.setTimeout", {
+        Hooker.hookMethod(window, "setTimeout",{
             beforeMethodInvoke(args, abortController) {
                 if (typeof args[0] === "string") {
                     abortController.abort();
                 }
             },
         });
-        Hooker.hookMethod(window, "setInterval", "window.setInterval", {
+        Hooker.hookMethod(window, "setInterval", {
             beforeMethodInvoke(args, abortController) {
                 if (typeof args[0] === "string") {
                     abortController.abort();
@@ -44,13 +44,13 @@ export class BlockStringCodeExecute extends AbstractTool {
         });
         //script标签相关
         for (const keyword of BlockStringCodeExecute.abortInvokeTargetAttrs) {
-            Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, keyword as keyof HTMLScriptElement, `HTMLScriptElement.prototype.${keyword}`, {
+            Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, keyword as keyof HTMLScriptElement, {
                 beforeSetterInvoke(_arg, abortController) {
                     abortController.abort();
                 },
             });
         }
-        Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, "src", "HTMLScriptElement.prototype.src", {
+        Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, "src", {
             beforeSetterInvoke(arg, abortController) {
                 const srcString=(arg as TrustedScriptURL|string) instanceof TrustedScriptURL ? arg.toString() : arg;
                 if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
@@ -59,7 +59,7 @@ export class BlockStringCodeExecute extends AbstractTool {
             },
         });
         //attr相关
-        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setAttribute, "HTMLScriptElement.prototype.setAttribute", {
+        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setAttribute, {
             beforeMethodInvoke(args, abortController) {
                 if (BlockStringCodeExecute.abortInvokeTargetAttrs.includes(args[0])) {
                     abortController.abort();
@@ -73,12 +73,12 @@ export class BlockStringCodeExecute extends AbstractTool {
                 }
             },
         })
-        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setHTMLUnsafe, "HTMLScriptElement.prototype.setHTMLUnsafe", {
+        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setHTMLUnsafe,{
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
         });
-        Hooker.hookMethod(HTMLScriptElement.prototype, "setHTML", "HTMLScriptElement.prototype.setHTML", {
+        Hooker.hookMethod(HTMLScriptElement.prototype, "setHTML", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
@@ -89,13 +89,11 @@ export class BlockStringCodeExecute extends AbstractTool {
             {
                 parent: window,
                 methodName: "setTimeout",
-                key: "window.setTimeout",
                 id: "pre#window.setTimeout"
             },
             {
                 parent: window,
                 methodName: "setInterval",
-                key: "window.setInterval",
                 id: "pre#window.setInterval"
             },
         ]

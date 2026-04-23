@@ -29,9 +29,9 @@ export class ToolManager {
         for (const preHookOption of this.preHooksMethodList) {
             if (hookedIds.has(preHookOption.id)) continue;
             if (preHookOption.useAsyncHook) {
-                Hooker.hookAsyncMethod(preHookOption.parent, preHookOption.methodName, preHookOption.key, { id: preHookOption.id })
+                Hooker.hookAsyncMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
             }else{
-                Hooker.hookMethod(preHookOption.parent, preHookOption.methodName, preHookOption.key, { id: preHookOption.id })
+                Hooker.hookMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
             }
             hookedIds.add(preHookOption.id);
         }

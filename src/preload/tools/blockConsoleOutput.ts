@@ -6,31 +6,31 @@ export class BlockConsoleOutput extends AbstractTool {
         abortController.abort();
     }
     onMount(): void {
-        Hooker.hookMethod(console, "table", "console.table", {
+        Hooker.hookMethod(console, "table", {
             beforeMethodInvoke: this.rejectAllInvoke
         });
-        Hooker.hookMethod(console, "debug", "console.debug", {
+        Hooker.hookMethod(console, "debug", {
             beforeMethodInvoke: this.rejectAllInvoke
         })
-        Hooker.hookMethod(console, "log", "console.log", {
+        Hooker.hookMethod(console, "log", {
             beforeMethodInvoke: this.rejectAllInvoke
         });
-        Hooker.hookMethod(console, "info", "console.info", {
+        Hooker.hookMethod(console, "info", {
             beforeMethodInvoke: this.rejectAllInvoke
         });
-        Hooker.hookMethod(console, "warn", "console.warn", {
+        Hooker.hookMethod(console, "warn", {
             beforeMethodInvoke: this.rejectAllInvoke
         });
-        Hooker.hookMethod(console, "error", "console.error", {
+        Hooker.hookMethod(console, "error", {
             beforeMethodInvoke: this.rejectAllInvoke
         });
-        Hooker.hookMethod(console, "dir", "console.dir", {
+        Hooker.hookMethod(console, "dir", {
             beforeMethodInvoke: this.rejectAllInvoke
         });
-        Hooker.hookMethod(console, "dirxml", "console.dirxml", {
+        Hooker.hookMethod(console, "dirxml", {
             beforeMethodInvoke: this.rejectAllInvoke
         });
-        Hooker.hookMethod(console, "clear", "console.clear", {
+        Hooker.hookMethod(console, "clear", {
             beforeMethodInvoke: this.rejectAllInvoke
         })
     }

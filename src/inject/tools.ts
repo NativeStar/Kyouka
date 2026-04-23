@@ -215,14 +215,14 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(Object.defineProperty)) {
             return showToast(executedText)
         }
-        const definePropertyHook = Hooker.hookMethod(Object, "defineProperty", "Object.defineProperty", {
+        const definePropertyHook = Hooker.hookMethod(Object, "defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
         });
-        const definePropertiesHook = Hooker.hookMethod(Object, "defineProperties", "Object.defineProperties", {
+        const definePropertiesHook = Hooker.hookMethod(Object, "defineProperties", {
             beforeMethodInvoke(args) {
                 const [_target, descriptors] = args as [object, PropertyDescriptorMap & ThisType<any>];
                 for (const property in descriptors) {
@@ -231,7 +231,7 @@ export const Tools: { [key: string]: () => void } = {
                 }
             },
         });
-        const reflectDefinePropertyHook = Hooker.hookMethod(Reflect, "defineProperty", "Reflect.defineProperty", {
+        const reflectDefinePropertyHook = Hooker.hookMethod(Reflect, "defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
                 descriptor.writable = true;
@@ -354,17 +354,17 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(JSON?.stringify ?? {})) {
             return showToast(executedText)
         }
-        const stringifyHook = Hooker.hookMethod(window.JSON, "stringify", "window.JSON.stringify", {
+        const stringifyHook = Hooker.hookMethod(window.JSON, "stringify", {
             afterMethodInvoke(args) {
                 originObjectReference.console.log("JSON Stringify:", args[0])
             },
         });
-        const parseHook = Hooker.hookMethod(window.JSON, "parse", "window.JSON.parse", {
+        const parseHook = Hooker.hookMethod(window.JSON, "parse", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("JSON Parse:", tempMethodResult.current)
             },
         });
-        const rawJsonHook = Hooker.hookMethod(window.JSON, "rawJSON", "window.JSON.rawJSON", {
+        const rawJsonHook = Hooker.hookMethod(window.JSON, "rawJSON", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("JSON Raw:", tempMethodResult.current)
             },
@@ -466,7 +466,7 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(window.open)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(window, "open", "window.open", {
+        const result = Hooker.hookMethod(window, "open", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("已阻止一次open调用")
                 abortController.abort();
@@ -482,31 +482,31 @@ export const Tools: { [key: string]: () => void } = {
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
             abortController.abort();
         }
-        const tableHook = Hooker.hookMethod(console, "table", "console.table", {
+        const tableHook = Hooker.hookMethod(console, "table", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const debugHook = Hooker.hookMethod(console, "debug", "console.debug", {
+        const debugHook = Hooker.hookMethod(console, "debug", {
             beforeMethodInvoke: rejectAllInvoke
         })
-        const logHook = Hooker.hookMethod(console, "log", "console.log", {
+        const logHook = Hooker.hookMethod(console, "log", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const infoHook = Hooker.hookMethod(console, "info", "console.info", {
+        const infoHook = Hooker.hookMethod(console, "info", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const warnHook = Hooker.hookMethod(console, "warn", "console.warn", {
+        const warnHook = Hooker.hookMethod(console, "warn", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const errorHook = Hooker.hookMethod(console, "error", "console.error", {
+        const errorHook = Hooker.hookMethod(console, "error", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const dirHook = Hooker.hookMethod(console, "dir", "console.dir", {
+        const dirHook = Hooker.hookMethod(console, "dir", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const dirxmlHook = Hooker.hookMethod(console, "dirxml", "console.dirxml", {
+        const dirxmlHook = Hooker.hookMethod(console, "dirxml", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const clearHook = Hooker.hookMethod(console, "clear", "console.clear", {
+        const clearHook = Hooker.hookMethod(console, "clear", {
             beforeMethodInvoke: rejectAllInvoke
         });
         showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? successText : failedText)
@@ -515,7 +515,7 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(navigator.sendBeacon)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(navigator, "sendBeacon", "navigator.sendBeacon", {
+        const result = Hooker.hookMethod(navigator, "sendBeacon", {
             beforeMethodInvoke(args, abortController) {
                 // 顺便看看有多少网站用了这个API
                 showToast("已阻止一次sendBeacon调用")
@@ -692,7 +692,7 @@ export const Tools: { [key: string]: () => void } = {
         //hook append
         //确保没有hook相关方法
         if (!Hooker.isModifiedMethodOrObject(HTMLElement.prototype.append)) {
-            const hookAppendResult = Hooker.hookMethod(HTMLElement.prototype, "append", "removeWatermarkEnchant", {
+            const hookAppendResult = Hooker.hookMethod(HTMLElement.prototype, "append", {
                 beforeMethodInvoke(args, abortController,thisArg,temp,origin) {
                     if (!(args[0] instanceof HTMLElement)) {
                         return
@@ -761,12 +761,12 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(window.btoa ?? {})) {
             return showToast(executedText)
         }
-        const atobHook = Hooker.hookMethod<any>(window, "atob", "window.atob", {
+        const atobHook = Hooker.hookMethod<any>(window, "atob", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("Base64 decode:", tempMethodResult.current)
             },
         });
-        const parseHook = Hooker.hookMethod(window, "btoa", "window.btoa", {
+        const parseHook = Hooker.hookMethod(window, "btoa", {
             afterMethodInvoke(args) {
                 originObjectReference.console.log("Base64 encode:", args[0])
             },
@@ -856,7 +856,7 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(crypto.randomUUID ?? {})) {
             return showToast(executedText)
         }
-        Hooker.hookMethod(crypto, "randomUUID", "crypto.randomUUID", {
+        Hooker.hookMethod(crypto, "randomUUID", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成UUID:", tempMethodResult.current)
             },
@@ -912,7 +912,7 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(URL.createObjectURL)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(URL, "createObjectURL", "URL.createObjectURL", {
+        const result = Hooker.hookMethod(URL, "createObjectURL", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成对象URL:", `'${tempMethodResult.current}'`)
             },
@@ -923,7 +923,7 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(window.postMessage)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(window, "postMessage", "window.postMessage", {
+        const result = Hooker.hookMethod(window, "postMessage", {
             afterMethodInvoke(args) {
                 const arg0Data = args[0] instanceof Object ? originObjectReference.JSON.stringify(args[0]) : args[0]
                 originObjectReference.console.log(`推送消息:${arg0Data}\n目标:${args[1] ?? "unset"}`)
@@ -935,7 +935,7 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(Math.random)) {
             return showToast(executedText)
         }
-        Hooker.hookMethod(Math, "random", "Math.random", {
+        Hooker.hookMethod(Math, "random",{
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成随机数:", tempMethodResult.current)
             },
@@ -946,7 +946,7 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(window.close)) {
             return showToast(executedText)
         }
-        Hooker.hookMethod(window, "close", "window.close", {
+        Hooker.hookMethod(window, "close", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("阻止一次close调用", 800);
                 abortController.abort();
@@ -981,7 +981,7 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(navigator.share)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookAsyncMethod(navigator, navigator.share, "navigator.share", {
+        const result = Hooker.hookAsyncMethod(navigator, navigator.share, {
             beforeMethodInvoke(_args, abortController) {
                 showToast("阻止一次share调用", 800);
                 abortController.abort();
@@ -1010,14 +1010,14 @@ UserAgent:${navigator.userAgent}
             return showToast(executedText)
         }
         if (!createUrlHooked) {
-            createUrlHooked = Hooker.hookMethod(URL, "createObjectURL", "URL.createObjectURL", {
+            createUrlHooked = Hooker.hookMethod(URL, "createObjectURL", {
                 afterMethodInvoke(_args, tempMethodResult) {
                     originObjectReference.console.log("生成对象URL:", `'${tempMethodResult.current}'`)
                 },
             });
         }
         if (!revokeUrlHooked) {
-            revokeUrlHooked = Hooker.hookMethod(URL, "revokeObjectURL", "URL.revokeObjectURL", {
+            revokeUrlHooked = Hooker.hookMethod(URL, "revokeObjectURL", {
                 beforeMethodInvoke(_args, abortController) {
                     abortController.abort();
                 },

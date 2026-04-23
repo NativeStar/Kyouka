@@ -19,38 +19,38 @@ export class ConsoleDetectBypass extends AbstractTool {
         if (args.every(item => item === null)) abortController.abort();
     }
     onMount(): void {
-        Hooker.hookMethod(console, "table", "console.table", {
+        Hooker.hookMethod(console, "table", {
             beforeMethodInvoke(_args, abortController) {
                 // 正常极少用+性能太差 直接屏蔽
                 abortController.abort();
             },
         });
-        Hooker.hookMethod(console, "debug", "console.debug", {
+        Hooker.hookMethod(console, "debug",{
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         })
-        Hooker.hookMethod(console, "log", "console.log", {
+        Hooker.hookMethod(console, "log", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "info", "console.info", {
+        Hooker.hookMethod(console, "info", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "warn", "console.warn", {
+        Hooker.hookMethod(console, "warn", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "error", "console.error", {
+        Hooker.hookMethod(console, "error", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "dir", "console.dir", {
+        Hooker.hookMethod(console, "dir", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
         });
-        Hooker.hookMethod(console, "dirxml", "console.dirxml", {
+        Hooker.hookMethod(console, "dirxml",{
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             }
         });
-        Hooker.hookMethod(console, "clear", "console.clear", {
+        Hooker.hookMethod(console, "clear", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             }
@@ -61,55 +61,46 @@ export class ConsoleDetectBypass extends AbstractTool {
             {
                 parent: console,
                 methodName: "table",
-                key: "console.table",
                 id: "pre#console.table"
             },
             {
                 parent: console,
                 methodName: "debug",
-                key: "console.debug",
                 id: "pre#console.debug"
             },
             {
                 parent: console,
                 methodName: "log",
-                key: "console.log",
                 id: "pre#console.log"
             },
             {
                 parent: console,
                 methodName: "info",
-                key: "console.info",
                 id: "pre#console.info"
             },
             {
                 parent: console,
                 methodName: "warn",
-                key: "console.warn",
                 id: "pre#console.warn"
             },
             {
                 parent: console,
                 methodName: "error",
-                key: "console.error",
                 id: "pre#console.error"
             },
             {
                 parent: console,
                 methodName: "dir",
-                key: "console.dir",
                 id: "pre#console.dir"
             },
             {
                 parent: console,
                 methodName: "dirxml",
-                key: "console.dirxml",
                 id: "pre#console.dirxml"
             },
             {
                 parent: console,
                 methodName: "clear",
-                key: "console.clear",
                 id: "pre#console.clear"
             }
         ]

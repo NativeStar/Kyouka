@@ -16,7 +16,6 @@ export type IpcObject = {
 export type PreHookOption = {
     parent: any,
     methodName: string,
-    key: string,
     id: string
     useAsyncHook?: boolean
 }
