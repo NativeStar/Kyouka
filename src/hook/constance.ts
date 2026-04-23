@@ -31,6 +31,8 @@ export interface AccessorHookOption<P extends object, K extends keyof P> {
 }
 export interface MethodHookMapItem {
     originMethod: AnyFunctionType;
+    originParent: object;
+    methodName:string
     option: MethodHookOption<AnyFunctionType>[];
 }
 export interface GetterAndSetterHookMapItem<T = any> {
