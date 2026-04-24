@@ -6,11 +6,13 @@ export const OriginObjects={
         freeze:Object.freeze,
     },
     Reflect:{
+        construct:Reflect.construct,
         has:Reflect.has,
         get:Reflect.get,
         set:Reflect.set,
         defineProperty:Reflect.defineProperty,
-        getOwnPropertyDescriptor:Reflect.getOwnPropertyDescriptor
+        getOwnPropertyDescriptor:Reflect.getOwnPropertyDescriptor,
+        deleteProperty:Reflect.deleteProperty
     },
     Proxy,
     String:{
