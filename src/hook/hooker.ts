@@ -533,13 +533,6 @@ export class Hooker {
             }
         }
     }
-    /**
-     * 在对象hook完善前手动获取这个打标记
-     * @returns 
-     */
-    static getHookSymbol() {
-        return HOOKED_SYMBOL;
-    }
     static getOriginMethod(method: Function) {
         return this.originObjectSource.Reflect.get(method, GET_ORIGIN_METHOD_SYMBOL) ?? null;
     }

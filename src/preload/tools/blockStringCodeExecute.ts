@@ -4,7 +4,6 @@ import { AbstractTool } from "../classes/abstractTool";
 export class BlockStringCodeExecute extends AbstractTool {
     private static readonly abortInvokeTargetAttrs: string[] = ["innerText", "innerHTML", "text", "textContent"] as const;
     onMount(): void {
-        const hookedTagSymbol = Hooker.getHookSymbol();
         Hooker.hookMethod(window, "eval", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
