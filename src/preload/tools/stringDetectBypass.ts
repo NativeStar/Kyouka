@@ -24,7 +24,8 @@ export class StringDetectBypass extends AbstractTool {
             {
                 parent: Function.prototype,
                 methodName: "toString",
-                id: "pre#Function.prototype.toString"
+                id: "pre#Function.prototype.toString",
+                type:"method"
             }
         ]
     }

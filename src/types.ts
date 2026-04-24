@@ -1,3 +1,5 @@
+import type { HookType } from "./hook/constance";
+
 export const DefaultExtensionConfig = {
     removeCsp: false,
     bypassConsoleDetect: false,
@@ -14,8 +16,9 @@ export type IpcObject = {
     getConfig: () => ExtensionConfig
 }
 export type PreHookOption = {
-    parent: any,
-    methodName: string,
+    parent: any
+    methodName: string
+    type:HookType
     id: string
     useAsyncHook?: boolean
 }

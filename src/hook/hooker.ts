@@ -1,9 +1,9 @@
 import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
-import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, AccessorHookMapItem, MethodHookMapItem, ObjectHookOption, ObjectHookMapItem, ConstructorPropertyName, AnyConstructorType } from "./constance"
-const hookedMethodMap: Map<object, Map<string, MethodHookMapItem>> = new Map();
-const hookedAccessorMap: WeakMap<object, Map<string, AccessorHookMapItem>> = new Map();
-const hookedObjectMap: WeakMap<object, Map<string, ObjectHookMapItem>> = new Map();
+import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, AccessorHookMapItem, MethodHookMapItem, ObjectHookOption, ObjectHookMapItem, ConstructorPropertyName, AnyConstructorType, HookType } from "./constance"
+const hookedMethodMap: WeakMap<object, Map<string, MethodHookMapItem>> = new WeakMap();
+const hookedAccessorMap: WeakMap<object, Map<string, AccessorHookMapItem>> = new WeakMap();
+const hookedObjectMap: WeakMap<object, Map<string, ObjectHookMapItem>> = new WeakMap();
 const HOOKED_SYMBOL = Symbol();
 const GET_ORIGIN_METHOD_SYMBOL = Symbol();
 export class Hooker {
@@ -29,7 +29,7 @@ export class Hooker {
             if (currentHookMethodItem) {
                 //判断id是否重复
                 if (hookOption.id && currentHookMethodItem.option.some(item => item.id === hookOption.id)) {
-                    this.originObjectSource.console.warn(`already has hook id:${hookOption.id}`);
+                    this.originObjectSource.console.warn(`already has method hook id:${hookOption.id}`);
                     return false
                 }
                 currentHookMethodItem.option.push(hookOption);
@@ -138,7 +138,7 @@ export class Hooker {
             if (currentHookMethodItem) {
                 //判断id是否重复
                 if (hookOption.id && currentHookMethodItem.option.some(item => item.id === hookOption.id)) {
-                    this.originObjectSource.console.warn(`already has hook id:${hookOption.id}`);
+                    this.originObjectSource.console.warn(`already has async method hook id:${hookOption.id}`);
                     return false
                 }
                 currentHookMethodItem.option.push(hookOption);
@@ -241,6 +241,11 @@ export class Hooker {
         if (!parent) return false
         const currentHookItem = this.getAccessorHookItem(parent, target);
         if (currentHookItem) {
+            //判断id是否重复
+            if (hookOption.id && currentHookItem.option.some(item => item.id === hookOption.id)) {
+                this.originObjectSource.console.warn(`already has accessor hook id:${hookOption.id}`);
+                return false
+            }
             currentHookItem.option.push(hookOption);
             return true
         }
@@ -387,7 +392,6 @@ export class Hooker {
         }
         return false;
     }
-    //TODO 补全unhook id
     static hookObject<P extends object, K extends ConstructorPropertyName<P>>(parent: P, target: K, hookOption: ObjectHookOption<Extract<P[K], AnyConstructorType>>): boolean;
     static hookObject<T extends AnyConstructorType>(parent: object, target: string, hookOption: ObjectHookOption<T>): boolean
     static hookObject(parent: any, objectName: string, hookOption: ObjectHookOption<AnyConstructorType>): boolean {
@@ -561,19 +565,31 @@ export class Hooker {
             return false;
         }
     }
-    // TODO 添加根据parent等进行精确unhook的方法 这样遍历性能太低了 而且不适配WeakMap
-    static unhookMethod(id: string) {
-        for (const parentItem of hookedMethodMap) {
-            for (const hookMapItem of parentItem[1]) {
-                const newMapItems = hookMapItem[1].option.filter(item => item.id !== id);
-                parentItem[1].set(hookMapItem[0], {
-                    originMethod: hookMapItem[1].originMethod,
-                    option: newMapItems,
-                    originParent: hookMapItem[1].originParent,
-                    methodName: hookMapItem[1].methodName
-                })
+    static unhook(type: HookType, parent: object, name: string, id: string) {
+        const targetMap = (() => {
+            switch (type) {
+                case "method":
+                    return hookedMethodMap
+                case "accessor":
+                    return hookedAccessorMap
+                case "object":
+                    return hookedObjectMap
+                    default:
+                        return null
+            }
+        })();
+        if (!targetMap) return;
+        const parentHookList = targetMap.get(parent);
+        if (!parentHookList) return;
+        const childHookList = parentHookList.get(name);
+        if (!childHookList) return;
+        for (let i = childHookList.option.length - 1; i >= 0; i--) {
+            if (childHookList.option[i]?.id === id) {
+                childHookList.option.splice(i, 1);
+                break
             }
         }
+        if (childHookList.option.length === 0) parentHookList.delete(name);
     }
     static getOriginMethod(method: Function) {
         return this.originObjectSource.Reflect.get(method, GET_ORIGIN_METHOD_SYMBOL) ?? null;
@@ -610,11 +626,6 @@ export class Hooker {
             hookedAccessorMap.set(parent, parentMap);
         }
         parentMap.set(name, item);
-    }
-    static unhookMethods(id: string[]) {
-        for (const idItem of id) {
-            this.unhookMethod(idItem);
-        }
     }
     static isModifiedMethodOrObject(method: any) {
         if (!method) return false;

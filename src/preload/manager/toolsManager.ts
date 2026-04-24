@@ -49,7 +49,8 @@ export class ToolManager {
             }
         }
         //释放占位hook
-        const preHookMethodIds = this.preHooksMethodList.map(preHookOption => preHookOption.id);
-        Hooker.unhookMethods(preHookMethodIds);
+        for (const preHookInstance of this.preHooksMethodList) {
+            Hooker.unhook(preHookInstance.type, preHookInstance.parent, preHookInstance.methodName, preHookInstance.id);
+        }
     }
 }

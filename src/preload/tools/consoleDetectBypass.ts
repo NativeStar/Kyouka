@@ -61,47 +61,56 @@ export class ConsoleDetectBypass extends AbstractTool {
             {
                 parent: console,
                 methodName: "table",
-                id: "pre#console.table"
+                id: "pre#console.table",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "debug",
-                id: "pre#console.debug"
+                id: "pre#console.debug",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "log",
-                id: "pre#console.log"
+                id: "pre#console.log",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "info",
-                id: "pre#console.info"
+                id: "pre#console.info",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "warn",
-                id: "pre#console.warn"
+                id: "pre#console.warn",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "error",
-                id: "pre#console.error"
+                id: "pre#console.error",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "dir",
-                id: "pre#console.dir"
+                id: "pre#console.dir",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "dirxml",
-                id: "pre#console.dirxml"
+                id: "pre#console.dirxml",
+                type:"method"
             },
             {
                 parent: console,
                 methodName: "clear",
-                id: "pre#console.clear"
+                id: "pre#console.clear",
+                type:"method"
             }
         ]
     }

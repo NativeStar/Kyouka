@@ -1,3 +1,4 @@
+export type HookType="method"|"accessor"|"object"
 export type AnyFunctionType = (...args: any[]) => any;
 export type AnyConstructorType = abstract new (...args: any[]) => any;
 export interface TempHookResultWrapper<T> {
@@ -28,6 +29,7 @@ export interface MethodHookOption<F extends AnyFunctionType, R = ReturnType<F>> 
     afterMethodInvoke?: (args: Parameters<F>, tempMethodResult: TempHookResultWrapper<R>, thisArg: ThisParameterType<F>,originMethod:F) => void;
 }
 export interface AccessorHookOption<P extends object, K extends keyof P> {
+    id?: string;
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value" | "writable">;
     beforeGetterInvoke?: (abortController: AbortController, thisArg: P, tempMethodResult: TempHookResultWrapper<P[K]>) => void;
     afterGetterInvoke?: (tempMethodResult: TempHookResultWrapper<P[K]>, thisArg: P) => void;

@@ -78,12 +78,14 @@ export class BlockStringCodeExecute extends AbstractTool {
             {
                 parent: window,
                 methodName: "setTimeout",
-                id: "pre#window.setTimeout"
+                id: "pre#window.setTimeout",
+                type:"method"
             },
             {
                 parent: window,
                 methodName: "setInterval",
-                id: "pre#window.setInterval"
+                id: "pre#window.setInterval",
+                type:"method"
             },
         ]
     }

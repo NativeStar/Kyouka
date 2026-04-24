@@ -30,9 +30,9 @@ export class BlockClipboardWrite extends AbstractTool {
     get preHookMethodList(): PreHookOption[] {
         //非https不能使用剪切板API
         return isSecureContext ? [
-            { parent: navigator.clipboard, methodName: "write", id: "pre#navigator.clipboard.write", useAsyncHook: true },
-            { parent: navigator.clipboard, methodName: "writeText", id: "pre#navigator.clipboard.writeText", useAsyncHook: true },
-            { parent: document, methodName: "execCommand", id: "pre#document.execCommand" }
-        ] : [{ parent: document, methodName: "execCommand", id: "pre#document.execCommand" }]
+            { parent: navigator.clipboard, methodName: "write", id: "pre#navigator.clipboard.write", useAsyncHook: true ,type:"method"},
+            { parent: navigator.clipboard, methodName: "writeText", id: "pre#navigator.clipboard.writeText", useAsyncHook: true ,type:"method"},
+            { parent: document, methodName: "execCommand", id: "pre#document.execCommand" ,type:"method"}
+        ] : [{ parent: document, methodName: "execCommand", id: "pre#document.execCommand" ,type:"method"}]
     }
 }
