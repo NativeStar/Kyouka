@@ -1,9 +1,9 @@
 import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
-import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, AccessorHookMapItem, MethodHookMapItem, ObjectHookOption, ObjectHookMapItem } from "./constance"
+import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, AccessorHookMapItem, MethodHookMapItem, ObjectHookOption, ObjectHookMapItem ,ConstructorPropertyName, AnyConstructorType} from "./constance"
 const hookedMethodMap: Map<object, Map<string, MethodHookMapItem>> = new Map();
-const hookedAccessorMap: Map<object, Map<string, AccessorHookMapItem>> = new Map();
-const hookedObjectMap: Map<object, Map<string, ObjectHookMapItem>> = new Map();
+const hookedAccessorMap: WeakMap<object, Map<string, AccessorHookMapItem>> = new Map();
+const hookedObjectMap: WeakMap<object, Map<string, ObjectHookMapItem>> = new Map();
 const HOOKED_SYMBOL = Symbol();
 const GET_ORIGIN_METHOD_SYMBOL = Symbol();
 export class Hooker {
@@ -95,9 +95,9 @@ export class Hooker {
             // 下面三个属性只有第一个hook的可以生效
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntryProxy,
-                writable: hookOption.descriptor?.writable ?? originDescriptor.writable,
-                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable,
-                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable??true,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable??true,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable??true,
             });
             if (hookDefineResult) {
                 const hookItem: MethodHookMapItem = {
@@ -206,9 +206,9 @@ export class Hooker {
             }
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntry,
-                writable: hookOption.descriptor?.writable ?? originDescriptor.writable,
-                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable,
-                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable??true,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable??true,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable??true,
             });
             if (hookDefineResult) {
                 const hookItem: MethodHookMapItem = {
@@ -364,10 +364,10 @@ export class Hooker {
         return false;
     }
     //TODO 补全unhook id
-    static hookObject<P extends object, K extends Extract<keyof P,string>>(parent: P, target: K, hookOption: ObjectHookOption<P[K]>): boolean;
-    static hookObject<P extends object, V extends Extract<P[keyof P], AnyFunctionType>>(parent: P, target: V, hookOption: ObjectHookOption<V>): boolean;
-    static hookObject<P extends object, K extends string>(parent: P, target: K, hookOption: ObjectHookOption<K extends keyof P ? P[K] : unknown>): boolean
-    static hookObject(parent: any, target: AnyFunctionType | string, hookOption: ObjectHookOption<any>): boolean {
+    static hookObject<P extends object, K extends ConstructorPropertyName<P>>(parent: P, target: K, hookOption: ObjectHookOption<Extract<P[K], AnyConstructorType>>): boolean;
+    static hookObject<C extends AnyConstructorType>(parent: object, target: C, hookOption: ObjectHookOption<C>): boolean;
+    static hookObject<T extends AnyConstructorType>(parent: object, target: string, hookOption: ObjectHookOption<T>): boolean
+    static hookObject(parent: any, target: AnyFunctionType | string, hookOption: ObjectHookOption<AnyConstructorType>): boolean {
         const objectName = typeof target === 'string' ? target : target.name;
         try {
             // 只支持hook构造函数
@@ -396,12 +396,12 @@ export class Hooker {
                 configurable: true,
             });
             const hookProxy = new this.originObjectSource.Proxy(originObject, {
-                get(target, p) {
+                get(target, p,receiver) {
                     if (p === GET_ORIGIN_METHOD_SYMBOL) {
                         return originObject;
                     }
                     const hookItems = Hooker.getObjectHookItem(parent, objectName);
-                    const tempResult: TempHookResultWrapper<any> = { current: Hooker.originObjectSource.Reflect.get(target, p) };
+                    const tempResult: TempHookResultWrapper<any> = { current: Hooker.originObjectSource.Reflect.get(target, p,receiver) };
                     if (!hookItems || hookItems.option.length == 0) {
                         //没有hook
                         return tempResult.current;
@@ -474,7 +474,7 @@ export class Hooker {
                     const allowDelete = new Hooker.originObjectSource.AbortController();
                     const tempResult: TempHookResultWrapper<boolean> = { current: true };
                     for (const hookOption of hookItems.option) {
-                        hookOption.beforeDelete?.(p, allowDelete);
+                        hookOption.beforeDelete?.(p, allowDelete,tempResult);
                     }
                     if (allowDelete.signal.aborted) {
                         return tempResult.current
@@ -505,14 +505,14 @@ export class Hooker {
             };
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, objectName, {
                 value: hookProxy,
-                writable: hookOption.descriptor?.writable ?? originDescriptor.writable,
-                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable,
-                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable??true,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable??true,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable??true,
             });
             if (hookDefineResult) {
                 const hookItem: ObjectHookMapItem = {
                     originParent: parent,
-                    originObject: originObject,
+                    originObject: originObject as AnyConstructorType,
                     objectName,
                     option: [hookOption]
                 }
@@ -524,9 +524,8 @@ export class Hooker {
             this.originObjectSource.console.warn("Error on hooking object:", error);
             return false;
         }
-        return true
     }
-    // TODO 添加根据parent等进行精确unhook的方法 这样遍历性能太低了
+    // TODO 添加根据parent等进行精确unhook的方法 这样遍历性能太低了 而且不适配WeakMap
     static unhookMethod(id: string) {
         for (const parentItem of hookedMethodMap) {
             for (const hookMapItem of parentItem[1]) {

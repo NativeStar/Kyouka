@@ -10,8 +10,12 @@ export class BlockStringCodeExecute extends AbstractTool {
                 abortController.abort();
             },
         });
-        Hooker.hookObject(window,98,{
-
+        Hooker.hookObject(window,"WeakRef",{
+            beforeDelete(prop, deleteController) {
+                
+            },
+            beforeConstruct(args, abortController, tempObject) {
+            },
         })
         // const functionProxy = Hooker.createProxyObject(window.Function, {
         //     has(target, p) {

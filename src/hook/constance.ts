@@ -1,8 +1,12 @@
 export type AnyFunctionType = (...args: any[]) => any;
+export type AnyConstructorType = abstract new (...args: any[]) => any;
 export interface TempHookResultWrapper<T> {
     current: T;
 }
 export type MethodByName<P extends object, K extends string> = K extends keyof P ? Extract<P[K], AnyFunctionType> : AnyFunctionType;
+export type ConstructorPropertyName<P extends object> = Extract<{
+    [K in keyof P]-?: P[K] extends AnyConstructorType ? K : never
+}[keyof P], string>;
 export interface MethodHookOption<F extends AnyFunctionType, R = ReturnType<F>> {
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value">;
     /**
@@ -32,7 +36,7 @@ export interface AccessorHookOption<P extends object, K extends keyof P> {
 export interface MethodHookMapItem {
     originMethod: AnyFunctionType;
     originParent: object;
-    methodName:string
+    methodName: string
     option: MethodHookOption<AnyFunctionType>[];
 }
 export interface AccessorHookMapItem<T = any> {
@@ -40,20 +44,20 @@ export interface AccessorHookMapItem<T = any> {
     originSetter: ((value: T) => void) | null;
     option: AccessorHookOption<any, any>[];
 }
-export interface ObjectHookOption<T=any>{
-    id?:string
+export interface ObjectHookOption<C extends AnyConstructorType = AnyConstructorType> {
+    id?: string
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value">;
-    afterGet?:(prop:string|symbol,tempResult:TempHookResultWrapper<any>)=>void
-    afterHas?:(prop:string|symbol,tempResult:TempHookResultWrapper<boolean>)=>void
-    beforeConstruct?:(args:any[],abortController:AbortController,tempObject:TempHookResultWrapper<any>)=>void
-    afterConstruct?:(args:any[],tempObject:TempHookResultWrapper<any>)=>void
-    beforeSet?:(prop:string|symbol,value:any ,abortController:AbortController,tempNewValue:TempHookResultWrapper<any>,tempReturnValue:TempHookResultWrapper<boolean>)=>void
-    beforeDelete?:(prop:string|symbol,deleteController:AbortController)=>void
-    beforeDefineProperty?:(prop:string|symbol,descriptor:PropertyDescriptor,abortController:AbortController,tempResult:TempHookResultWrapper<boolean>)=>void
+    afterGet?: (prop: string | symbol, tempResult: TempHookResultWrapper<any>) => void
+    afterHas?: (prop: string | symbol, tempResult: TempHookResultWrapper<boolean>) => void
+    beforeConstruct?: (args: ConstructorParameters<C>, abortController: AbortController, tempObject: TempHookResultWrapper<InstanceType<C>>) => void
+    afterConstruct?: (args: any[], tempObject: TempHookResultWrapper<any>) => void
+    beforeSet?: (prop: string | symbol, value: any, abortController: AbortController, tempNewValue: TempHookResultWrapper<any>, tempReturnValue: TempHookResultWrapper<boolean>) => void
+    beforeDelete?: (prop: string | symbol, deleteController: AbortController,tempReturn:TempHookResultWrapper<boolean>) => void
+    beforeDefineProperty?: (prop: string | symbol, descriptor: PropertyDescriptor, abortController: AbortController, tempResult: TempHookResultWrapper<boolean>) => void
 }
-export interface ObjectHookMapItem<T=any> {
-    originObject: T;
+export interface ObjectHookMapItem<C extends AnyConstructorType=AnyConstructorType> {
+    originObject: C;
     originParent: object;
-    objectName:string
-    option: ObjectHookOption<T>[];
+    objectName: string
+    option: ObjectHookOption<C>[];
 }
