@@ -25,7 +25,7 @@ export interface MethodHookOption<F extends AnyFunctionType, R = ReturnType<F>> 
      * @param tempMethodResult 可修改返回值
      * @param thisArg this指向
      */
-    afterMethodInvoke?: (args: Parameters<F>, tempMethodResult: TempHookResultWrapper<R>, thisArg: ThisParameterType<F>) => void;
+    afterMethodInvoke?: (args: Parameters<F>, tempMethodResult: TempHookResultWrapper<R>, thisArg: ThisParameterType<F>,originMethod:F) => void;
 }
 export interface AccessorHookOption<P extends object, K extends keyof P> {
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value" | "writable">;
@@ -49,8 +49,8 @@ export interface ObjectHookOption<C extends AnyConstructorType = AnyConstructorT
     descriptor?: Omit<PropertyDescriptor, "set" | "get" | "value">;
     afterGet?: (prop: string | symbol, tempResult: TempHookResultWrapper<any>) => void
     afterHas?: (prop: string | symbol, tempResult: TempHookResultWrapper<boolean>) => void
-    beforeConstruct?: (args: ConstructorParameters<C>, abortController: AbortController, tempObject: TempHookResultWrapper<InstanceType<C>>) => void
-    afterConstruct?: (args: any[], tempObject: TempHookResultWrapper<any>) => void
+    beforeConstruct?: (args: ConstructorParameters<C>, abortController: AbortController, tempObject: TempHookResultWrapper<InstanceType<C>>,originConstruct:C) => void
+    afterConstruct?: (args: any[], tempObject: TempHookResultWrapper<any>,originConstruct:C) => void
     beforeSet?: (prop: string | symbol, value: any, abortController: AbortController, tempNewValue: TempHookResultWrapper<any>, tempReturnValue: TempHookResultWrapper<boolean>) => void
     beforeDelete?: (prop: string | symbol, deleteController: AbortController,tempReturn:TempHookResultWrapper<boolean>) => void
     beforeDefineProperty?: (prop: string | symbol, descriptor: PropertyDescriptor, abortController: AbortController, tempResult: TempHookResultWrapper<boolean>) => void

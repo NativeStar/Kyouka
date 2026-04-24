@@ -68,7 +68,7 @@ export class Hooker {
                         throw error;
                     }
                     for (const currentHookOption of hookItem.option) {
-                        currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg);
+                        currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg,originMethod as AnyFunctionType);
                     }
                     return tempResult.current;
                 },
@@ -177,7 +177,7 @@ export class Hooker {
                             return
                         }
                         for (const currentHookOption of hookItem.option) {
-                            currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg);
+                            currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg,originMethod as AnyFunctionType);
                         }
                         resolve(tempResult.current);
                     })
@@ -429,14 +429,14 @@ export class Hooker {
                     }
                     const abortController= new Hooker.originObjectSource.AbortController();
                     for (const beforeHookOption of hookItems.option) {
-                        beforeHookOption?.beforeConstruct?.(argArray, abortController, tempResult);
+                        beforeHookOption?.beforeConstruct?.(argArray, abortController, tempResult,target as AnyConstructorType);
                     }
                     if (abortController.signal.aborted) {
                         return tempResult.current;
                     }
                     tempResult.current = Hooker.originObjectSource.Reflect.construct(target, argArray, newTarget);
                     for (const afterHookOption of hookItems.option) {
-                        afterHookOption.afterConstruct?.(argArray, tempResult)
+                        afterHookOption.afterConstruct?.(argArray, tempResult,target as AnyConstructorType)
                     }
                     return tempResult.current;
                 },

@@ -10,24 +10,12 @@ export class BlockStringCodeExecute extends AbstractTool {
                 abortController.abort();
             },
         });
-        // const functionProxy = Hooker.createProxyObject(window.Function, {
-        //     has(target, p) {
-        //         // 标记
-        //         if (p === hookedTagSymbol) {
-        //             return true;
-        //         }
-        //         return Reflect.has(target, p);
-        //     },
-        //     construct(target) {
-        //         //直接空参数
-        //         return new target()
-        //     },
-        // }, "Function");
-        // Reflect.defineProperty(window, "Function", {
-        //     value: functionProxy,
-        //     configurable: true,
-        //     writable: true,
-        // });
+        Hooker.hookObject(window,"Function",{
+            beforeConstruct(_args, abortController, tempObject, originConstruct) {
+                abortController.abort();
+                tempObject.current = originConstruct("");
+            },
+        })
         Hooker.hookMethod(window, "setTimeout",{
             beforeMethodInvoke(args, abortController) {
                 if (typeof args[0] === "string") {
