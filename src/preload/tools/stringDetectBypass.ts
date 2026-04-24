@@ -6,7 +6,7 @@ export class StringDetectBypass extends AbstractTool {
     onMount(): void {
         Hooker.hookMethod(Function.prototype, "toString",{
             beforeMethodInvoke(_args, abortController, thisArg, tempMethodResult) {
-                if (thisArg instanceof Function && Hooker.isModifiedMethodOrObject(thisArg)) {
+                if (thisArg instanceof Function && Hooker.isHooked(thisArg)) {
                     tempMethodResult.current = `function ${thisArg.name}() { [native code] }`
                     abortController.abort();
                 }

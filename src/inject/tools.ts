@@ -212,7 +212,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(`已对${translateElements.length}个元素强制启用翻译`);
     },
     "forcePropertyRW": () => {
-        if (Hooker.isModifiedMethodOrObject(Object.defineProperty)) {
+        if (Hooker.isHooked(Object.defineProperty)) {
             return showToast(executedText)
         }
         const definePropertyHook = Hooker.hookMethod(Object, "defineProperty", {
@@ -351,7 +351,7 @@ export const Tools: { [key: string]: () => void } = {
         })
     },
     "logJsonOperation": () => {
-        if (Hooker.isModifiedMethodOrObject(JSON?.stringify ?? {})) {
+        if (Hooker.isHooked(JSON?.stringify ?? {})) {
             return showToast(executedText)
         }
         const stringifyHook = Hooker.hookMethod(window.JSON, "stringify", {
@@ -463,7 +463,7 @@ export const Tools: { [key: string]: () => void } = {
         }).catch(() => { })
     },
     "blockOpen": () => {
-        if (Hooker.isModifiedMethodOrObject(window.open)) {
+        if (Hooker.isHooked(window.open)) {
             return showToast(executedText)
         }
         const result = Hooker.hookMethod(window, "open", {
@@ -476,7 +476,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "blockConsole": () => {
         //两个典型
-        if (Hooker.isModifiedMethodOrObject(console.table) && Hooker.isModifiedMethodOrObject(console.log)) {
+        if (Hooker.isHooked(console.table) && Hooker.isHooked(console.log)) {
             return showToast(executedText)
         }
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
@@ -512,7 +512,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? successText : failedText)
     },
     "blockSendBeacon": () => {
-        if (Hooker.isModifiedMethodOrObject(navigator.sendBeacon)) {
+        if (Hooker.isHooked(navigator.sendBeacon)) {
             return showToast(executedText)
         }
         const result = Hooker.hookMethod(navigator, "sendBeacon", {
@@ -691,7 +691,7 @@ export const Tools: { [key: string]: () => void } = {
     "sub:removeWatermark": () => {
         //hook append
         //确保没有hook相关方法
-        if (!Hooker.isModifiedMethodOrObject(HTMLElement.prototype.append)) {
+        if (!Hooker.isHooked(HTMLElement.prototype.append)) {
             const hookAppendResult = Hooker.hookMethod(HTMLElement.prototype, "append", {
                 beforeMethodInvoke(args, abortController,thisArg,temp,origin) {
                     if (!(args[0] instanceof HTMLElement)) {
@@ -758,7 +758,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(successText)
     },
     "logBase64Operation": () => {
-        if (Hooker.isModifiedMethodOrObject(window.btoa ?? {})) {
+        if (Hooker.isHooked(window.btoa ?? {})) {
             return showToast(executedText)
         }
         const atobHook = Hooker.hookMethod(window, "atob", {
@@ -853,7 +853,7 @@ UserAgent:${navigator.userAgent}
 屏幕尺寸:${window.screen.width}x${window.screen.height}`)
     },
     "logRandomUuid": () => {
-        if (Hooker.isModifiedMethodOrObject(crypto.randomUUID ?? {})) {
+        if (Hooker.isHooked(crypto.randomUUID ?? {})) {
             return showToast(executedText)
         }
         Hooker.hookMethod(crypto, "randomUUID", {
@@ -909,7 +909,7 @@ UserAgent:${navigator.userAgent}
         }).catch(() => { })
     },
     "logCreateObjectURL": () => {
-        if (Hooker.isModifiedMethodOrObject(URL.createObjectURL)) {
+        if (Hooker.isHooked(URL.createObjectURL)) {
             return showToast(executedText)
         }
         const result = Hooker.hookMethod(URL, "createObjectURL", {
@@ -920,7 +920,7 @@ UserAgent:${navigator.userAgent}
         showToast(result ? successText : executedText)
     },
     "logPostMessage": () => {
-        if (Hooker.isModifiedMethodOrObject(window.postMessage)) {
+        if (Hooker.isHooked(window.postMessage)) {
             return showToast(executedText)
         }
         const result = Hooker.hookMethod(window, "postMessage", {
@@ -932,7 +932,7 @@ UserAgent:${navigator.userAgent}
         showToast(result ? successText : executedText)
     },
     "logMathRandom": () => {
-        if (Hooker.isModifiedMethodOrObject(Math.random)) {
+        if (Hooker.isHooked(Math.random)) {
             return showToast(executedText)
         }
         Hooker.hookMethod(Math, "random",{
@@ -943,7 +943,7 @@ UserAgent:${navigator.userAgent}
         showToast(successText)
     },
     "blockClose": () => {
-        if (Hooker.isModifiedMethodOrObject(window.close)) {
+        if (Hooker.isHooked(window.close)) {
             return showToast(executedText)
         }
         Hooker.hookMethod(window, "close", {
@@ -978,7 +978,7 @@ UserAgent:${navigator.userAgent}
         if (!OriginObjects.Reflect.has(navigator,"share")) {
             return showToast(isSecureContext?"当前浏览器不支持share API":"Share API仅在HTTPS下可用 无需屏蔽");
         }
-        if (Hooker.isModifiedMethodOrObject(navigator.share)) {
+        if (Hooker.isHooked(navigator.share)) {
             return showToast(executedText)
         }
         const result = Hooker.hookAsyncMethod(navigator, "share", {
@@ -1005,7 +1005,7 @@ UserAgent:${navigator.userAgent}
         }
     },
     "sub:logCreateObjectURL": () => {
-        let [createUrlHooked, revokeUrlHooked] = [Hooker.isModifiedMethodOrObject(URL.createObjectURL), Hooker.isModifiedMethodOrObject(URL.revokeObjectURL)];
+        let [createUrlHooked, revokeUrlHooked] = [Hooker.isHooked(URL.createObjectURL), Hooker.isHooked(URL.revokeObjectURL)];
         if (createUrlHooked && revokeUrlHooked) {
             return showToast(executedText)
         }
