@@ -1,8 +1,8 @@
 import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
-import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, GetterAndSetterHookMapItem, MethodHookMapItem } from "./constance"
+import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, AccessorHookMapItem, MethodHookMapItem } from "./constance"
 const hookedMethodMap: Map<object, Map<string, MethodHookMapItem>> = new Map();
-const hookedGetterAndSetterKeyMap: Map<object, Map<string, GetterAndSetterHookMapItem>> = new Map();
+const hookedAccessorMap: Map<object, Map<string, AccessorHookMapItem>> = new Map();
 const HOOKED_SYMBOL = Symbol();
 const GET_ORIGIN_METHOD_SYMBOL = Symbol();
 export class Hooker {
@@ -225,8 +225,8 @@ export class Hooker {
             return false;
         }
     }
-    static hookGetterAndSetter<P extends object, K extends keyof P>(parent: P, target: K, hookOption: AccessorHookOption<P, K>): boolean;
-    static hookGetterAndSetter(parent: any, target: string, hookOption: AccessorHookOption<any, any>) {
+    static hookAccessor<P extends object, K extends keyof P>(parent: P, target: K, hookOption: AccessorHookOption<P, K>): boolean;
+    static hookAccessor(parent: any, target: string, hookOption: AccessorHookOption<any, any>) {
         if (!parent) return false
         const currentHookItem = this.getAccessorHookItem(parent, target);
         if (currentHookItem) {
@@ -352,7 +352,7 @@ export class Hooker {
             configurable: hookOption.descriptor?.configurable ?? true,
         });
         if (hookDefineResult) {
-            const hookItem: GetterAndSetterHookMapItem = {
+            const hookItem: AccessorHookMapItem = {
                 originGetter: originGetter ?? null,
                 originSetter: originSetter ?? null,
                 option: [hookOption]
@@ -404,13 +404,13 @@ export class Hooker {
         parentMap.set(methodName, item);
     }
     static getAccessorHookItem(parent: object, name: string) {
-        return hookedGetterAndSetterKeyMap.get(parent)?.get(name) ?? null;
+        return hookedAccessorMap.get(parent)?.get(name) ?? null;
     }
-    private static setAccessorHookItem(parent: object, name: string, item: GetterAndSetterHookMapItem) {
-        let parentMap = hookedGetterAndSetterKeyMap.get(parent);
+    private static setAccessorHookItem(parent: object, name: string, item: AccessorHookMapItem) {
+        let parentMap = hookedAccessorMap.get(parent);
         if (!parentMap) {
             parentMap = new Map();
-            hookedGetterAndSetterKeyMap.set(parent, parentMap);
+            hookedAccessorMap.set(parent, parentMap);
         }
         parentMap.set(name, item);
     }

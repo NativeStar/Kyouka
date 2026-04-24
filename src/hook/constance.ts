@@ -35,7 +35,7 @@ export interface MethodHookMapItem {
     methodName:string
     option: MethodHookOption<AnyFunctionType>[];
 }
-export interface GetterAndSetterHookMapItem<T = any> {
+export interface AccessorHookMapItem<T = any> {
     originGetter: (() => T) | null;
     originSetter: ((value: T) => void) | null;
     option: AccessorHookOption<any, any>[];

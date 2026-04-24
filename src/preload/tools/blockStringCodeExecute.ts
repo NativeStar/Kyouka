@@ -44,13 +44,13 @@ export class BlockStringCodeExecute extends AbstractTool {
         });
         //script标签相关
         for (const keyword of BlockStringCodeExecute.abortInvokeTargetAttrs) {
-            Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, keyword as keyof HTMLScriptElement, {
+            Hooker.hookAccessor(HTMLScriptElement.prototype, keyword as keyof HTMLScriptElement, {
                 beforeSetterInvoke(_arg, abortController) {
                     abortController.abort();
                 },
             });
         }
-        Hooker.hookGetterAndSetter(HTMLScriptElement.prototype, "src", {
+        Hooker.hookAccessor(HTMLScriptElement.prototype, "src", {
             beforeSetterInvoke(arg, abortController) {
                 const srcString=(arg as TrustedScriptURL|string) instanceof TrustedScriptURL ? arg.toString() : arg;
                 if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
