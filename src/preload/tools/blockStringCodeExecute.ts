@@ -39,9 +39,11 @@ export class BlockStringCodeExecute extends AbstractTool {
         }
         Hooker.hookAccessor(HTMLScriptElement.prototype, "src", {
             beforeSetterInvoke(arg, abortController) {
-                const srcString=(arg as TrustedScriptURL|string) instanceof TrustedScriptURL ? arg.toString() : arg;
-                if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
-                    abortController.abort();
+                if (typeof arg ==="string") {
+                    const srcString=(arg as TrustedScriptURL|string) instanceof TrustedScriptURL ? arg.toString() : arg;
+                    if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
+                        abortController.abort();
+                    }
                 }
             },
         });

@@ -9,7 +9,11 @@ const leakedStackFeature = [
     "at new Promise (<anonymous>)",
     "at <anonymous>:",
     "at Object.construct (<anonymous>:",
-    "chrome-extension://"
+    "chrome-extension://",
+    "at Object.before",
+    "at Object.after",
+    "beforeConstruct",
+    "afterConstruct"
 ]
 export function needDeleteStack(stack: string): boolean {
     for (const leakStr of leakedStackFeature) {

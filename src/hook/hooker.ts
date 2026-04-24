@@ -1,6 +1,6 @@
 import { OriginObjects } from "./originObjects";
 import { createBypassToStringMethod, filterErrorStack } from "./util";
-import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, AccessorHookMapItem, MethodHookMapItem, ObjectHookOption, ObjectHookMapItem ,ConstructorPropertyName, AnyConstructorType} from "./constance"
+import type { AnyFunctionType, MethodByName, TempHookResultWrapper, MethodHookOption, AccessorHookOption, AccessorHookMapItem, MethodHookMapItem, ObjectHookOption, ObjectHookMapItem, ConstructorPropertyName, AnyConstructorType } from "./constance"
 const hookedMethodMap: Map<object, Map<string, MethodHookMapItem>> = new Map();
 const hookedAccessorMap: WeakMap<object, Map<string, AccessorHookMapItem>> = new Map();
 const hookedObjectMap: WeakMap<object, Map<string, ObjectHookMapItem>> = new Map();
@@ -46,8 +46,15 @@ export class Hooker {
                 apply(_target, thisArg, args) {
                     const hookItem = Hooker.getMethodHookItem(parent, methodName);
                     if (!hookItem || hookItem.option.length === 0) {
-                        //没有hook
-                        return originMethod.apply(thisArg, args);
+                        try {
+                            //没有hook
+                            return originMethod.apply(thisArg, args);
+                        } catch (error: any) {
+                            if (error.stack) {
+                                error.stack = filterErrorStack(error.stack);
+                            }
+                            throw error;
+                        }
                     }
                     const tempResult: TempHookResultWrapper<ReturnType<typeof methodExecutable>> = {
                         current: undefined
@@ -68,7 +75,7 @@ export class Hooker {
                         throw error;
                     }
                     for (const currentHookOption of hookItem.option) {
-                        currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg,originMethod as AnyFunctionType);
+                        currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg, originMethod as AnyFunctionType);
                     }
                     return tempResult.current;
                 },
@@ -93,9 +100,9 @@ export class Hooker {
             // 下面三个属性只有第一个hook的可以生效
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntryProxy,
-                writable: hookOption.descriptor?.writable ?? originDescriptor.writable??true,
-                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable??true,
-                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable??true,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable ?? true,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable ?? true,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable ?? true,
             });
             if (hookDefineResult) {
                 const hookItem: MethodHookMapItem = {
@@ -152,9 +159,16 @@ export class Hooker {
                     return new Hooker.originObjectSource.Promise<any>(async (resolve, reject) => {
                         const hookItem = Hooker.getMethodHookItem(parent, methodName)
                         if (!hookItem || hookItem.option.length == 0) {
-                            //没有hook
-                            resolve(await originMethod.apply(thisArg, args))
-                            return
+                            try {
+                                resolve(await originMethod.apply(thisArg, args));
+                                return
+                            } catch (error: any) {
+                                if (error.stack) {
+                                    error.stack = filterErrorStack(error.stack);
+                                }
+                                reject(error as Error)
+                                return
+                            }
                         }
                         const tempResult: TempHookResultWrapper<Awaited<ReturnType<typeof methodExecutable>>> = {
                             current: undefined
@@ -177,7 +191,7 @@ export class Hooker {
                             return
                         }
                         for (const currentHookOption of hookItem.option) {
-                            currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg,originMethod as AnyFunctionType);
+                            currentHookOption.afterMethodInvoke?.(args, tempResult, thisArg, originMethod as AnyFunctionType);
                         }
                         resolve(tempResult.current);
                     })
@@ -202,9 +216,9 @@ export class Hooker {
             }
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, methodName, {
                 value: hookEntry,
-                writable: hookOption.descriptor?.writable ?? originDescriptor.writable??true,
-                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable??true,
-                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable??true,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable ?? true,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable ?? true,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable ?? true,
             });
             if (hookDefineResult) {
                 const hookItem: MethodHookMapItem = {
@@ -257,8 +271,15 @@ export class Hooker {
                 apply(_target, thisArg) {
                     const hookItem = Hooker.getAccessorHookItem(parent, target);
                     if (!hookItem || hookItem.option.length == 0) {
-                        //没有hook
-                        return originGetter.apply(thisArg);
+                        try {
+                            //没有hook
+                            return originGetter.apply(thisArg);
+                        } catch (error: any) {
+                            if (error.stack) {
+                                error.stack = filterErrorStack(error.stack);
+                            }
+                            throw error;
+                        }
                     }
                     const tempResult: TempHookResultWrapper<ReturnType<typeof originGetter>> = {
                         current: undefined
@@ -308,8 +329,15 @@ export class Hooker {
                 apply(_target, thisArg, arg: [any]) {
                     const hookItem = Hooker.getAccessorHookItem(parent, target);
                     if (!hookItem || hookItem.option.length == 0) {
-                        //没有hook
-                        return originSetter.apply(thisArg, arg);
+                        try {
+                            //没有hook
+                            return originSetter.apply(thisArg, arg);
+                        } catch (error: any) {
+                            if (error.stack) {
+                                error.stack = filterErrorStack(error.stack);
+                            }
+                            throw error;
+                        }
                     }
                     const abortController = new Hooker.originObjectSource.AbortController();
                     for (const currentHookOption of hookItem.option) {
@@ -390,12 +418,12 @@ export class Hooker {
                 configurable: true,
             });
             const hookProxy = new this.originObjectSource.Proxy(originObject, {
-                get(target, p,receiver) {
+                get(target, p, receiver) {
                     if (p === GET_ORIGIN_METHOD_SYMBOL) {
                         return originObject;
                     }
                     const hookItems = Hooker.getObjectHookItem(parent, objectName);
-                    const tempResult: TempHookResultWrapper<any> = { current: Hooker.originObjectSource.Reflect.get(target, p,receiver) };
+                    const tempResult: TempHookResultWrapper<any> = { current: Hooker.originObjectSource.Reflect.get(target, p, receiver) };
                     if (!hookItems || hookItems.option.length == 0) {
                         //没有hook
                         return tempResult.current;
@@ -422,21 +450,35 @@ export class Hooker {
                 },
                 construct(target, argArray, newTarget) {
                     const hookItems = Hooker.getObjectHookItem(parent, objectName);
-                    const tempResult: TempHookResultWrapper<any> = { current: null};
+                    const tempResult: TempHookResultWrapper<any> = { current: null };
                     if (!hookItems || hookItems.option.length == 0) {
-                        //没有hook
-                        return Hooker.originObjectSource.Reflect.construct(target, argArray, newTarget)
+                        try {
+                            //没有hook
+                            return Hooker.originObjectSource.Reflect.construct(target, argArray, newTarget)
+                        } catch (error: any) {
+                            if (error.stack) {
+                                error.stack = filterErrorStack(error.stack);
+                            }
+                            throw error;
+                        }
                     }
-                    const abortController= new Hooker.originObjectSource.AbortController();
-                    for (const beforeHookOption of hookItems.option) {
-                        beforeHookOption?.beforeConstruct?.(argArray, abortController, tempResult,target as AnyConstructorType);
-                    }
-                    if (abortController.signal.aborted) {
-                        return tempResult.current;
-                    }
-                    tempResult.current = Hooker.originObjectSource.Reflect.construct(target, argArray, newTarget);
-                    for (const afterHookOption of hookItems.option) {
-                        afterHookOption.afterConstruct?.(argArray, tempResult,target as AnyConstructorType)
+                    try {
+                        const abortController = new Hooker.originObjectSource.AbortController();
+                        for (const beforeHookOption of hookItems.option) {
+                            beforeHookOption?.beforeConstruct?.(argArray, abortController, tempResult, target as AnyConstructorType);
+                        }
+                        if (abortController.signal.aborted) {
+                            return tempResult.current;
+                        }
+                        tempResult.current = Hooker.originObjectSource.Reflect.construct(target, argArray, newTarget);
+                        for (const afterHookOption of hookItems.option) {
+                            afterHookOption.afterConstruct?.(argArray, tempResult, target as AnyConstructorType)
+                        }
+                    } catch (error: any) {
+                        if (error.stack) {
+                            error.stack = filterErrorStack(error.stack);
+                        }
+                        throw error;
                     }
                     return tempResult.current;
                 },
@@ -450,9 +492,9 @@ export class Hooker {
                         //没有hook
                         return Hooker.originObjectSource.Reflect.set(target, p, newValue, receiver);
                     }
-                    const abortController=new Hooker.originObjectSource.AbortController();
+                    const abortController = new Hooker.originObjectSource.AbortController();
                     for (const hookOption of hookItems.option) {
-                        hookOption.beforeSet?.(p, newValue, abortController,tempNewValue,tempReturnValue)
+                        hookOption.beforeSet?.(p, newValue, abortController, tempNewValue, tempReturnValue)
                     }
                     if (abortController.signal.aborted) {
                         return tempReturnValue.current
@@ -468,7 +510,7 @@ export class Hooker {
                     const allowDelete = new Hooker.originObjectSource.AbortController();
                     const tempResult: TempHookResultWrapper<boolean> = { current: true };
                     for (const hookOption of hookItems.option) {
-                        hookOption.beforeDelete?.(p, allowDelete,tempResult);
+                        hookOption.beforeDelete?.(p, allowDelete, tempResult);
                     }
                     if (allowDelete.signal.aborted) {
                         return tempResult.current
@@ -477,14 +519,14 @@ export class Hooker {
                     return tempResult.current;
                 },
                 defineProperty(target, property, attributes) {
-                    const hookItem = Hooker.getObjectHookItem(parent,objectName);
-                    if (!hookItem||hookItem.option.length===0) {
+                    const hookItem = Hooker.getObjectHookItem(parent, objectName);
+                    if (!hookItem || hookItem.option.length === 0) {
                         return Hooker.originObjectSource.Reflect.defineProperty(target, property, attributes);
                     }
-                    const abortController=new Hooker.originObjectSource.AbortController();
-                    const tempResult:TempHookResultWrapper<boolean>={current:true};
-                    for (const option of hookItem.option) { 
-                        option.beforeDefineProperty?.(property,attributes,abortController,tempResult);
+                    const abortController = new Hooker.originObjectSource.AbortController();
+                    const tempResult: TempHookResultWrapper<boolean> = { current: true };
+                    for (const option of hookItem.option) {
+                        option.beforeDefineProperty?.(property, attributes, abortController, tempResult);
                     }
                     if (abortController.signal.aborted) {
                         return tempResult.current;
@@ -499,9 +541,9 @@ export class Hooker {
             };
             const hookDefineResult = this.originObjectSource.Reflect.defineProperty(parent, objectName, {
                 value: hookProxy,
-                writable: hookOption.descriptor?.writable ?? originDescriptor.writable??true,
-                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable??true,
-                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable??true,
+                writable: hookOption.descriptor?.writable ?? originDescriptor.writable ?? true,
+                enumerable: hookOption.descriptor?.enumerable ?? originDescriptor.enumerable ?? true,
+                configurable: hookOption.descriptor?.configurable ?? originDescriptor.configurable ?? true,
             });
             if (hookDefineResult) {
                 const hookItem: ObjectHookMapItem = {
