@@ -12,10 +12,8 @@ export class Hooker {
         this.originObjectSource = source;
     }
     static hookMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = ReturnType<F>>(parent: P, target: K, hookOption: MethodHookOption<F>): boolean;
-    static hookMethod<F extends AnyFunctionType, T = ReturnType<F>>(parent: object, target: F, hookOption: MethodHookOption<F>): boolean;
     static hookMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, hookOption: MethodHookOption<F>): boolean;
-    static hookMethod(parent: any, target: string | AnyFunctionType, hookOption: MethodHookOption<AnyFunctionType>): boolean {
-        const methodName = typeof target === 'string' ? target : target.name;
+    static hookMethod(parent: any, methodName: string, hookOption: MethodHookOption<AnyFunctionType>): boolean {
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
                 return false;
@@ -117,10 +115,8 @@ export class Hooker {
     }
 
     static hookAsyncMethod<P extends object, K extends keyof P, F extends Extract<P[K], AnyFunctionType>, T = Awaited<ReturnType<F>>>(parent: P, target: K, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
-    static hookAsyncMethod<F extends AnyFunctionType, T = Awaited<ReturnType<F>>>(parent: object, target: F, hookOption: MethodHookOption<F>): boolean;
     static hookAsyncMethod<P extends object, K extends string, F extends MethodByName<P, K> = MethodByName<P, K>>(parent: P, target: K, hookOption: MethodHookOption<F, Awaited<ReturnType<F>>>): boolean;
-    static hookAsyncMethod(parent: Record<string, any>, target: string | AnyFunctionType, hookOption: MethodHookOption<AnyFunctionType>): boolean {
-        const methodName = typeof target === 'string' ? target : target.name;
+    static hookAsyncMethod(parent: Record<string, any>, methodName: string, hookOption: MethodHookOption<AnyFunctionType>): boolean {
         try {
             if (!parent || typeof parent[methodName] !== 'function') {
                 return false;
@@ -365,10 +361,8 @@ export class Hooker {
     }
     //TODO 补全unhook id
     static hookObject<P extends object, K extends ConstructorPropertyName<P>>(parent: P, target: K, hookOption: ObjectHookOption<Extract<P[K], AnyConstructorType>>): boolean;
-    static hookObject<C extends AnyConstructorType>(parent: object, target: C, hookOption: ObjectHookOption<C>): boolean;
     static hookObject<T extends AnyConstructorType>(parent: object, target: string, hookOption: ObjectHookOption<T>): boolean
-    static hookObject(parent: any, target: AnyFunctionType | string, hookOption: ObjectHookOption<AnyConstructorType>): boolean {
-        const objectName = typeof target === 'string' ? target : target.name;
+    static hookObject(parent: any, objectName: string, hookOption: ObjectHookOption<AnyConstructorType>): boolean {
         try {
             // 只支持hook构造函数
             if (!parent || typeof parent[objectName] !== 'function') {

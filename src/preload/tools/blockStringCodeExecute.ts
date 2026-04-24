@@ -10,13 +10,6 @@ export class BlockStringCodeExecute extends AbstractTool {
                 abortController.abort();
             },
         });
-        Hooker.hookObject(window,"WeakRef",{
-            beforeDelete(prop, deleteController) {
-                
-            },
-            beforeConstruct(args, abortController, tempObject) {
-            },
-        })
         // const functionProxy = Hooker.createProxyObject(window.Function, {
         //     has(target, p) {
         //         // 标记
@@ -66,7 +59,7 @@ export class BlockStringCodeExecute extends AbstractTool {
             },
         });
         //attr相关
-        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setAttribute, {
+        Hooker.hookMethod(HTMLScriptElement.prototype, "setAttribute", {
             beforeMethodInvoke(args, abortController) {
                 if (BlockStringCodeExecute.abortInvokeTargetAttrs.includes(args[0])) {
                     abortController.abort();
@@ -80,7 +73,7 @@ export class BlockStringCodeExecute extends AbstractTool {
                 }
             },
         })
-        Hooker.hookMethod(HTMLScriptElement.prototype, HTMLScriptElement.prototype.setHTMLUnsafe,{
+        Hooker.hookMethod(HTMLScriptElement.prototype, "setHTMLUnsafe",{
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },

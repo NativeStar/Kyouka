@@ -761,7 +761,7 @@ export const Tools: { [key: string]: () => void } = {
         if (Hooker.isModifiedMethodOrObject(window.btoa ?? {})) {
             return showToast(executedText)
         }
-        const atobHook = Hooker.hookMethod<any>(window, "atob", {
+        const atobHook = Hooker.hookMethod(window, "atob", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("Base64 decode:", tempMethodResult.current)
             },
@@ -981,7 +981,7 @@ UserAgent:${navigator.userAgent}
         if (Hooker.isModifiedMethodOrObject(navigator.share)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookAsyncMethod(navigator, navigator.share, {
+        const result = Hooker.hookAsyncMethod(navigator, "share", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("阻止一次share调用", 800);
                 abortController.abort();
