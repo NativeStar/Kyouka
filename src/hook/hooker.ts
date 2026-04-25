@@ -594,10 +594,10 @@ export class Hooker {
     static getOriginExecutable(target: Function | object) {
         return this.originObjectSource.Reflect.get(target, GET_ORIGIN_METHOD_SYMBOL) ?? null;
     }
-    static getHookItem(type:"method",parent: object, name: string):MethodHookMapItem | null
-    static getHookItem(type:"object",parent: object, name: string):ObjectHookMapItem | null
-    static getHookItem(type:"accessor",parent: object, name: string):AccessorHookMapItem | null
-    static getHookItem(type: HookType, parent: object, name: string):any{
+    private static getHookItem(type:"method",parent: object, name: string):MethodHookMapItem | null
+    private static getHookItem(type:"object",parent: object, name: string):ObjectHookMapItem | null
+    private static getHookItem(type:"accessor",parent: object, name: string):AccessorHookMapItem | null
+    private static getHookItem(type: HookType, parent: object, name: string):any{
         const rootMap = (() => {
             switch (type) {
                 case "method":
