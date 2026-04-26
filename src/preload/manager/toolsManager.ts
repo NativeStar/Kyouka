@@ -1,4 +1,3 @@
-// import { Hooker } from "../../hook/hooker";
 import { Hooker } from "js-hooker";
 import { type PreHookOption, type ExtensionConfig } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
@@ -21,8 +20,9 @@ export class ToolManager {
         printStackInLogs:new PrintLogStack(),
     } as const;
     private preHooksMethodList: PreHookOption[];
-    private hooker:Hooker=new Hooker();
-    constructor() {
+    private hooker:Hooker;
+    constructor(hooker:Hooker) {
+        this.hooker=hooker;
         const tools: AbstractTool[] = Object.values(this.toolsConfigList);
         this.preHooksMethodList = tools.flatMap(toolInstance => toolInstance.preHookMethodList);
         //preHook

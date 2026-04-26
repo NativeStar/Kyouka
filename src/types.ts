@@ -1,4 +1,3 @@
-// import type { HookType } from "./hook/constance";
 import { type HookType} from "js-hooker";
 
 export const DefaultExtensionConfig = {

@@ -2,11 +2,12 @@ import { Hooker, type OriginObjects } from "js-hooker";
 import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
-let originObjectReference: typeof OriginObjects=Hooker.getOriginReference();
+let originObjectReference: typeof OriginObjects = Hooker.getOriginReference();
 const successText = "执行成功";
 const failedText = "执行失败";
 const executedText = "该功能已执行过"
-let hookerInstance: Hooker;
+//避免处理ipc慢了崩溃
+let hookerInstance: Hooker = new Hooker();
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -38,8 +39,6 @@ const toolState = {
     wheelRemoveElement: false
 }
 export async function waitOriginObject() {
-    //提前准备
-    hookerInstance = new Hooker();
     for (let index = 0; index < 200; index++) {
         if (!Reflect.has(window, "kyouka-backup-object")) {
             await new Promise(resolve => setTimeout(resolve, 25));
@@ -48,17 +47,22 @@ export async function waitOriginObject() {
         break
     }
     const originObjects = Reflect.get(window, "kyouka-backup-object") as typeof OriginObjects;
-    if (!originObjects) {
+    const preloadHooker = Reflect.get(window, "kyouka-hooker") as Hooker;
+    if (!originObjects || !preloadHooker) {
         if (!location.href.includes("chrome/newtab")) {
-            showToast("获取原始对象引用失败 功能可能出现异常")
+            showToast("获取备份引用失败 功能可能出现异常")
         }
+        //unmount
+        Reflect.deleteProperty(window, "kyouka-backup-object");
+        Reflect.deleteProperty(window, "kyouka-hooker");
         return
     }
     //重新实例化一个hooker
     originObjectReference = originObjects;
-    hookerInstance = new Hooker({ originReference: originObjects });
+    hookerInstance = preloadHooker;
     //unmount
     Reflect.deleteProperty(window, "kyouka-backup-object");
+    Reflect.deleteProperty(window, "kyouka-hooker");
 }
 export const Tools: { [key: string]: () => void } = {
     "injectScript": () => {
