@@ -1,4 +1,4 @@
-import { Hooker } from "../../hook/hooker";
+import {type Hooker } from "js-hooker";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 //不移出来某些情况下会崩溃
@@ -18,45 +18,45 @@ export class ConsoleDetectBypass extends AbstractTool {
         // 全都是空了 不打印 避免刷屏
         if (args.every(item => item === null)) abortController.abort();
     }
-    onMount(): void {
-        Hooker.hookMethod(console, "table", {
+    onMount(_config: never, hooker: Hooker): void {
+        hooker.hookMethod(console, "table", {
             beforeMethodInvoke(_args, abortController) {
                 // 正常极少用+性能太差 直接屏蔽
                 abortController.abort();
             },
         });
-        Hooker.hookMethod(console, "debug",{
+        hooker.hookMethod(console, "debug",{
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         })
-        Hooker.hookMethod(console, "log", {
+        hooker.hookMethod(console, "log", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "info", {
+        hooker.hookMethod(console, "info", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "warn", {
+        hooker.hookMethod(console, "warn", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "error", {
+        hooker.hookMethod(console, "error", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         });
-        Hooker.hookMethod(console, "dir", {
+        hooker.hookMethod(console, "dir", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             },
         });
-        Hooker.hookMethod(console, "dirxml",{
+        hooker.hookMethod(console, "dirxml",{
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             }
         });
-        Hooker.hookMethod(console, "clear", {
+        hooker.hookMethod(console, "clear", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             }
         });
     }
-    get preHookMethodList(): PreHookOption[] {
+    override get preHookMethodList(): PreHookOption[] {
         return [
             {
                 parent: console,

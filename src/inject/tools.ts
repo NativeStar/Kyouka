@@ -1,12 +1,12 @@
-import { Hooker } from "../hook/hooker";
-import { OriginObjects } from "../hook/originObjects";
+import { Hooker, type OriginObjects } from "js-hooker";
 import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
-let originObjectReference: typeof OriginObjects = OriginObjects;
+let originObjectReference: typeof OriginObjects=Hooker.getOriginReference();
 const successText = "执行成功";
 const failedText = "执行失败";
 const executedText = "该功能已执行过"
+let hookerInstance: Hooker;
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -38,9 +38,11 @@ const toolState = {
     wheelRemoveElement: false
 }
 export async function waitOriginObject() {
+    //提前准备
+    hookerInstance = new Hooker();
     for (let index = 0; index < 200; index++) {
         if (!Reflect.has(window, "kyouka-backup-object")) {
-            await new originObjectReference.Promise(resolve => setTimeout(resolve, 25));
+            await new Promise(resolve => setTimeout(resolve, 25));
             continue
         }
         break
@@ -52,8 +54,9 @@ export async function waitOriginObject() {
         }
         return
     }
-    Hooker.setOriginObjectSource(originObjects);
+    //重新实例化一个hooker
     originObjectReference = originObjects;
+    hookerInstance = new Hooker({ originReference: originObjects });
     //unmount
     Reflect.deleteProperty(window, "kyouka-backup-object");
 }
@@ -212,28 +215,28 @@ export const Tools: { [key: string]: () => void } = {
         showToast(`已对${translateElements.length}个元素强制启用翻译`);
     },
     "forcePropertyRW": () => {
-        if (Hooker.isHooked(Object.defineProperty)) {
+        if (hookerInstance.isHooked(Object.defineProperty)) {
             return showToast(executedText)
         }
-        const definePropertyHook = Hooker.hookMethod(Object, "defineProperty", {
+        const definePropertyHook = hookerInstance.hookMethod(Object, "defineProperty", {
             beforeMethodInvoke(args) {
-                const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
+                const [_target, _property, descriptor] = args;
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
         });
-        const definePropertiesHook = Hooker.hookMethod(Object, "defineProperties", {
+        const definePropertiesHook = hookerInstance.hookMethod(Object, "defineProperties", {
             beforeMethodInvoke(args) {
-                const [_target, descriptors] = args as [object, PropertyDescriptorMap & ThisType<any>];
+                const [_target, descriptors] = args;
                 for (const property in descriptors) {
                     descriptors[property]!.writable = true;
                     descriptors[property]!.configurable = true;
                 }
             },
         });
-        const reflectDefinePropertyHook = Hooker.hookMethod(Reflect, "defineProperty", {
+        const reflectDefinePropertyHook = hookerInstance.hookMethod(Reflect, "defineProperty", {
             beforeMethodInvoke(args) {
-                const [_target, _property, descriptor] = args as [object, PropertyKey, PropertyDescriptor];
+                const [_target, _property, descriptor] = args;
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
@@ -311,7 +314,11 @@ export const Tools: { [key: string]: () => void } = {
                 dropper.open().then(res => {
                     if (confirm(`所选像素颜色值为:${res.sRGBHex}\n点击确定将复制到剪切板`)) {
                         //能用这个API的情况下已经是https了
-                        originObjectReference.navigator.clipboard?.writeText?.(res.sRGBHex);
+                        const rawMethod: (data: string) => Promise<void> | null = navigator?.clipboard?.writeText ?? null
+                        if (rawMethod !== null) {
+                            const originWriteText = hookerInstance.ensureOriginExecutable<typeof navigator.clipboard.writeText>(rawMethod);
+                            originWriteText.call(navigator.clipboard, res.sRGBHex);
+                        }
                         return showToast(successText);
                     }
                 }).catch(() => { });
@@ -319,7 +326,7 @@ export const Tools: { [key: string]: () => void } = {
 
             }
         } else {
-            showToast(isSecureContext? "浏览器不支持EyeDropper API!":"EyeDropper API仅在HTTPS下可用");
+            showToast(isSecureContext ? "浏览器不支持EyeDropper API!" : "EyeDropper API仅在HTTPS下可用");
         }
     },
     "forceOpenInNewTab": () => {
@@ -335,7 +342,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "becomeDocumentPictureInPicture": () => {
         if (!("documentPictureInPicture" in window)) {
-            showToast(isSecureContext?"浏览器不支持文档画中画!":"文档画中画仅在HTTPS下可用");
+            showToast(isSecureContext ? "浏览器不支持文档画中画!" : "文档画中画仅在HTTPS下可用");
             return
         }
         if (document.pictureInPictureElement) {
@@ -351,20 +358,20 @@ export const Tools: { [key: string]: () => void } = {
         })
     },
     "logJsonOperation": () => {
-        if (Hooker.isHooked(JSON?.stringify ?? {})) {
+        if (hookerInstance.isHooked(JSON?.stringify ?? {})) {
             return showToast(executedText)
         }
-        const stringifyHook = Hooker.hookMethod(window.JSON, "stringify", {
+        const stringifyHook = hookerInstance.hookMethod(window.JSON, "stringify", {
             afterMethodInvoke(args) {
                 originObjectReference.console.log("JSON Stringify:", args[0])
             },
         });
-        const parseHook = Hooker.hookMethod(window.JSON, "parse", {
+        const parseHook = hookerInstance.hookMethod(window.JSON, "parse", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("JSON Parse:", tempMethodResult.current)
             },
         });
-        const rawJsonHook = Hooker.hookMethod(window.JSON, "rawJSON", {
+        const rawJsonHook = hookerInstance.hookMethod(window.JSON, "rawJSON", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("JSON Raw:", tempMethodResult.current)
             },
@@ -463,10 +470,10 @@ export const Tools: { [key: string]: () => void } = {
         }).catch(() => { })
     },
     "blockOpen": () => {
-        if (Hooker.isHooked(window.open)) {
+        if (hookerInstance.isHooked(window.open)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(window, "open", {
+        const result = hookerInstance.hookMethod(window, "open", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("已阻止一次open调用")
                 abortController.abort();
@@ -476,46 +483,46 @@ export const Tools: { [key: string]: () => void } = {
     },
     "blockConsole": () => {
         //两个典型
-        if (Hooker.isHooked(console.table) && Hooker.isHooked(console.log)) {
+        if (hookerInstance.isHooked(console.table) && hookerInstance.isHooked(console.log)) {
             return showToast(executedText)
         }
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
             abortController.abort();
         }
-        const tableHook = Hooker.hookMethod(console, "table", {
+        const tableHook = hookerInstance.hookMethod(console, "table", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const debugHook = Hooker.hookMethod(console, "debug", {
+        const debugHook = hookerInstance.hookMethod(console, "debug", {
             beforeMethodInvoke: rejectAllInvoke
         })
-        const logHook = Hooker.hookMethod(console, "log", {
+        const logHook = hookerInstance.hookMethod(console, "log", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const infoHook = Hooker.hookMethod(console, "info", {
+        const infoHook = hookerInstance.hookMethod(console, "info", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const warnHook = Hooker.hookMethod(console, "warn", {
+        const warnHook = hookerInstance.hookMethod(console, "warn", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const errorHook = Hooker.hookMethod(console, "error", {
+        const errorHook = hookerInstance.hookMethod(console, "error", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const dirHook = Hooker.hookMethod(console, "dir", {
+        const dirHook = hookerInstance.hookMethod(console, "dir", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const dirxmlHook = Hooker.hookMethod(console, "dirxml", {
+        const dirxmlHook = hookerInstance.hookMethod(console, "dirxml", {
             beforeMethodInvoke: rejectAllInvoke
         });
-        const clearHook = Hooker.hookMethod(console, "clear", {
+        const clearHook = hookerInstance.hookMethod(console, "clear", {
             beforeMethodInvoke: rejectAllInvoke
         });
         showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? successText : failedText)
     },
     "blockSendBeacon": () => {
-        if (Hooker.isHooked(navigator.sendBeacon)) {
+        if (hookerInstance.isHooked(navigator.sendBeacon)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(navigator, "sendBeacon", {
+        const result = hookerInstance.hookMethod(navigator, "sendBeacon", {
             beforeMethodInvoke(args, abortController) {
                 // 顺便看看有多少网站用了这个API
                 showToast("已阻止一次sendBeacon调用")
@@ -691,9 +698,9 @@ export const Tools: { [key: string]: () => void } = {
     "sub:removeWatermark": () => {
         //hook append
         //确保没有hook相关方法
-        if (!Hooker.isHooked(HTMLElement.prototype.append)) {
-            const hookAppendResult = Hooker.hookMethod(HTMLElement.prototype, "append", {
-                beforeMethodInvoke(args, abortController,thisArg,temp,origin) {
+        if (!hookerInstance.isHooked(HTMLElement.prototype.append)) {
+            const hookAppendResult = hookerInstance.hookMethod(HTMLElement.prototype, "append", {
+                beforeMethodInvoke(args, abortController) {
                     if (!(args[0] instanceof HTMLElement)) {
                         return
                     }
@@ -720,8 +727,10 @@ export const Tools: { [key: string]: () => void } = {
     "copyPageIconUrl": () => {
         const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;
         if (linkElement) {
-            if (originObjectReference.navigator.clipboard.writeText) {
-                originObjectReference.navigator.clipboard.writeText(linkElement.href);
+            const rawWriteText = navigator?.clipboard?.writeText ?? null
+            if (rawWriteText !== null) {
+                const originWriteText = hookerInstance.ensureOriginExecutable<typeof navigator.clipboard.writeText>(rawWriteText);
+                originWriteText.call(navigator.clipboard, linkElement.href);
                 return showToast("已复制图标URL")
             }
             showToast("粘贴失败 浏览器不支持剪切板操作或当前网页未使用HTTPS")
@@ -730,8 +739,10 @@ export const Tools: { [key: string]: () => void } = {
         }
     },
     "copyTitle": () => {
-        if (originObjectReference.navigator.clipboard.writeText) {
-            originObjectReference.navigator.clipboard.writeText(document.title);
+        const rawWriteText = navigator?.clipboard?.writeText ?? null
+        if (rawWriteText !== null) {
+            const originWriteText = hookerInstance.ensureOriginExecutable<typeof navigator.clipboard.writeText>(rawWriteText);
+            originWriteText.call(navigator.clipboard, document.title);
             return showToast("已复制页面标题")
         }
         showToast("粘贴失败 浏览器不支持剪切板操作或当前网页未使用HTTPS")
@@ -758,15 +769,15 @@ export const Tools: { [key: string]: () => void } = {
         showToast(successText)
     },
     "logBase64Operation": () => {
-        if (Hooker.isHooked(window.btoa ?? {})) {
+        if (hookerInstance.isHooked(window.btoa ?? {})) {
             return showToast(executedText)
         }
-        const atobHook = Hooker.hookMethod(window, "atob", {
+        const atobHook = hookerInstance.hookMethod(window, "atob", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("Base64 decode:", tempMethodResult.current)
             },
         });
-        const parseHook = Hooker.hookMethod(window, "btoa", {
+        const parseHook = hookerInstance.hookMethod(window, "btoa", {
             afterMethodInvoke(args) {
                 originObjectReference.console.log("Base64 encode:", args[0])
             },
@@ -853,10 +864,10 @@ UserAgent:${navigator.userAgent}
 屏幕尺寸:${window.screen.width}x${window.screen.height}`)
     },
     "logRandomUuid": () => {
-        if (Hooker.isHooked(crypto.randomUUID ?? {})) {
+        if (hookerInstance.isHooked(crypto.randomUUID ?? {})) {
             return showToast(executedText)
         }
-        Hooker.hookMethod(crypto, "randomUUID", {
+        hookerInstance.hookMethod(crypto, "randomUUID", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成UUID:", tempMethodResult.current)
             },
@@ -909,10 +920,10 @@ UserAgent:${navigator.userAgent}
         }).catch(() => { })
     },
     "logCreateObjectURL": () => {
-        if (Hooker.isHooked(URL.createObjectURL)) {
+        if (hookerInstance.isHooked(URL.createObjectURL)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(URL, "createObjectURL", {
+        const result = hookerInstance.hookMethod(URL, "createObjectURL", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成对象URL:", `'${tempMethodResult.current}'`)
             },
@@ -920,22 +931,23 @@ UserAgent:${navigator.userAgent}
         showToast(result ? successText : executedText)
     },
     "logPostMessage": () => {
-        if (Hooker.isHooked(window.postMessage)) {
+        if (hookerInstance.isHooked(window.postMessage)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookMethod(window, "postMessage", {
+        const result = hookerInstance.hookMethod(window, "postMessage", {
             afterMethodInvoke(args) {
-                const arg0Data = args[0] instanceof Object ? originObjectReference.JSON.stringify(args[0]) : args[0]
+                const originJsonStringify = hookerInstance.ensureOriginExecutable<typeof JSON.stringify>(JSON.stringify);
+                const arg0Data = args[0] instanceof Object ? originJsonStringify(args[0]) : args[0]
                 originObjectReference.console.log(`推送消息:${arg0Data}\n目标:${args[1] ?? "unset"}`)
             },
         });
         showToast(result ? successText : executedText)
     },
     "logMathRandom": () => {
-        if (Hooker.isHooked(Math.random)) {
+        if (hookerInstance.isHooked(Math.random)) {
             return showToast(executedText)
         }
-        Hooker.hookMethod(Math, "random",{
+        hookerInstance.hookMethod(Math, "random", {
             afterMethodInvoke(_args, tempMethodResult) {
                 originObjectReference.console.log("生成随机数:", tempMethodResult.current)
             },
@@ -943,10 +955,10 @@ UserAgent:${navigator.userAgent}
         showToast(successText)
     },
     "blockClose": () => {
-        if (Hooker.isHooked(window.close)) {
+        if (hookerInstance.isHooked(window.close)) {
             return showToast(executedText)
         }
-        Hooker.hookMethod(window, "close", {
+        hookerInstance.hookMethod(window, "close", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("阻止一次close调用", 800);
                 abortController.abort();
@@ -975,13 +987,13 @@ UserAgent:${navigator.userAgent}
         showToast(successText);
     },
     "blockShare": () => {
-        if (!OriginObjects.Reflect.has(navigator,"share")) {
-            return showToast(isSecureContext?"当前浏览器不支持share API":"Share API仅在HTTPS下可用 无需屏蔽");
+        if (!originObjectReference.Reflect.has(navigator, "share")) {
+            return showToast(isSecureContext ? "当前浏览器不支持share API" : "Share API仅在HTTPS下可用 无需屏蔽");
         }
-        if (Hooker.isHooked(navigator.share)) {
+        if (hookerInstance.isHooked(navigator.share)) {
             return showToast(executedText)
         }
-        const result = Hooker.hookAsyncMethod(navigator, "share", {
+        const result = hookerInstance.hookAsyncMethod(navigator, "share", {
             beforeMethodInvoke(_args, abortController) {
                 showToast("阻止一次share调用", 800);
                 abortController.abort();
@@ -1000,24 +1012,24 @@ UserAgent:${navigator.userAgent}
             //小窗打开
             window.open(response.url, "_blank", `width=400,height=400,noopener,noreferrer`);
         } catch (error) {
-            OriginObjects.console.error(error);
+            originObjectReference.console.error(error);
             showToast("加载robots.txt失败 详见控制台")
         }
     },
     "sub:logCreateObjectURL": () => {
-        let [createUrlHooked, revokeUrlHooked] = [Hooker.isHooked(URL.createObjectURL), Hooker.isHooked(URL.revokeObjectURL)];
+        let [createUrlHooked, revokeUrlHooked] = [hookerInstance.isHooked(URL.createObjectURL), hookerInstance.isHooked(URL.revokeObjectURL)];
         if (createUrlHooked && revokeUrlHooked) {
             return showToast(executedText)
         }
         if (!createUrlHooked) {
-            createUrlHooked = Hooker.hookMethod(URL, "createObjectURL", {
+            createUrlHooked = hookerInstance.hookMethod(URL, "createObjectURL", {
                 afterMethodInvoke(_args, tempMethodResult) {
                     originObjectReference.console.log("生成对象URL:", `'${tempMethodResult.current}'`)
                 },
             });
         }
         if (!revokeUrlHooked) {
-            revokeUrlHooked = Hooker.hookMethod(URL, "revokeObjectURL", {
+            revokeUrlHooked = hookerInstance.hookMethod(URL, "revokeObjectURL", {
                 beforeMethodInvoke(_args, abortController) {
                     abortController.abort();
                 },

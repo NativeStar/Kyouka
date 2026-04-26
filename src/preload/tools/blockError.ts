@@ -17,13 +17,13 @@ export class BlockError extends AbstractTool {
             event.preventDefault();
         }
     }
-    onMount(config: ExtensionConfig): void {
+    override onMount(config: ExtensionConfig): void {
         this.isBlockErrorEnabled = config.blockError;
         Reflect.defineProperty(window, "onerror", this.eventHandlerDescriptor);
         Reflect.defineProperty(window, "onunhandledrejection", this.eventHandlerDescriptor);
         Reflect.defineProperty(window, "onrejectionhandled", this.eventHandlerDescriptor);
     }
-    onPreload(): string[] | void {
+    override onPreload(): string[] | void {
         window.addEventListener("error", (event) => this.processErrorEvent(event));
         window.addEventListener("unhandledrejection", (event) => this.processErrorEvent(event));
         window.addEventListener("rejectionhandled", (event) => this.processErrorEvent(event));

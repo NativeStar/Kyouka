@@ -4,9 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  js-hooker: link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker
+
 importers:
 
   .:
+    dependencies:
+      js-hooker:
+        specifier: link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker
+        version: link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.36

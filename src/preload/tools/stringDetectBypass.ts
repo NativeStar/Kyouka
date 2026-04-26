@@ -1,12 +1,12 @@
-import { Hooker } from "../../hook/hooker";
+import {type Hooker } from "js-hooker";
 import type { PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 
 export class StringDetectBypass extends AbstractTool {
-    onMount(): void {
-        Hooker.hookMethod(Function.prototype, "toString",{
+    onMount(_config: never, hooker: Hooker): void {
+        hooker.hookMethod(Function.prototype, "toString",{
             beforeMethodInvoke(_args, abortController, thisArg, tempMethodResult) {
-                if (thisArg instanceof Function && Hooker.isHooked(thisArg)) {
+                if (thisArg instanceof Function && hooker.isHooked(thisArg)) {
                     tempMethodResult.current = `function ${thisArg.name}() { [native code] }`
                     abortController.abort();
                 }
@@ -19,7 +19,7 @@ export class StringDetectBypass extends AbstractTool {
             },
         })
     }
-    get preHookMethodList(): PreHookOption[] {
+    override get preHookMethodList(): PreHookOption[] {
         return [
             {
                 parent: Function.prototype,

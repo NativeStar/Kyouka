@@ -1,14 +1,15 @@
 ///<reference path="../dom.d.ts" />
 import { type IpcObject, type ExtensionConfig } from '../types';
-import { OriginObjects } from "../hook/originObjects";
+import { Hooker } from "js-hooker";
 import { ToolManager } from "./manager/toolsManager";
 let config: ExtensionConfig | {} = {};
 const toolManager = new ToolManager();
 async function init() {
+    const originObjectsRef=Hooker.getOriginReference();
     //等待ipc
     for (let index = 0; index < 250; index++) {
         if (!Reflect.has(window, "kyouka-ipc")) {
-            await new OriginObjects.Promise(resolve => setTimeout(resolve, 20));
+            await new originObjectsRef.Promise(resolve => setTimeout(resolve, 20));
             continue
         }
         break
@@ -31,7 +32,7 @@ async function init() {
             enumerable: false,
             configurable: true,
             writable: false,
-            value: OriginObjects
+            value: originObjectsRef
         });
     }
     initConfig();

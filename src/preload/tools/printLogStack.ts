@@ -1,31 +1,31 @@
-import { Hooker } from "../../hook/hooker";
-import { OriginObjects } from "../../hook/originObjects";
+import {type Hooker} from "js-hooker"
 import type { PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 export class PrintLogStack extends AbstractTool {
+    private backupCaptureStackTrace=Error.captureStackTrace
     private appendStackItem(args: any[]) {
         const obj = { stack: null }
-        OriginObjects.Error.captureStackTrace(obj);
+        this.backupCaptureStackTrace!(obj);
         args.push(obj.stack)
     }
-    onMount(): void {
-        Hooker.hookMethod(console, "debug", {
-            beforeMethodInvoke: this.appendStackItem
+    onMount(_config: never, hooker: Hooker): void {
+        hooker.hookMethod(console, "debug", {
+            beforeMethodInvoke: this.appendStackItem.bind(this)
         })
-        Hooker.hookMethod(console, "log", {
-            beforeMethodInvoke: this.appendStackItem
+        hooker.hookMethod(console, "log", {
+            beforeMethodInvoke: this.appendStackItem.bind(this)
         });
-        Hooker.hookMethod(console, "info", {
-            beforeMethodInvoke: this.appendStackItem
+        hooker.hookMethod(console, "info", {
+            beforeMethodInvoke: this.appendStackItem.bind(this)
         });
-        Hooker.hookMethod(console, "warn", {
-            beforeMethodInvoke: this.appendStackItem
+        hooker.hookMethod(console, "warn", {
+            beforeMethodInvoke: this.appendStackItem.bind(this)
         });
-        Hooker.hookMethod(console, "error", {
-            beforeMethodInvoke: this.appendStackItem
+        hooker.hookMethod(console, "error", {
+            beforeMethodInvoke: this.appendStackItem.bind(this)
         });
     }
-    get preHookMethodList(): PreHookOption[] {
+     override get preHookMethodList(): PreHookOption[] {
         return [
             {
                 parent: console,

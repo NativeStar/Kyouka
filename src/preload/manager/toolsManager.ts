@@ -1,4 +1,5 @@
-import { Hooker } from "../../hook/hooker";
+// import { Hooker } from "../../hook/hooker";
+import { Hooker } from "js-hooker";
 import { type PreHookOption, type ExtensionConfig } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 import { BlockClipboardWrite } from "../tools/blockClipboardWrite";
@@ -20,6 +21,7 @@ export class ToolManager {
         printStackInLogs:new PrintLogStack(),
     } as const;
     private preHooksMethodList: PreHookOption[];
+    private hooker:Hooker=new Hooker();
     constructor() {
         const tools: AbstractTool[] = Object.values(this.toolsConfigList);
         this.preHooksMethodList = tools.flatMap(toolInstance => toolInstance.preHookMethodList);
@@ -29,9 +31,9 @@ export class ToolManager {
         for (const preHookOption of this.preHooksMethodList) {
             if (hookedIds.has(preHookOption.id)) continue;
             if (preHookOption.useAsyncHook) {
-                Hooker.hookAsyncMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
+                this.hooker.hookAsyncMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
             }else{
-                Hooker.hookMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
+                this.hooker.hookMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
             }
             hookedIds.add(preHookOption.id);
         }
@@ -45,12 +47,12 @@ export class ToolManager {
         for (const key of toolKeys) {
             // 初始化工具
             if (config[key]) {
-                this.toolsConfigList[key].onMount(config);
+                this.toolsConfigList[key].onMount(config as never,this.hooker);
             }
         }
         //释放占位hook
         for (const preHookInstance of this.preHooksMethodList) {
-            Hooker.unhook(preHookInstance.type, preHookInstance.parent, preHookInstance.methodName, preHookInstance.id);
+            this.hooker.unhook(preHookInstance.type, preHookInstance.parent, preHookInstance.methodName, preHookInstance.id);
         }
     }
 }

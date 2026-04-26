@@ -11,10 +11,10 @@ async function init() {
         return
     }
     shadowDomDiv.removeAttribute("id");
+    await waitOriginObject();
     initDom(menuShadowRoot);
     menuShadowRoot.getElementById("injectScript")?.remove();
     //等待preload设置干净的OriginObject
-    waitOriginObject();
 }
 function initDom(shadow: ShadowRoot) {
     const titleBar = shadow.getElementById("menuTitleBar") as HTMLDivElement;
