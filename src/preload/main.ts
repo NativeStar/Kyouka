@@ -3,7 +3,7 @@ import { type IpcObject, type ExtensionConfig } from '../types';
 import { Hooker } from "js-hooker";
 import { ToolManager } from "./manager/toolsManager";
 let config: ExtensionConfig | {} = {};
-const hooker = new Hooker();
+const hooker = new Hooker({enableBypassDefault:false});
 const toolManager = new ToolManager(hooker);
 async function init() {
     const originObjectsRef=Hooker.getOriginReference();

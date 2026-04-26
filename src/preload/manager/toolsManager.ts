@@ -52,7 +52,7 @@ export class ToolManager {
         }
         //释放占位hook
         for (const preHookInstance of this.preHooksMethodList) {
-            this.hooker.unhook(preHookInstance.type, preHookInstance.parent, preHookInstance.methodName, preHookInstance.id);
+            this.hooker.unhook(preHookInstance.type, preHookInstance.parent, preHookInstance.methodName, preHookInstance.id,true);
         }
     }
 }
