@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       js-hooker:
-        specifier: link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker
-        version: link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.36
@@ -203,6 +203,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  js-hooker@1.0.0:
+    resolution: {integrity: sha512-ZoXllQ+m/jG407Ndrjhubapt2z8U78kxm887j7aPbR8xapec4Dg2RtgJtrduvZlyDKxDuzoGgyBhduqcdcxsnA==}
+
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
@@ -331,5 +334,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.2
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
+
+  js-hooker@1.0.0: {}
 
   undici-types@7.16.0: {}

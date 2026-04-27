@@ -8,6 +8,7 @@ const failedText = "执行失败";
 const executedText = "该功能已执行过"
 //避免处理ipc慢了崩溃
 let hookerInstance: Hooker = new Hooker();
+//TODO 强制将密码输入框改普通输入框
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -57,7 +58,7 @@ export async function waitOriginObject() {
         Reflect.deleteProperty(window, "kyouka-hooker");
         return
     }
-    //重新实例化一个hooker
+    //改用获取到的hooker
     originObjectReference = originObjects;
     hookerInstance = preloadHooker;
     //unmount

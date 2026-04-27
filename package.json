@@ -16,6 +16,6 @@
     "esbuild": "^0.27.2"
   },
   "dependencies": {
-    "js-hooker": "link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker"
+    "js-hooker": "^1.0.0"
   }
 }
