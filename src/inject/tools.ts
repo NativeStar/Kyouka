@@ -1041,5 +1041,12 @@ UserAgent:${navigator.userAgent}
             });
         }
         showToast(createUrlHooked && revokeUrlHooked ? successText : failedText);
+    },
+    "visibilityPasswordInput":()=>{
+        const passwordInput=document.querySelectorAll("input[type=password]");
+        for (const pwdInput of passwordInput) {
+            pwdInput.removeAttribute("type");
+        }
+        showToast(passwordInput.length>0?successText:"未找到密码输入框");
     }
 }
