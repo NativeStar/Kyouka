@@ -1015,7 +1015,8 @@ UserAgent:${navigator.userAgent}
                 return
             }
             //小窗打开
-            window.open(response.url, "_blank", `width=400,height=400,noopener,noreferrer`);
+            const originOpen=hookerInstance.ensureOriginExecutable<typeof open>(window.open);
+            originOpen(response.url, "_blank", `width=400,height=400,noopener,noreferrer`);
         } catch (error) {
             originObjectReference.console.error(error);
             showToast("加载robots.txt失败 详见控制台")
