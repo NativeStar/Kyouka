@@ -3,6 +3,9 @@ declare var EyeDropper: {
         open(): Promise<{ sRGBHex: string }>
     }
 }
+declare interface Navigator{
+    deviceMemory?:number
+}
 declare var documentPictureInPicture: {
     requestWindow: (option?: { height: number, width: number }) => Promise<Window & typeof globalThis>
 }

@@ -864,10 +864,19 @@ Cookie(非HttpOnly):${cookieCount} 存储桶:${storageBucketCount}
 资源总占用:${totalSize !== null ? parseFileSize(totalSize) : "由于未知原因 计算失败"}`)
     },
     "clientInfo": () => {
-        alert(`V8堆占用:${parseFileSize(performance.memory.totalJSHeapSize)} V8堆上限:${parseFileSize(performance.memory.jsHeapSizeLimit)}
+        alert(`---- PAGE 1/2 ----
+V8堆占用:${parseFileSize(performance.memory.totalJSHeapSize)} V8堆上限:${parseFileSize(performance.memory.jsHeapSizeLimit)}
 UserAgent:${navigator.userAgent}
 语言:${navigator.language} 支持语言:${navigator.languages.length}
-屏幕尺寸:${window.screen.width}x${window.screen.height}`)
+屏幕尺寸:${window.screen.width}x${window.screen.height} 窗口尺寸:${innerWidth}x${innerHeight}
+像素比:${window.devicePixelRatio} 时区:${Intl.DateTimeFormat().resolvedOptions().timeZone} 平台:${navigator.platform}
+安全上下文:${isSecureContext?"是":"否"}`);
+            alert(`---- PAGE 2/2 ----
+CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory?`${navigator.deviceMemory}GB`:"无法获取"}
+多点触控数:${navigator.maxTouchPoints} 色深:${window.screen.colorDepth}
+跨源隔离:${crossOriginIsolated?"是":"否"} 字符集:${document.characterSet}
+拒绝跟踪:${navigator.doNotTrack==="1"?"是":"否"}`)
+
     },
     "logRandomUuid": () => {
         if (hookerInstance.isHooked(crypto.randomUUID ?? {})) {
