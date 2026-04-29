@@ -6,13 +6,15 @@ export class BlockConsoleOutput extends AbstractTool {    private rejectAllInvok
     }
     onMount(_config: never, hooker: Hooker): void {
         hooker.hookMethod(console, "table", {
-            beforeMethodInvoke: this.rejectAllInvoke
+            beforeMethodInvoke: this.rejectAllInvoke,
+            id:"toolBlockConsoleExec"
         });
         hooker.hookMethod(console, "debug", {
             beforeMethodInvoke: this.rejectAllInvoke
         })
         hooker.hookMethod(console, "log", {
-            beforeMethodInvoke: this.rejectAllInvoke
+            beforeMethodInvoke: this.rejectAllInvoke,
+            id:"toolBlockConsoleExec"
         });
         hooker.hookMethod(console, "info", {
             beforeMethodInvoke: this.rejectAllInvoke

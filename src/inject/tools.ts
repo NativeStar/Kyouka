@@ -8,7 +8,6 @@ const failedText = "执行失败";
 const executedText = "该功能已执行过"
 //避免处理ipc慢了崩溃
 let hookerInstance: Hooker = new Hooker();
-//TODO 强制将密码输入框改普通输入框
 function wheelRemoveElementEventListener(event: MouseEvent) {
     if (event.button === 1) {
         event.preventDefault();
@@ -488,20 +487,22 @@ export const Tools: { [key: string]: () => void } = {
     },
     "blockConsole": () => {
         //两个典型
-        if (hookerInstance.isHooked(console.table) && hookerInstance.isHooked(console.log)) {
+        if (hookerInstance.isHookedById("method",console,"table","toolBlockConsoleExec") && hookerInstance.isHookedById("method",console,"log","toolBlockConsoleExec")) {
             return showToast(executedText)
         }
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
             abortController.abort();
         }
         const tableHook = hookerInstance.hookMethod(console, "table", {
-            beforeMethodInvoke: rejectAllInvoke
+            beforeMethodInvoke: rejectAllInvoke,
+            id:"toolBlockConsoleExec"
         });
         const debugHook = hookerInstance.hookMethod(console, "debug", {
             beforeMethodInvoke: rejectAllInvoke
         })
         const logHook = hookerInstance.hookMethod(console, "log", {
-            beforeMethodInvoke: rejectAllInvoke
+            beforeMethodInvoke: rejectAllInvoke,
+            id:"toolBlockConsoleExec"
         });
         const infoHook = hookerInstance.hookMethod(console, "info", {
             beforeMethodInvoke: rejectAllInvoke
