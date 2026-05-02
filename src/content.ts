@@ -3,6 +3,7 @@ async function injectGuiScript() {
     menuContainer.id = "kyouka-menu";
     const menuShadowRoot = menuContainer.attachShadow({ mode: "open" });
     const shadowRootScript = document.createElement("script");
+    shadowRootScript.charset = "utf-8";
     shadowRootScript.src = chrome.runtime.getURL("./inject.js");
     shadowRootScript.id = "injectScript"
     const menuHtml = await fetch(chrome.runtime.getURL("./menu.html")).then(res => res.text());
