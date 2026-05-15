@@ -811,7 +811,8 @@ export const Tools: { [key: string]: () => void } = {
             //图片
             imgCount: 0,
             //视频
-            videoCount: 0
+            videoCount: 0,
+            flash:0
         };
         for (const resInfo of resourcesInfoList) {
             switch (resInfo.initiatorType) {
@@ -850,12 +851,19 @@ export const Tools: { [key: string]: () => void } = {
         const cachesCount = (await caches.keys()).length;
         const storageBucketCount = (await (navigator.storageBuckets.keys())).length
         const cookieCount = (await cookieStore.getAll()).length
-        const totalSize = (await navigator.storage.estimate()).usage ?? null
+        const totalSize = (await navigator.storage.estimate()).usage ?? null;
+        const suspectedFlashElement=[...document.querySelectorAll("object"),...document.querySelectorAll("embed"),...document.querySelectorAll("ruffle-embed")];
+        for (const element of suspectedFlashElement) {
+            const src:string=Reflect.get(element,"src")??Reflect.get(element,"data")??Reflect.get(element,"value")??"null"
+            if (src.includes(".swf")) {
+                resCounts.flash++
+            }
+        }
         alert(`数据准确度一般 仅供参考 部分项目仅计算从网络加载的内容数量
 ---- PAGE 1/2 ----
 script元素数:${scriptElementCount} style元素数:${styleElementCount}
 CSS文件:${resCounts.cssCount} CSS引用数据:${resCounts.cssRefCount} JavaScript文件:${resCounts.jsCount}
-音频:${resCounts.audioCount} 图片:${resCounts.networkCount}\ 视频:${resCounts.videoCount}
+音频:${resCounts.audioCount} 图片:${resCounts.networkCount} 视频:${resCounts.videoCount} Flash:${resCounts.flash}
 其他网络请求:${resCounts.networkCount} 信标请求:${resCounts.beaconCount}`)
         alert(`---- PAGE 2/2 ----
 本地存储条目:${localStorage.length} 会话存储条目:${sessionStorage.length}
