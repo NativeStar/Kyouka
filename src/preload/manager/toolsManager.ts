@@ -8,6 +8,7 @@ import { BlockStringCodeExecute } from "../tools/blockStringCodeExecute";
 import { ConsoleDetectBypass } from "../tools/consoleDetectBypass";
 import { PrintLogStack } from "../tools/printLogStack";
 import { StringDetectBypass } from "../tools/stringDetectBypass";
+import { AllowContextMenu } from "../tools/allowContextMenu";
 
 export class ToolManager {
     private toolsConfigList = {
@@ -18,6 +19,7 @@ export class ToolManager {
         blockStringCodeExecute: new BlockStringCodeExecute(),
         stringDetectBypass:new StringDetectBypass(),
         printStackInLogs:new PrintLogStack(),
+        allowContextMenu:new AllowContextMenu(),
     } as const;
     private preHooksMethodList: PreHookOption[];
     private hooker:Hooker;
@@ -30,6 +32,7 @@ export class ToolManager {
         const hookedIds = new Set<string>();
         for (const preHookOption of this.preHooksMethodList) {
             if (hookedIds.has(preHookOption.id)) continue;
+            //TODO 实现其他类型hook
             if (preHookOption.useAsyncHook) {
                 this.hooker.hookAsyncMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
             }else{

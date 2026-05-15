@@ -9,7 +9,8 @@ export const DefaultExtensionConfig = {
     blockStringCodeExecute: false,
     stringDetectBypass:false,
     enableGui:true,
-    printStackInLogs:false
+    printStackInLogs:false,
+    allowContextMenu:false
 } as const;
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {
