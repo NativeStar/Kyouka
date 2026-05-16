@@ -487,7 +487,7 @@ export const Tools: { [key: string]: () => void } = {
     },
     "blockConsole": () => {
         //两个典型
-        if (hookerInstance.isHookedById("method",console,"table","toolBlockConsoleExec") && hookerInstance.isHookedById("method",console,"log","toolBlockConsoleExec")) {
+        if (hookerInstance.isHookedById("method", console, "table", "toolBlockConsoleExec") && hookerInstance.isHookedById("method", console, "log", "toolBlockConsoleExec")) {
             return showToast(executedText)
         }
         function rejectAllInvoke(_args: any[], abortController: AbortController) {
@@ -495,14 +495,14 @@ export const Tools: { [key: string]: () => void } = {
         }
         const tableHook = hookerInstance.hookMethod(console, "table", {
             beforeMethodInvoke: rejectAllInvoke,
-            id:"toolBlockConsoleExec"
+            id: "toolBlockConsoleExec"
         });
         const debugHook = hookerInstance.hookMethod(console, "debug", {
             beforeMethodInvoke: rejectAllInvoke
         })
         const logHook = hookerInstance.hookMethod(console, "log", {
             beforeMethodInvoke: rejectAllInvoke,
-            id:"toolBlockConsoleExec"
+            id: "toolBlockConsoleExec"
         });
         const infoHook = hookerInstance.hookMethod(console, "info", {
             beforeMethodInvoke: rejectAllInvoke
@@ -812,7 +812,7 @@ export const Tools: { [key: string]: () => void } = {
             imgCount: 0,
             //视频
             videoCount: 0,
-            flash:0
+            flash: 0
         };
         for (const resInfo of resourcesInfoList) {
             switch (resInfo.initiatorType) {
@@ -852,9 +852,9 @@ export const Tools: { [key: string]: () => void } = {
         const storageBucketCount = (await (navigator.storageBuckets.keys())).length
         const cookieCount = (await cookieStore.getAll()).length
         const totalSize = (await navigator.storage.estimate()).usage ?? null;
-        const suspectedFlashElement=[...document.querySelectorAll("object"),...document.querySelectorAll("embed"),...document.querySelectorAll("ruffle-embed")];
+        const suspectedFlashElement = [...document.querySelectorAll("object"), ...document.querySelectorAll("embed"), ...document.querySelectorAll("ruffle-embed")];
         for (const element of suspectedFlashElement) {
-            const src:string=Reflect.get(element,"src")??Reflect.get(element,"data")??Reflect.get(element,"value")??"null"
+            const src: string = Reflect.get(element, "src") ?? Reflect.get(element, "data") ?? Reflect.get(element, "value") ?? "null"
             if (src.includes(".swf")) {
                 resCounts.flash++
             }
@@ -878,12 +878,12 @@ UserAgent:${navigator.userAgent}
 语言:${navigator.language} 支持语言:${navigator.languages.length}
 屏幕尺寸:${window.screen.width}x${window.screen.height} 窗口尺寸:${innerWidth}x${innerHeight}
 像素比:${window.devicePixelRatio} 时区:${Intl.DateTimeFormat().resolvedOptions().timeZone} 平台:${navigator.platform}
-安全上下文:${isSecureContext?"是":"否"}`);
-            alert(`---- PAGE 2/2 ----
-CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory?`${navigator.deviceMemory}GB`:"无法获取"}
+安全上下文:${isSecureContext ? "是" : "否"}`);
+        alert(`---- PAGE 2/2 ----
+CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${navigator.deviceMemory}GB` : "无法获取"}
 多点触控数:${navigator.maxTouchPoints} 色深:${window.screen.colorDepth}
-跨源隔离:${crossOriginIsolated?"是":"否"} 字符集:${document.characterSet}
-拒绝跟踪:${navigator.doNotTrack==="1"?"是":"否"}`)
+跨源隔离:${crossOriginIsolated ? "是" : "否"} 字符集:${document.characterSet}
+拒绝跟踪:${navigator.doNotTrack === "1" ? "是" : "否"}`)
 
     },
     "logRandomUuid": () => {
@@ -1033,7 +1033,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory?`${na
                 return
             }
             //小窗打开
-            const originOpen=hookerInstance.ensureOriginExecutable<typeof open>(window.open);
+            const originOpen = hookerInstance.ensureOriginExecutable<typeof open>(window.open);
             originOpen(response.url, "_blank", `width=400,height=400,noopener,noreferrer`);
         } catch (error) {
             originObjectReference.console.error(error);
@@ -1061,11 +1061,34 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory?`${na
         }
         showToast(createUrlHooked && revokeUrlHooked ? successText : failedText);
     },
-    "visibilityPasswordInput":()=>{
-        const passwordInput=document.querySelectorAll("input[type=password]");
+    "visibilityPasswordInput": () => {
+        const passwordInput = document.querySelectorAll("input[type=password]");
         for (const pwdInput of passwordInput) {
             pwdInput.removeAttribute("type");
         }
-        showToast(passwordInput.length>0?successText:"未找到密码输入框");
+        showToast(passwordInput.length > 0 ? successText : "未找到密码输入框");
+    },
+    "logCredentials": () => {
+        if(hookerInstance.isHooked(navigator.credentials.create)&&hookerInstance.isHooked(navigator.credentials.get)){
+            showToast(executedText);
+            return
+        }
+        const createHookResult = hookerInstance.hookAsyncMethod(navigator.credentials, "create", {
+            beforeMethodInvoke: ([arg]) => {
+                originObjectReference.console.log("navigator.credentials.create invoke args:", arg);
+            },
+            afterMethodInvoke: (_args, tempResult) => {
+                originObjectReference.console.log("navigator.credentials.create invoke result:", tempResult.current);
+            }
+        });
+        const getHookResult = hookerInstance.hookAsyncMethod(navigator.credentials, "get", {
+            beforeMethodInvoke: ([arg]) => {
+                originObjectReference.console.log("navigator.credentials.get invoke args:", arg);
+            },
+            afterMethodInvoke: (_args, tempResult) => {
+                originObjectReference.console.log("navigator.credentials.get invoke result:", tempResult.current);
+            }
+        });
+        showToast(createHookResult&&getHookResult?successText:failedText);
     }
 }

@@ -51,6 +51,7 @@
         <button class="itemButton toolButton" tool="logPostMessage" tooltip="打印对window.postMessage方法的调用\n(对Worker 其他window的postMessage无效)">打印postMessage</button>
         <button class="itemButton toolButton" tool="logMathRandom" tooltip="在控制台打印通过Math.random生成的随机数">打印随机数</button>
         <button class="itemButton toolButton" tool="blockShare" tooltip="使navigator.share方法调用不触发系统分享并返回成功">屏蔽share</button>
+        <button class="itemButton toolButton" tool="logCredentials" tooltip="打印对navigator.credentials.get和\nnavigator.credentials.create\n的调用参数和返回值">打印凭证</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
         <button class="itemButton toolButton" tool="injectScript" subTool="sub:injectOnlineScript" tooltip="左键:选择本地JS文件并执行\n右键:加载指定URL的JS并执行\n可能被跨域政策或CSP阻止加载">注入JS</button>
