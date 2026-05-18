@@ -1,4 +1,6 @@
-import { Tools, waitOriginObject } from "./tools"
+import { getHooker, Tools, waitOriginObject } from "./tools"
+import type { Hooker } from "js-hooker";
+let hooker: Hooker;
 async function init() {
     const shadowDomDiv = document.getElementById("kyouka-menu");
     if (!shadowDomDiv) {
@@ -12,6 +14,7 @@ async function init() {
     }
     shadowDomDiv.removeAttribute("id");
     await waitOriginObject();
+    hooker = getHooker();
     initDom(menuShadowRoot);
     menuShadowRoot.getElementById("injectScript")?.remove();
     //等待preload设置干净的OriginObject
@@ -114,7 +117,8 @@ function initDom(shadow: ShadowRoot) {
             });
             //副功能执行
             if (toolButton.hasAttribute("subTool")) {
-                toolButton.addEventListener("contextmenu",(event)=>{
+                const originAddEventListener = hooker.ensureOriginExecutable<typeof HTMLElement.prototype.addEventListener>(HTMLElement.prototype.addEventListener);
+                originAddEventListener.call(toolButton, "contextmenu", (event) => {
                     event.stopImmediatePropagation();
                     event.preventDefault();
                     const subToolName = toolButton.getAttribute("subTool") ?? null;
@@ -161,7 +165,8 @@ function initDom(shadow: ShadowRoot) {
     }
     //禁用右键
     {
-        root.addEventListener("contextmenu", event => {
+        const originAddEventListener = hooker.ensureOriginExecutable<typeof HTMLElement.prototype.addEventListener>(HTMLElement.prototype.addEventListener);
+        originAddEventListener.call(root, "contextmenu", event => {
             event.preventDefault();
             event.stopImmediatePropagation();
         });

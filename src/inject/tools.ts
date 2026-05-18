@@ -64,6 +64,9 @@ export async function waitOriginObject() {
     Reflect.deleteProperty(window, "kyouka-backup-object");
     Reflect.deleteProperty(window, "kyouka-hooker");
 }
+export function getHooker(){
+    return hookerInstance
+}
 export const Tools: { [key: string]: () => void } = {
     "injectScript": () => {
         if (!("showOpenFilePicker" in window)) {
