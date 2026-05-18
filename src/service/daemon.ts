@@ -72,7 +72,11 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
         if (mergedConfig.enableGui) {
             chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
         }
-        setupContextMenu();
+        try {
+            mergedConfig.enableContextMenu ? setupContextMenu() : teardownContextMenu();
+        } catch (error) {
+            console.log(error)
+        }
     }
 });
 //兜底 避免某些情况状态不一致
@@ -208,6 +212,9 @@ function onSettingChange(change: { [key: string]: chrome.storage.StorageChange; 
                 [disableFont ? "enableRulesetIds" : "disableRulesetIds"]: ["disableFont"]
             })
             break
+        case "enableContextMenu":
+            const newValue = change.enableContextMenu!.newValue as boolean;
+            newValue ? setupContextMenu() : teardownContextMenu()
     }
 }
 function setupContextMenu() {
@@ -232,41 +239,46 @@ function setupContextMenu() {
         title: "使用小窗跳转(仅限链接)",
         contexts: ["selection"],
     });
-    chrome.contextMenus.onClicked.addListener((info, tab) => {
-        if (!tab || !tab.id) {
-            return
-        }
-        switch (info.menuItemId) {
-            case "openPanelMenuItem":
-                chrome.tabs.sendMessage(tab.id, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
-                break
-            case "becomeFloatingWindowMenuItem":
-                chrome.windows.create({ url: info.pageUrl ?? tab.url, type: "popup", width: 500, height: 500 });
-                chrome.tabs.remove(tab.id)
-                break
-            case "openLinkElementWithFloatingWindowMenuItem":
-                chrome.windows.create({ url: info.linkUrl, type: "popup", width: 500, height: 500 });
-                break
-            case "openSelectedUrlWithFloatingWindowMenuItem":
-                const selectedText = info.selectionText;
-                if (!selectedText) return
-                try {
-                    const urlInstance = new URL(selectedText);
-                    chrome.windows.create({ url: urlInstance.href, type: "popup", width: 500, height: 500 });
-                } catch (error) {
-                    chrome.scripting.executeScript({
-                        target: {
-                            tabId: tab.id
-                        },
-                        func: () => {
-                            alert("无效URL!")
-                        }
-                    }).catch(e => console.log(e))
-                }
-                break
-            default:
-                console.error(`Unknown context menu item id:${info.menuItemId}`);
-                break;
-        }
-    })
+    chrome.contextMenus.onClicked.addListener(onContextMenuClickHandle)
+}
+function teardownContextMenu() {
+    chrome.contextMenus.removeAll();
+    chrome.contextMenus.onClicked.removeListener(onContextMenuClickHandle)
+}
+function onContextMenuClickHandle(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) {
+    if (!tab || !tab.id) {
+        return
+    }
+    switch (info.menuItemId) {
+        case "openPanelMenuItem":
+            chrome.tabs.sendMessage(tab.id, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
+            break
+        case "becomeFloatingWindowMenuItem":
+            chrome.windows.create({ url: info.pageUrl ?? tab.url, type: "popup", width: 500, height: 500 });
+            chrome.tabs.remove(tab.id)
+            break
+        case "openLinkElementWithFloatingWindowMenuItem":
+            chrome.windows.create({ url: info.linkUrl, type: "popup", width: 500, height: 500 });
+            break
+        case "openSelectedUrlWithFloatingWindowMenuItem":
+            const selectedText = info.selectionText;
+            if (!selectedText) return
+            try {
+                const urlInstance = new URL(selectedText);
+                chrome.windows.create({ url: urlInstance.href, type: "popup", width: 500, height: 500 });
+            } catch (error) {
+                chrome.scripting.executeScript({
+                    target: {
+                        tabId: tab.id
+                    },
+                    func: () => {
+                        alert("无效URL!")
+                    }
+                }).catch(e => console.log(e))
+            }
+            break
+        default:
+            console.error(`Unknown context menu item id:${info.menuItemId}`);
+            break;
+    }
 }
