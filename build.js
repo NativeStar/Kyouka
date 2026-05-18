@@ -37,7 +37,7 @@ esbuild.buildSync({
 })
 //其他
 esbuild.buildSync({
-    entryPoints:["./src/content.ts","./src/service.ts","./src/options.ts"],
+    entryPoints:["./src/content.ts","./src/service/daemon.ts","./src/options.ts"],
     bundle:true,
     outdir:"./dist",
     minify:true,
