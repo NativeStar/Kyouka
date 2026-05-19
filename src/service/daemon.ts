@@ -88,6 +88,7 @@ chrome.runtime.onStartup.addListener(() => {
         } else {
             isRegisteredGuiScript && chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
         }
+        (value as ExtensionConfig).enableContextMenu ? setupContextMenu() : teardownContextMenu();
     });
 });
 // action
