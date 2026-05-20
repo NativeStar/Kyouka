@@ -108,7 +108,7 @@ function initDom(dom: Document) {
                 alert("该网站未保存任何可导出数据!")
                 return
             }
-            showSaveFilePicker({ suggestedName: `DataSnapshot-${location.host}-${localTimeString}.json` }).then(async (fd) => {
+            showSaveFilePicker({ suggestedName: `DataSnapshot-${location.host}_${localTimeString}.json` }).then(async (fd) => {
                 try {
                     const writeStream = await fd.createWritable();
                     //cookie
