@@ -53,6 +53,44 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender, sendResponse) 
                 }
             })
             break
+        case "replaceCookie":
+            //清空现有cookie
+            const newCookie: chrome.cookies.Cookie[] = msg.data;
+            const callerDomain: string = msg.domain;
+            const allCookies = await chrome.cookies.getAll({ url: sender.url });
+            for (const cookieItem of allCookies) {
+                const host = cookieItem.domain.startsWith(".")
+                    ? cookieItem.domain.slice(1)
+                    : cookieItem.domain;
+                chrome.cookies.remove({
+                    url: `${cookieItem.secure ? "https://" : "http://"}${host}${cookieItem.path}`,
+                    name: cookieItem.name,
+                    storeId: cookieItem.storeId,
+                    partitionKey: cookieItem.partitionKey
+                })
+            }
+            //放置cookie
+            for (const cookieItem of newCookie) {
+                let host = cookieItem.domain.startsWith(".")
+                    ? cookieItem.domain.slice(1)
+                    : cookieItem.domain;
+                if (!host.includes(callerDomain)) {
+                    host = callerDomain;
+                }
+                await chrome.cookies.set({
+                    url: sender.url ?? `${cookieItem.secure ? "https://" : "http://"}${host}${cookieItem.path}`,
+                    expirationDate: cookieItem.expirationDate,
+                    httpOnly: cookieItem.httpOnly,
+                    name: cookieItem.name,
+                    path: cookieItem.path,
+                    partitionKey: cookieItem.partitionKey,
+                    sameSite: cookieItem.sameSite,
+                    secure: cookieItem.secure,
+                    storeId: cookieItem.storeId,
+                    value: cookieItem.value
+                })
+            }
+            break
         case "openSettingPage":
             chrome.runtime.openOptionsPage();
             break

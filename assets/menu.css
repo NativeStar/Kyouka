@@ -110,9 +110,11 @@ label:not([class*="keepCursor"]) {
     flex-direction: row;
     justify-content: space-between;
 }
+
 #menuTitleBar.dragging {
     cursor: grabbing;
 }
+
 #menuContainer {
     margin-top: 2%;
     display: flex;
@@ -156,7 +158,11 @@ label:not([class*="keepCursor"]) {
     box-shadow: none;
 }
 
-[subTool]{
+[subTool] {
+    background-color: rgba(73, 42, 91, 0.8);
+}
+
+.subToolColor {
     background-color: rgba(73, 42, 91, 0.8);
 }
 
@@ -180,6 +186,7 @@ label:not([class*="keepCursor"]) {
     border-radius: 10px;
     font-size: x-small;
 }
+
 #root button {
     font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
 }

@@ -1,3 +1,4 @@
+import type { SnapshotJson } from "./types"
 async function injectGuiScript() {
     const menuContainer = document.createElement("div");
     menuContainer.id = "kyouka-menu";
@@ -86,36 +87,51 @@ function initDom(dom: Document) {
     }
     {
         //导出存储
-        dom.getElementById("exportStorageExtension")?.addEventListener("click", () => {
+        dom.getElementById("siteDataSnapshot")?.addEventListener("click", async () => {
             if (!("showSaveFilePicker" in window)) {
                 alert("当前浏览器不支持showSaveFilePicker")
                 return
             }
-            showSaveFilePicker({ suggestedName: `ExportStorage-${Date.now()}.csv` }).then(async (fd) => {
+            if ((await indexedDB.databases()).length > 0) {
+                if (!confirm("该页面使用了IndexedDB保存数据 但扩展不支持处理此类数据 恢复后可能出现异常\n确定继续?")) return
+            }
+            //避免文件名出现Windows保留字
+            const localTimeString = new Date().toLocaleString().replaceAll("/", "-").replaceAll(":", "-");
+            const cookieList = await chrome.runtime.sendMessage<any, chrome.cookies.Cookie[]>({ type: "getAllCookie" });
+            const localStorageEntries = Object.entries(localStorage);
+            const sessionStorageEntries = Object.entries(sessionStorage);
+            if (cookieList === null) {
+                alert("无法获取Cookie列表!")
+                return
+            }
+            if (cookieList.length === 0 && localStorageEntries.length === 0 && sessionStorageEntries.length === 0) {
+                alert("该网站未保存任何可导出数据!")
+                return
+            }
+            showSaveFilePicker({ suggestedName: `DataSnapshot-${location.host}-${localTimeString}.json` }).then(async (fd) => {
                 try {
                     const writeStream = await fd.createWritable();
-                    const cookieList = await chrome.runtime.sendMessage<any, chrome.cookies.Cookie[]>({ type: "getAllCookie" });
                     //cookie
-                    writeStream.write("Cookie\nname,value,domain,path,expires,secure,httpOnly,sameSite,partitionKey")
-                    if (cookieList === null) {
-                        alert("无法获取Cookie列表!")
-                        writeStream.close().catch(() => { });
-                        return
-                    }
-                    const nowTimestamp = Date.now();
+                    const tempObject: SnapshotJson = { metadata: { version: 1, host: location.host }, data: { cookie: [], localStorage: [], sessionStorage: [] } };
                     for (const cookieItem of cookieList) {
-                        writeStream.write(`\n"${cookieItem.name}","${cookieItem.value}","${cookieItem.domain}","${cookieItem.path}",${cookieItem.expirationDate ? new Date(cookieItem.expirationDate + nowTimestamp).toLocaleString() : "Session"},${cookieItem.secure},${cookieItem.httpOnly},${cookieItem.sameSite},"${cookieItem.partitionKey ?? ""}"`)
+                        cookieItem.partitionKey
+                        tempObject.data.cookie.push(cookieItem)
                     }
                     //localStorage
-                    writeStream.write("\n\nLocalStorage\nname,value");
-                    for (const [name, value] of Object.entries(localStorage)) {
-                        writeStream.write(`\n"${name}","${value}"`)
+                    for (const [name, value] of localStorageEntries) {
+                        tempObject.data.localStorage.push({
+                            key: name,
+                            value: value
+                        })
                     }
                     //sessionStorage
-                    writeStream.write("\n\nSessionStorage\nname,value");
-                    for (const [name, value] of Object.entries(sessionStorage)) {
-                        writeStream.write(`\n"${name}","${value}"`)
+                    for (const [name, value] of sessionStorageEntries) {
+                        tempObject.data.sessionStorage.push({
+                            key: name,
+                            value: value
+                        })
                     }
+                    await writeStream.write(JSON.stringify(tempObject));
                     //结束
                     await writeStream.close();
                     alert("导出完成");
@@ -125,6 +141,50 @@ function initDom(dom: Document) {
                 }
             }).catch(() => { });
         });
+        dom.getElementById("siteDataSnapshot")?.addEventListener("contextmenu", () => {
+            if (!("showOpenFilePicker" in window)) {
+                alert("当前浏览器不支持showOpenFilePicker");
+                return
+            }
+            showOpenFilePicker().then(files => {
+                const targetFile = files[0];
+                if (!targetFile) return
+                targetFile.getFile().then(fileInstance => {
+                    fileInstance.text().then(async (json) => {
+                        try {
+                            const parsedJson = JSON.parse(json) as SnapshotJson;
+                            //简单检查
+                            if (!(parsedJson.data.cookie instanceof Array) || !(parsedJson.data.localStorage instanceof Array) || !(parsedJson.data.sessionStorage instanceof Array)) {
+                                alert("快照文件无效!");
+                                return
+                            }
+                            if (parsedJson.metadata.host !== location.host && !confirm(`快照文件网站和当前网站不一致 请确认文件选择是否正确\n快照网站:${parsedJson.metadata.host} 当前网站:${location.host}\n如果继续加载 Cookie可能出现问题(扩展会尝试修复 但不保证成功)\n确认继续?`)) return
+                            if (!confirm("加载快照将清空当前数据 确定继续?")) return
+                            //cookie
+                            await chrome.runtime.sendMessage({
+                                type: "replaceCookie",
+                                data: parsedJson.data.cookie,
+                                domain: location.host
+                            });
+                            //localStorage
+                            localStorage.clear();
+                            for (const storageItem of parsedJson.data.localStorage) {
+                                localStorage.setItem(storageItem.key, storageItem.value)
+                            }
+                            //sessionStorage
+                            sessionStorage.clear();
+                            for (const storageItem of parsedJson.data.sessionStorage) {
+                                sessionStorage.setItem(storageItem.key, storageItem.value)
+                            }
+                            alert("导入完成")
+                        } catch (error) {
+                            alert("加载快照时发生异常 详见控制台")
+                            console.error(error);
+                        }
+                    })
+                })
+            })
+        })
     }
 }
 init();
