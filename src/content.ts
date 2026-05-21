@@ -176,7 +176,7 @@ function initDom(dom: Document) {
                             for (const storageItem of parsedJson.data.sessionStorage) {
                                 sessionStorage.setItem(storageItem.key, storageItem.value)
                             }
-                            alert("导入完成")
+                            confirm("导入完成 建议立即刷新页面避免可能的异常\n是否立即刷新")&&location.reload();
                         } catch (error) {
                             alert("加载快照时发生异常 详见控制台")
                             console.error(error);
