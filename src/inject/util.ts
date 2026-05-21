@@ -11,6 +11,7 @@ export function showToast(text: string, time: number = 1500) {
     toast.style.position = "fixed";
     toast.style.top = "9%";
     toast.style.userSelect = "none";
+    toast.style.pointerEvents = "none";
     toast.style.zIndex = "9999999999999999999999";
     toast.innerText = text;
     document.body.appendChild(toast);
@@ -36,6 +37,7 @@ export function showProgressToast(text: string | null, show: boolean) {
     toast.style.backgroundColor = "rgba(78, 47, 112, 0.82)";
     toast.style.color = "white";
     toast.style.position = "fixed";
+    toast.style.pointerEvents = "none";
     toast.style.top = "9%";
     toast.style.userSelect = "none";
     toast.style.zIndex = "9999999999999999999999";
