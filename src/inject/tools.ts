@@ -64,7 +64,7 @@ export async function waitOriginObject() {
     Reflect.deleteProperty(window, "kyouka-backup-object");
     Reflect.deleteProperty(window, "kyouka-hooker");
 }
-export function getHooker(){
+export function getHooker() {
     return hookerInstance
 }
 export const Tools: { [key: string]: () => void } = {
@@ -956,17 +956,20 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         });
         showToast(result ? successText : executedText)
     },
-    "logPostMessage": () => {
+    "logMessage": () => {
         if (hookerInstance.isHooked(window.postMessage)) {
             return showToast(executedText)
         }
         const result = hookerInstance.hookMethod(window, "postMessage", {
             afterMethodInvoke(args) {
-                const originJsonStringify = hookerInstance.ensureOriginExecutable<typeof JSON.stringify>(JSON.stringify);
-                const arg0Data = args[0] instanceof Object ? originJsonStringify(args[0]) : args[0]
-                originObjectReference.console.log(`推送消息:${arg0Data}\n目标:${args[1] ?? "unset"}`)
+                // const originJsonStringify = hookerInstance.ensureOriginExecutable<typeof JSON.stringify>(JSON.stringify);
+                // const arg0Data = args[0] instanceof Object ? originJsonStringify(args[0]) : args[0]
+                originObjectReference.console.log(`推送消息 \n目标:${args[1] ?? "unset"}`,args[0])
             },
         });
+        window.addEventListener("message", event => {
+            originObjectReference.console.log("收到消息:", event.data);
+        })
         showToast(result ? successText : executedText)
     },
     "logMathRandom": () => {
@@ -1072,7 +1075,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         showToast(passwordInput.length > 0 ? successText : "未找到密码输入框");
     },
     "logCredentials": () => {
-        if(hookerInstance.isHooked(navigator.credentials.create)&&hookerInstance.isHooked(navigator.credentials.get)){
+        if (hookerInstance.isHooked(navigator.credentials.create) && hookerInstance.isHooked(navigator.credentials.get)) {
             showToast(executedText);
             return
         }
@@ -1092,6 +1095,6 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
                 originObjectReference.console.log("navigator.credentials.get invoke result:", tempResult.current);
             }
         });
-        showToast(createHookResult&&getHookResult?successText:failedText);
+        showToast(createHookResult && getHookResult ? successText : failedText);
     }
 }
