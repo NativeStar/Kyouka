@@ -926,7 +926,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
                         currentCacheItemIndex++
                         showProgressToast(`导出第${currentRepoIndex}/${cacheKeys.length}个仓库的第${currentCacheItemIndex}/${cacheFilesList.length}个文件`, true)
                         const cacheItemResponse = await cacheRepoInstance.match(originCacheRequest)!;
-                        if (!cacheItemResponse) {
+                        if (!cacheItemResponse || cacheItemResponse.body === null) {
                             originObjectReference.console.log(`Missing cache data:${originCacheRequest.url}`);
                             continue
                         }
@@ -964,7 +964,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
             afterMethodInvoke(args) {
                 // const originJsonStringify = hookerInstance.ensureOriginExecutable<typeof JSON.stringify>(JSON.stringify);
                 // const arg0Data = args[0] instanceof Object ? originJsonStringify(args[0]) : args[0]
-                originObjectReference.console.log(`推送消息 \n目标:${args[1] ?? "unset"}`,args[0])
+                originObjectReference.console.log(`推送消息 \n目标:${args[1] ?? "unset"}`, args[0])
             },
         });
         window.addEventListener("message", event => {
