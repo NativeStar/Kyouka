@@ -1,5 +1,5 @@
 import { Hooker, type OriginObjects } from "js-hooker";
-import { parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
+import { makeFileParentDir, parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
 let originObjectReference: typeof OriginObjects = Hooker.getOriginReference();
@@ -931,7 +931,8 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
                             continue
                         }
                         const url = new URL(originCacheRequest.url);
-                        const targetFileHandle = await dirHandle.getFileHandle(`${Date.now()}-${replaceWindowsFileNameInvalidChars(url.pathname)}`, { create: true })
+                        const {directory:lastDirectoryHandle,file}=await makeFileParentDir(dirHandle,url.pathname);
+                        const targetFileHandle = await lastDirectoryHandle.getFileHandle(replaceWindowsFileNameInvalidChars(file), { create: true })
                         const targetFileOutputStream = await targetFileHandle.createWritable();
                         await cacheItemResponse.body?.pipeTo(targetFileOutputStream);
                     }

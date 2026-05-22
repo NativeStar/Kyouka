@@ -78,3 +78,18 @@ export function replaceWindowsFileNameInvalidChars(input: string, replacement: s
         .replace(windowsTrailingSpaceOrDotRegex, match => replacement.repeat(match.length));
     return sanitized.replace(windowsReservedFileNameRegex, match => replacement.repeat(match.length));
 }
+export async function makeFileParentDir(root: FileSystemDirectoryHandle, path: string):Promise<{ directory: FileSystemDirectoryHandle; file: string; }>{
+    const rawPaths = path.split("/");
+    const pathLastElement = rawPaths[rawPaths.length - 1]??rawPaths[0];
+    const paths=rawPaths.slice(0,-1);
+    if (paths.length<=1) {
+        return {directory:root,file:pathLastElement!};
+    }
+    let lastDirectory = root;
+    for (const path of paths) {
+        if (path === "") continue;
+        const directory = await lastDirectory.getDirectoryHandle(path, { create: true });
+        lastDirectory = directory;
+    }
+    return {directory:lastDirectory,file:pathLastElement!};
+}
