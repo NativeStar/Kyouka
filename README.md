@@ -42,7 +42,7 @@
 - 伪造页面事件(包含load unload事件快捷键 亦可自定义事件名)
 - 打印crypto.randomUUID返回
 - 打印URL.createObjectURL返回
-- 打印postMessage参数
+- 打印postMessage方法调用参数和window上的消息事件
 - 打印Math.random返回
 - 屏蔽share函数
 - 打印WebAuthn相关API输入和返回
