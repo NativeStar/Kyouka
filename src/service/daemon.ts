@@ -278,6 +278,11 @@ function setupContextMenu() {
         title: "使用小窗跳转(仅限链接)",
         contexts: ["selection"],
     });
+    chrome.contextMenus.create({
+        id: "calcTextCount",
+        title: "选中字数统计",
+        contexts: ["selection"],
+    });
     chrome.contextMenus.onClicked.addListener(onContextMenuClickHandle)
 }
 function teardownContextMenu() {
@@ -313,6 +318,21 @@ function onContextMenuClickHandle(info: chrome.contextMenus.OnClickData, tab?: c
                     func: () => {
                         alert("无效URL!")
                     }
+                }).catch(e => console.log(e))
+            }
+            break
+        case "calcTextCount":
+            {
+                const selectedText = info.selectionText;
+                if (typeof selectedText !== "string") return;
+                chrome.scripting.executeScript({
+                    target: {
+                        tabId: tab.id
+                    },
+                    func: (text: string) => {
+                        alert(`选中文本数量:${text.length}`)
+                    },
+                    args: [selectedText]
                 }).catch(e => console.log(e))
             }
             break
