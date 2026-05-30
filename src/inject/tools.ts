@@ -1031,7 +1031,6 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         });
         showToast(result ? successText : failedText)
     },
-    //TODO 禁用cache api
     "visitRobotsTxt": async () => {
         showToast("Loading...", 350);
         try {
