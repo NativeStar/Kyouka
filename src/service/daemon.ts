@@ -1,4 +1,5 @@
 import { DefaultExtensionConfig, type ExtensionConfig } from "../types.js";
+import { windowAlert } from "./util.js";
 type Message = {
     type: string
     [key: string]: any
@@ -142,14 +143,7 @@ chrome.action.onClicked.addListener(async (tab) => {
         config = await chrome.storage.local.get(null);
     }
     if (!(config as ExtensionConfig).enableGui) {
-        tab.id && chrome.scripting.executeScript({
-            target: {
-                tabId: tab.id
-            },
-            func: () => {
-                window.alert("Kyouka:请在设置中开启注入GUI并刷新页面")
-            }
-        }).catch(e => console.log(e))
+        tab.id && windowAlert(tab.id, "Kyouka:请在设置中开启注入GUI并刷新页面")
         return
     }
     chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
@@ -161,14 +155,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
         config = await chrome.storage.local.get(null);
     }
     if (!(config as ExtensionConfig).enableGui) {
-        tab.id && chrome.scripting.executeScript({
-            target: {
-                tabId: tab.id
-            },
-            func: () => {
-                window.alert("Kyouka:请在设置中开启注入GUI并刷新页面")
-            }
-        }).catch(e => console.log(e))
+        tab.id && windowAlert(tab.id, "Kyouka:请在设置中开启注入GUI并刷新页面")
         return
     }
     if (command === "openPanelHotkey") {
@@ -287,11 +274,16 @@ async function setupContextMenu() {
         title: "选中字数统计",
         contexts: ["selection"],
     });
+    chrome.contextMenus.create({
+        id: "calcImageResolution",
+        title: "获取图片分辨率",
+        contexts: ["image"],
+    });
 }
 function teardownContextMenu() {
     chrome.contextMenus.removeAll();
 }
-function onContextMenuClickHandle(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) {
+async function onContextMenuClickHandle(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) {
     if (!tab || !tab.id) {
         return
     }
@@ -313,29 +305,28 @@ function onContextMenuClickHandle(info: chrome.contextMenus.OnClickData, tab?: c
                 const urlInstance = new URL(selectedText);
                 chrome.windows.create({ url: urlInstance.href, type: "popup", width: 500, height: 500 });
             } catch (error) {
-                chrome.scripting.executeScript({
-                    target: {
-                        tabId: tab.id
-                    },
-                    func: () => {
-                        alert("无效URL!")
-                    }
-                }).catch(e => console.log(e))
+                windowAlert(tab.id!, "无效URL!");
             }
             break
         case "calcTextCount":
             {
                 const selectedText = info.selectionText;
                 if (typeof selectedText !== "string") return;
-                chrome.scripting.executeScript({
-                    target: {
-                        tabId: tab.id
-                    },
-                    func: (text: string) => {
-                        alert(`选中文本数量:${text.length}`)
-                    },
-                    args: [selectedText]
-                }).catch(e => console.log(e))
+                windowAlert(tab.id!, `选中文本数量:${selectedText.length}`);
+            }
+            break
+        case "calcImageResolution":
+            if (!info.srcUrl) {
+                alert("无法打开图片!");
+                return
+            }
+            try {
+                const data=await (await fetch(info.srcUrl)).blob();
+                const bitmap=await createImageBitmap(data);
+                windowAlert(tab.id!, `图片分辨率:${bitmap.width}*${bitmap.height}`);
+                bitmap.close();
+            } catch (error) {
+                windowAlert(tab.id!, `无法加载图片!\n${error}`);
             }
             break
         default:
