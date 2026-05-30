@@ -12,6 +12,7 @@ export const DefaultExtensionConfig = {
     printStackInLogs: false,
     allowContextMenu: false,
     enableContextMenu: true,
+    disableCacheApi: false,
 } as const;
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {

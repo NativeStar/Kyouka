@@ -9,6 +9,7 @@ import { ConsoleDetectBypass } from "../tools/consoleDetectBypass";
 import { PrintLogStack } from "../tools/printLogStack";
 import { StringDetectBypass } from "../tools/stringDetectBypass";
 import { AllowContextMenu } from "../tools/allowContextMenu";
+import { DisableCacheApi } from "../tools/disableCacheApi";
 
 export class ToolManager {
     private toolsConfigList = {
@@ -17,14 +18,15 @@ export class ToolManager {
         blockConsole: new BlockConsoleOutput(),
         blockError: new BlockError(),
         blockStringCodeExecute: new BlockStringCodeExecute(),
-        stringDetectBypass:new StringDetectBypass(),
-        printStackInLogs:new PrintLogStack(),
-        allowContextMenu:new AllowContextMenu(),
+        stringDetectBypass: new StringDetectBypass(),
+        printStackInLogs: new PrintLogStack(),
+        allowContextMenu: new AllowContextMenu(),
+        disableCacheApi: new DisableCacheApi(),
     } as const;
     private preHooksMethodList: PreHookOption[];
-    private hooker:Hooker;
-    constructor(hooker:Hooker) {
-        this.hooker=hooker;
+    private hooker: Hooker;
+    constructor(hooker: Hooker) {
+        this.hooker = hooker;
         const tools: AbstractTool[] = Object.values(this.toolsConfigList);
         this.preHooksMethodList = tools.flatMap(toolInstance => toolInstance.preHookMethodList);
         //preHook
@@ -35,7 +37,7 @@ export class ToolManager {
             //TODO 实现其他类型hook
             if (preHookOption.useAsyncHook) {
                 this.hooker.hookAsyncMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
-            }else{
+            } else {
                 this.hooker.hookMethod(preHookOption.parent, preHookOption.methodName, { id: preHookOption.id })
             }
             hookedIds.add(preHookOption.id);
@@ -50,12 +52,12 @@ export class ToolManager {
         for (const key of toolKeys) {
             // 初始化工具
             if (config[key]) {
-                this.toolsConfigList[key].onMount(config as never,this.hooker);
+                this.toolsConfigList[key].onMount(config as never, this.hooker);
             }
         }
         //释放占位hook
         for (const preHookInstance of this.preHooksMethodList) {
-            this.hooker.unhook(preHookInstance.type, preHookInstance.parent, preHookInstance.methodName, preHookInstance.id,true);
+            this.hooker.unhook(preHookInstance.type, preHookInstance.parent, preHookInstance.methodName, preHookInstance.id, true);
         }
     }
 }
