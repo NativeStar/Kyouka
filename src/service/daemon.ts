@@ -100,6 +100,9 @@ chrome.runtime.onMessage.addListener(async (msg: Message, sender, sendResponse) 
             break;
     }
 });
+if (!chrome.contextMenus.onClicked.hasListener(onContextMenuClickHandle)) {
+    chrome.contextMenus.onClicked.addListener(onContextMenuClickHandle);
+}
 //初始化配置
 chrome.runtime.onInstalled.addListener(async (detail) => {
     if (detail.reason === "update" || detail.reason === "install") {
@@ -120,13 +123,14 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
 //兜底 避免某些情况状态不一致
 chrome.runtime.onStartup.addListener(() => {
     chrome.storage.local.get(null).then(async (value) => {
+        const mergedConfig = { ...DefaultExtensionConfig, ...value };
         const isRegisteredGuiScript = (await chrome.scripting.getRegisteredContentScripts({ ids: ["guiScript"] })).length > 0;
-        if ((value as ExtensionConfig).enableGui) {
+        if (mergedConfig.enableGui) {
             !isRegisteredGuiScript && chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
         } else {
             isRegisteredGuiScript && chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
         }
-        (value as ExtensionConfig).enableContextMenu ? setupContextMenu() : teardownContextMenu();
+        mergedConfig.enableContextMenu ? setupContextMenu() : teardownContextMenu();
     });
 });
 // action
@@ -256,8 +260,8 @@ function onSettingChange(change: { [key: string]: chrome.storage.StorageChange; 
             newValue ? setupContextMenu() : teardownContextMenu()
     }
 }
-function setupContextMenu() {
-    chrome.contextMenus.removeAll();
+async function setupContextMenu() {
+    await chrome.contextMenus.removeAll();
     chrome.contextMenus.create({
         id: "openPanelMenuItem",
         title: "打开面板",
@@ -283,11 +287,9 @@ function setupContextMenu() {
         title: "选中字数统计",
         contexts: ["selection"],
     });
-    chrome.contextMenus.onClicked.addListener(onContextMenuClickHandle)
 }
 function teardownContextMenu() {
     chrome.contextMenus.removeAll();
-    chrome.contextMenus.onClicked.removeListener(onContextMenuClickHandle)
 }
 function onContextMenuClickHandle(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) {
     if (!tab || !tab.id) {
