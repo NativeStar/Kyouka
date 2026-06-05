@@ -1,4 +1,4 @@
-import { Hooker, type OriginObjects } from "js-hooker";
+import { Hooker, type OriginObjects, FastUtils } from "js-hooker";
 import { makeFileParentDir, parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
@@ -480,12 +480,9 @@ export const Tools: { [key: string]: () => void } = {
         if (hookerInstance.isHooked(window.open)) {
             return showToast(executedText)
         }
-        const result = hookerInstance.hookMethod(window, "open", {
-            beforeMethodInvoke(_args, abortController) {
-                showToast("已阻止一次open调用")
-                abortController.abort();
-            }
-        });
+        const result = FastUtils.hookAbortMethodExecute(hookerInstance, window, "open", "sync", () => {
+            showToast("已阻止一次open调用")
+        })
         showToast(result ? successText : failedText)
     },
     "blockConsole": () => {
@@ -531,14 +528,9 @@ export const Tools: { [key: string]: () => void } = {
         if (hookerInstance.isHooked(navigator.sendBeacon)) {
             return showToast(executedText)
         }
-        const result = hookerInstance.hookMethod(navigator, "sendBeacon", {
-            beforeMethodInvoke(args, abortController) {
-                // 顺便看看有多少网站用了这个API
-                showToast("已阻止一次sendBeacon调用")
-                originObjectReference.console.log(args)
-                abortController.abort();
-            }
-        });
+        const result = FastUtils.hookAbortMethodExecute(hookerInstance, navigator, "sendBeacon", "sync", () => {
+            showToast("已阻止一次sendBeacon调用")
+        })
         showToast(result ? successText : failedText)
     },
     "forceRTL": () => {
@@ -931,7 +923,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
                             continue
                         }
                         const url = new URL(originCacheRequest.url);
-                        const {directory:lastDirectoryHandle,file}=await makeFileParentDir(dirHandle,url.pathname);
+                        const { directory: lastDirectoryHandle, file } = await makeFileParentDir(dirHandle, url.pathname);
                         const targetFileHandle = await lastDirectoryHandle.getFileHandle(replaceWindowsFileNameInvalidChars(file), { create: true })
                         const targetFileOutputStream = await targetFileHandle.createWritable();
                         await cacheItemResponse.body?.pipeTo(targetFileOutputStream);
@@ -963,8 +955,6 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         }
         const result = hookerInstance.hookMethod(window, "postMessage", {
             afterMethodInvoke(args) {
-                // const originJsonStringify = hookerInstance.ensureOriginExecutable<typeof JSON.stringify>(JSON.stringify);
-                // const arg0Data = args[0] instanceof Object ? originJsonStringify(args[0]) : args[0]
                 originObjectReference.console.log(`推送消息 \n目标:${args[1] ?? "unset"}`, args[0])
             },
         });
@@ -988,13 +978,8 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         if (hookerInstance.isHooked(window.close)) {
             return showToast(executedText)
         }
-        hookerInstance.hookMethod(window, "close", {
-            beforeMethodInvoke(_args, abortController) {
-                showToast("阻止一次close调用", 800);
-                abortController.abort();
-            }
-        });
-        showToast(successText)
+        const result = FastUtils.hookPrintMethodExecuteArgs(hookerInstance, window, "close", "sync")
+        showToast(result ? successText : failedText)
     },
     "removeElement": () => {
         const input = prompt("欲删除元素名 如input", "");
@@ -1023,12 +1008,9 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         if (hookerInstance.isHooked(navigator.share)) {
             return showToast(executedText)
         }
-        const result = hookerInstance.hookAsyncMethod(navigator, "share", {
-            beforeMethodInvoke(_args, abortController) {
-                showToast("阻止一次share调用", 800);
-                abortController.abort();
-            }
-        });
+        const result = FastUtils.hookAbortMethodExecute(hookerInstance, navigator, "share", "async", () => {
+            showToast("阻止一次share调用", 800);
+        })
         showToast(result ? successText : failedText)
     },
     "visitRobotsTxt": async () => {
