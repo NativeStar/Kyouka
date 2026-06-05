@@ -1079,5 +1079,16 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
             }
         });
         showToast(createHookResult && getHookResult ? successText : failedText);
+    },
+    "allowScale": () => {
+        const metaList = document.querySelectorAll("meta[name=viewport]");
+        if (metaList.length === 0) {
+            showToast("未找到相关限制标签");
+            return
+        }
+        metaList.forEach(meta => {
+            meta.setAttribute("content", "width=device-width,initial-scale=1.0,maximum-scale=10.0,user-scalable=yes")
+        });
+        showToast(successText);
     }
 }
