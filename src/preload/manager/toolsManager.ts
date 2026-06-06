@@ -10,6 +10,7 @@ import { PrintLogStack } from "../tools/printLogStack";
 import { StringDetectBypass } from "../tools/stringDetectBypass";
 import { AllowContextMenu } from "../tools/allowContextMenu";
 import { DisableCacheApi } from "../tools/disableCacheApi";
+import { BlockServiceWorker } from "../tools/BlockServiceWorker";
 
 export class ToolManager {
     private toolsConfigList = {
@@ -22,6 +23,7 @@ export class ToolManager {
         printStackInLogs: new PrintLogStack(),
         allowContextMenu: new AllowContextMenu(),
         disableCacheApi: new DisableCacheApi(),
+        blockServiceWorker:new BlockServiceWorker()
     } as const;
     private preHooksMethodList: PreHookOption[];
     private hooker: Hooker;

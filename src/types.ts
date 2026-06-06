@@ -13,6 +13,7 @@ export const DefaultExtensionConfig = {
     allowContextMenu: false,
     enableContextMenu: true,
     disableCacheApi: false,
+    blockServiceWorker:false
 } as const;
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {
