@@ -1,39 +1,27 @@
-import {type Hooker } from "js-hooker";
+import { type Hooker ,FastUtils} from "js-hooker";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
-export class BlockConsoleOutput extends AbstractTool {    private rejectAllInvoke(_args: any[], abortController: AbortController) {
+export class BlockConsoleOutput extends AbstractTool {
+    private rejectAllInvoke(_args: any[], abortController: AbortController) {
         abortController.abort();
     }
     onMount(_config: never, hooker: Hooker): void {
+        //有id的保持原hook法用作判断 等更新hooker库支持自定义id
         hooker.hookMethod(console, "table", {
             beforeMethodInvoke: this.rejectAllInvoke,
-            id:"toolBlockConsoleExec"
+            id: "toolBlockConsoleExec"
         });
-        hooker.hookMethod(console, "debug", {
-            beforeMethodInvoke: this.rejectAllInvoke
-        })
         hooker.hookMethod(console, "log", {
             beforeMethodInvoke: this.rejectAllInvoke,
-            id:"toolBlockConsoleExec"
+            id: "toolBlockConsoleExec"
         });
-        hooker.hookMethod(console, "info", {
-            beforeMethodInvoke: this.rejectAllInvoke
-        });
-        hooker.hookMethod(console, "warn", {
-            beforeMethodInvoke: this.rejectAllInvoke
-        });
-        hooker.hookMethod(console, "error", {
-            beforeMethodInvoke: this.rejectAllInvoke
-        });
-        hooker.hookMethod(console, "dir", {
-            beforeMethodInvoke: this.rejectAllInvoke
-        });
-        hooker.hookMethod(console, "dirxml", {
-            beforeMethodInvoke: this.rejectAllInvoke
-        });
-        hooker.hookMethod(console, "clear", {
-            beforeMethodInvoke: this.rejectAllInvoke
-        })
+        FastUtils.hookAbortMethodExecute(hooker,console,"debug","sync");
+        FastUtils.hookAbortMethodExecute(hooker,console,"info","sync");
+        FastUtils.hookAbortMethodExecute(hooker,console,"warn","sync");
+        FastUtils.hookAbortMethodExecute(hooker,console,"error","sync");
+        FastUtils.hookAbortMethodExecute(hooker,console,"dir","sync");
+        FastUtils.hookAbortMethodExecute(hooker,console,"dirxml","sync");
+        FastUtils.hookAbortMethodExecute(hooker,console,"clear","sync");
     }
     override get preHookMethodList(): PreHookOption[] {
         return [
@@ -41,56 +29,56 @@ export class BlockConsoleOutput extends AbstractTool {    private rejectAllInvok
                 parent: console,
                 methodName: "table",
                 id: "pre#console.table",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "debug",
                 id: "pre#console.debug",
-                type:"method"
+                type: "method"
 
             },
             {
                 parent: console,
                 methodName: "log",
                 id: "pre#console.log",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "info",
                 id: "pre#console.info",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "warn",
                 id: "pre#console.warn",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "error",
                 id: "pre#console.error",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "dir",
                 id: "pre#console.dir",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "dirxml",
                 id: "pre#console.dirxml",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "clear",
                 id: "pre#console.clear",
-                type:"method"
+                type: "method"
             }
         ]
     }

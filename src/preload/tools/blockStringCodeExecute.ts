@@ -1,14 +1,10 @@
-import {type Hooker } from "js-hooker";
+import {type Hooker ,FastUtils} from "js-hooker";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 export class BlockStringCodeExecute extends AbstractTool {
     private static readonly abortInvokeTargetAttrs: string[] = ["innerText", "innerHTML", "text", "textContent"] as const;
     onMount(_config: never, hooker: Hooker): void {
-        hooker.hookMethod(window, "eval", {
-            beforeMethodInvoke(_args, abortController) {
-                abortController.abort();
-            },
-        });
+        FastUtils.hookAbortMethodExecute(hooker,window,"eval","sync");
         hooker.hookObject(window,"Function",{
             beforeConstruct(_args, abortController, tempObject, originConstruct) {
                 abortController.abort();
@@ -62,16 +58,8 @@ export class BlockStringCodeExecute extends AbstractTool {
                 }
             },
         })
-        hooker.hookMethod(HTMLScriptElement.prototype, "setHTMLUnsafe",{
-            beforeMethodInvoke(_args, abortController) {
-                abortController.abort();
-            },
-        });
-        hooker.hookMethod(HTMLScriptElement.prototype, "setHTML", {
-            beforeMethodInvoke(_args, abortController) {
-                abortController.abort();
-            },
-        });
+        FastUtils.hookAbortMethodExecute(hooker,HTMLScriptElement.prototype,"setHTMLUnsafe","sync");
+        FastUtils.hookAbortMethodExecute(hooker,HTMLScriptElement.prototype,"setHTML","sync");
     }
     override get preHookMethodList(): PreHookOption[] {
         return [
