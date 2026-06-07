@@ -1,8 +1,9 @@
 import { Hooker, type OriginObjects, FastUtils } from "js-hooker";
-import { makeFileParentDir, parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
+import { getWatermarkElements, makeFileParentDir, parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 const shadowDomDiv = document.getElementById("kyouka-menu");
 let recorder: MediaRecorder | null = null;
 let originObjectReference: typeof OriginObjects = Hooker.getOriginReference();
+const watermarkElementsMap = new Map<Node, CSSStyleDeclaration>();
 const successText = "执行成功";
 const failedText = "执行失败";
 const executedText = "该功能已执行过"
@@ -681,24 +682,18 @@ export const Tools: { [key: string]: () => void } = {
         }).catch(() => { })
     },
     "removeWatermark": () => {
-        const allElements = document.querySelectorAll('*') as NodeListOf<HTMLElement>;
-        let removedElementCount = 0;
-        for (const element of allElements) {
-            const elementStyle = getComputedStyle(element);
-            const zIndexNumber = parseInt(elementStyle.zIndex);
-            //防止异常
-            if (isNaN(zIndexNumber)) continue
-            // 将所有忽略指针事件且带zIndex的元素判为水印
-            if (elementStyle.pointerEvents === "none" && zIndexNumber > 1) {
-                element.remove();
-                removedElementCount++;
-            }
+        const elements = getWatermarkElements();
+        if (elements.length === 0) {
+            showToast("未找到符合条件的元素");
+            return
         }
-        showToast(removedElementCount === 0 ? "未找到符合条件的元素" : `已移除${removedElementCount}个元素`)
+        elements.forEach(element => element.remove());
+        showToast(`已移除${elements.length}个元素`)
     },
     "sub:removeWatermark": () => {
-        //hook append
+        //hook append 阻止重新追加
         //确保没有hook相关方法
+        const originGetComputedStyle = hookerInstance.ensureOriginExecutable<typeof getComputedStyle>(getComputedStyle)
         if (!hookerInstance.isHooked(HTMLElement.prototype.append)) {
             const hookAppendResult = hookerInstance.hookMethod(HTMLElement.prototype, "append", {
                 beforeMethodInvoke(args, abortController) {
@@ -722,8 +717,36 @@ export const Tools: { [key: string]: () => void } = {
                 return
             }
         }
-        //之后调用旧的移除水印即可
-        Tools["removeWatermark"]!();
+        //hook getComputedStyle 阻止获取样式
+        if (!hookerInstance.isHooked(window.getComputedStyle)) {
+            hookerInstance.hookMethod(window, "getComputedStyle", {
+                beforeMethodInvoke([element], abortController, _thisArg, tempMethodResult) {
+                    if (watermarkElementsMap.has(element)) {
+                        tempMethodResult.current = watermarkElementsMap.get(element)!;
+                        abortController.abort();
+                    }
+                }
+            })
+        }
+        //hook isConnected 拦截移除检测
+        if (!hookerInstance.isHookedById("accessor",Node.prototype,"isConnected","RemoveWatermarkIsConnectedHook")) {
+            hookerInstance.hookAccessor(Node.prototype, "isConnected", {
+                beforeGetterInvoke(abortController, thisArg, tempMethodResult) {
+                    if (watermarkElementsMap.has(thisArg)) {
+                        tempMethodResult.current = true;
+                        abortController.abort();
+                    }
+                },
+                id:"RemoveWatermarkIsConnectedHook"
+            })
+        }
+        //执行移除
+        const watermarkList = getWatermarkElements();
+        for (const element of watermarkList) {
+            watermarkElementsMap.set(element, originGetComputedStyle(element))
+            element.remove();
+        }
+        showToast(`已移除${watermarkList.length}个元素`)
     },
     "copyPageIconUrl": () => {
         const linkElement: HTMLLinkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement;

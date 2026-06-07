@@ -78,12 +78,12 @@ export function replaceWindowsFileNameInvalidChars(input: string, replacement: s
         .replace(windowsTrailingSpaceOrDotRegex, match => replacement.repeat(match.length));
     return sanitized.replace(windowsReservedFileNameRegex, match => replacement.repeat(match.length));
 }
-export async function makeFileParentDir(root: FileSystemDirectoryHandle, path: string):Promise<{ directory: FileSystemDirectoryHandle; file: string; }>{
+export async function makeFileParentDir(root: FileSystemDirectoryHandle, path: string): Promise<{ directory: FileSystemDirectoryHandle; file: string; }> {
     const rawPaths = path.split("/");
-    const pathLastElement = rawPaths[rawPaths.length - 1]??rawPaths[0];
-    const paths=rawPaths.slice(0,-1);
-    if (paths.length<=1) {
-        return {directory:root,file:pathLastElement!};
+    const pathLastElement = rawPaths[rawPaths.length - 1] ?? rawPaths[0];
+    const paths = rawPaths.slice(0, -1);
+    if (paths.length <= 1) {
+        return { directory: root, file: pathLastElement! };
     }
     let lastDirectory = root;
     for (const path of paths) {
@@ -91,5 +91,20 @@ export async function makeFileParentDir(root: FileSystemDirectoryHandle, path: s
         const directory = await lastDirectory.getDirectoryHandle(path, { create: true });
         lastDirectory = directory;
     }
-    return {directory:lastDirectory,file:pathLastElement!};
+    return { directory: lastDirectory, file: pathLastElement! };
+}
+export function getWatermarkElements() {
+    const allElements = document.querySelectorAll('*') as NodeListOf<HTMLElement>;
+    const tempWatermarkElementList: HTMLElement[] = [];
+    for (const element of allElements) {
+        const elementStyle = getComputedStyle(element);
+        const zIndexNumber = parseInt(elementStyle.zIndex);
+        //防止异常
+        if (isNaN(zIndexNumber)) continue
+        // 将所有忽略指针事件且带zIndex的元素判为水印
+        if (elementStyle.pointerEvents === "none" && zIndexNumber > 1) {
+            tempWatermarkElementList.push(element);
+        }
+    }
+    return tempWatermarkElementList;
 }
