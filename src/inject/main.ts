@@ -67,6 +67,7 @@ function initDom(shadow: ShadowRoot) {
                 root.style.top = (root.offsetTop - offsetY) + "px";
             }
         });
+        titleBar.addEventListener("pointercancel",()=>dragging=false);
         document.addEventListener("pointerup", event => {
             if (dragging) {
                 event.stopPropagation();

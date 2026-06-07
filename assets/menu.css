@@ -109,6 +109,7 @@ label:not([class*="keepCursor"]) {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    touch-action: none;
 }
 
 #menuTitleBar.dragging {
