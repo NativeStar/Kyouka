@@ -72,11 +72,11 @@ async function playButtonCheckChangeAudio(isEnable: boolean) {
     lastOscillator.frequency.value = isEnable ? 920 : 550;
     lastOscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
     firstOscillator.start();
-    lastOscillator.start(audioContext.currentTime + 0.08);
-    firstOscillator.stop(audioContext.currentTime + 0.08);
-    lastOscillator.stop(audioContext.currentTime + 0.16);
+    lastOscillator.start(audioContext.currentTime + 0.1);
+    firstOscillator.stop(audioContext.currentTime + 0.1);
+    lastOscillator.stop(audioContext.currentTime + 0.2);
 }
 async function getChromeConfig<T = any>(key: string, defaultValue: T): Promise<T> {
     const result = tempedConfig ?? await chrome.storage.local.get<{ [key: string]: boolean | string }>(key);

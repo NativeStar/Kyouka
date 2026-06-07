@@ -1005,7 +1005,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         showToast(result ? successText : failedText)
     },
     "removeElement": () => {
-        const input = prompt("欲删除元素名 如input", "");
+        const input = prompt("欲删除元素标签名 如input", "");
         if (!input) return
         for (const element of document.querySelectorAll(input)) {
             element.remove();
