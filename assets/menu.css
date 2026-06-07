@@ -139,8 +139,8 @@ label:not([class*="keepCursor"]) {
     flex-wrap: wrap;
     gap: 1vh;
     align-content: flex-start;
+    overflow-y: scroll;
 }
-
 .itemButton {
     background-color: rgba(34, 34, 84, 0.8);
     color: white;
