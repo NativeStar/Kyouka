@@ -68,9 +68,11 @@ function initDom(shadow: ShadowRoot) {
             }
         });
         document.addEventListener("pointerup", event => {
-            event.stopPropagation();
-            dragging = false;
-            titleBar.releasePointerCapture(event.pointerId);
+            if (dragging) {
+                event.stopPropagation();
+                dragging = false;
+                titleBar.releasePointerCapture(event.pointerId);
+            }
         });
     }
     //关闭按钮
