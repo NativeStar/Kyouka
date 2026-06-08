@@ -112,6 +112,19 @@ label:not([class*="keepCursor"]) {
     touch-action: none;
 }
 
+@media (max-aspect-ratio: 1 / 1) {
+    #root {
+        width: 92%;
+        height: 30%;
+        top: 25%;
+        left: 5%;
+    }
+
+    #menuTitleBar {
+        font-size: 2vh;
+    }
+}
+
 #menuTitleBar.dragging {
     cursor: grabbing;
 }
@@ -141,9 +154,11 @@ label:not([class*="keepCursor"]) {
     align-content: flex-start;
     overflow-y: scroll;
 }
-.toolList::-webkit-scrollbar{
+
+.toolList::-webkit-scrollbar {
     width: 0;
 }
+
 .itemButton {
     background-color: rgba(34, 34, 84, 0.8);
     color: white;
