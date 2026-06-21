@@ -153,6 +153,8 @@ label:not([class*="keepCursor"]) {
     gap: 1vh;
     align-content: flex-start;
     overflow-y: scroll;
+    /* 移除滚动动画 */
+    overscroll-behavior-y: none;
 }
 
 .toolList::-webkit-scrollbar {
