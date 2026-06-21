@@ -729,7 +729,7 @@ export const Tools: { [key: string]: () => void } = {
             })
         }
         //hook isConnected 拦截移除检测
-        if (!hookerInstance.isHookedById("accessor",Node.prototype,"isConnected","RemoveWatermarkIsConnectedHook")) {
+        if (!hookerInstance.isHookedById("accessor", Node.prototype, "isConnected", "RemoveWatermarkIsConnectedHook")) {
             hookerInstance.hookAccessor(Node.prototype, "isConnected", {
                 beforeGetterInvoke(abortController, thisArg, tempMethodResult) {
                     if (watermarkElementsMap.has(thisArg)) {
@@ -737,7 +737,7 @@ export const Tools: { [key: string]: () => void } = {
                         abortController.abort();
                     }
                 },
-                id:"RemoveWatermarkIsConnectedHook"
+                id: "RemoveWatermarkIsConnectedHook"
             })
         }
         //执行移除
@@ -1113,5 +1113,19 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
             meta.setAttribute("content", "width=device-width,initial-scale=1.0,maximum-scale=10.0,user-scalable=yes")
         });
         showToast(successText);
+    },
+    "unregisterServiceWorker": () => {
+        navigator.serviceWorker.getRegistrations().then(async (registrations) => {
+            if (registrations.length === 0) {
+                showToast("当前网站未注册ServiceWorker");
+                return
+            }
+            const counter = { success: 0, fail: 0 }
+            for (const registration of registrations) {
+                (await registration.unregister()) ? counter.success++ : counter.fail++
+
+            }
+            showToast(`已注销${counter.success}个ServiceWorker,失败${counter.fail}个`);
+        })
     }
 }
