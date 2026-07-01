@@ -26,6 +26,13 @@ export class AllowContextMenu extends AbstractTool {
             beforeSetterInvoke(_arg, abortController) {
                 abortController.abort();
             },
+        });
+        hooker.hookMethod(Window.prototype,"addEventListener",{
+            beforeMethodInvoke: ([eventName], abortController) => {
+                if (eventName === "contextmenu") {
+                    abortController.abort();
+                }
+            }
         })
     }
     get preHookMethodList(): PreHookOption[] {
