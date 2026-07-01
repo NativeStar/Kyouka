@@ -18,6 +18,13 @@ export class ConsoleDetectBypass extends AbstractTool {
         // 全都是空了 不打印 避免刷屏
         if (args.every(item => item === null)) abortController.abort();
     }
+    private checkKeyEvent(event: KeyboardEvent) {
+        if (event.key==="F12"||event.keyCode===123) {
+            console.log("f12 trigger");
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        }
+    }
     onMount(_config: never, hooker: Hooker): void {
         hooker.hookMethod(console, "table", {
             beforeMethodInvoke(_args, abortController) {
@@ -55,6 +62,14 @@ export class ConsoleDetectBypass extends AbstractTool {
                 abortController.abort();
             }
         });
+    }
+    onPreload(): void {
+        window.addEventListener("keydown",(event)=>{
+            this.checkKeyEvent(event);
+        },{capture:true});
+        document.addEventListener("keydown",(event)=>{
+            this.checkKeyEvent(event);
+        },{capture:true});
     }
     override get preHookMethodList(): PreHookOption[] {
         return [
