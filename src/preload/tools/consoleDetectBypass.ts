@@ -19,8 +19,7 @@ export class ConsoleDetectBypass extends AbstractTool {
         if (args.every(item => item === null)) abortController.abort();
     }
     private checkKeyEvent(event: KeyboardEvent) {
-        if (event.key==="F12"||event.keyCode===123) {
-            console.log("f12 trigger");
+        if (event.key==="F12") {
             event.stopPropagation();
             event.stopImmediatePropagation();
         }
