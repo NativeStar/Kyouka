@@ -174,6 +174,11 @@ async function setupContextMenu() {
         title: "获取图片分辨率",
         contexts: ["image"],
     });
+    chrome.contextMenus.create({
+        id: "speakSelectedText",
+        title: "朗读选中文字",
+        contexts: ["selection"],
+    });
 }
 function teardownContextMenu() {
     chrome.contextMenus.removeAll();

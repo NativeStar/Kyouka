@@ -136,6 +136,25 @@ export async function rightClickMenuHandle(info: chrome.contextMenus.OnClickData
                 windowAlert(tab.id!, `无法加载图片!\n${error}`);
             }
             break
+        case "speakSelectedText":
+            {
+                const selectedText = info.selectionText;
+                if (typeof selectedText !== "string") return;
+                console.log("speak");
+                console.log(info.selectionText);
+                chrome.scripting.executeScript({
+                    func:(text: string)=>{
+                        const tts = new SpeechSynthesisUtterance(text);
+                        tts.lang = "zh-CN";
+                        speechSynthesis.speak(tts);
+                    },
+                    args: [selectedText],
+                    target: {
+                        tabId: tab.id
+                    }
+                })
+            }
+            break
         default:
             console.error(`Unknown context menu item id:${info.menuItemId}`);
             break;
