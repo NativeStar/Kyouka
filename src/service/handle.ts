@@ -150,7 +150,19 @@ export async function rightClickMenuHandle(info: chrome.contextMenus.OnClickData
                     target: {
                         tabId: tab.id
                     }
-                })
+                }).catch(e => console.log(e));
+            }
+            break
+        case "conversionTime":
+            {
+                const selectedText = info.selectionText;
+                if (typeof selectedText !== "string") return;
+                const date = new Date(selectedText);
+                if (isNaN(date.valueOf())) {
+                    windowAlert(tab.id!, "无效时间格式!");
+                    return;
+                }
+                windowAlert(tab.id!, `日期:${date.toLocaleString()}\n时间戳:${date.getTime()}`);
             }
             break
         default:

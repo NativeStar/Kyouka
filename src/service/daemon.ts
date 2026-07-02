@@ -179,6 +179,11 @@ async function setupContextMenu() {
         title: "朗读选中文字",
         contexts: ["selection"],
     });
+    chrome.contextMenus.create({
+        id: "conversionTime",
+        title: "转换时间格式",
+        contexts: ["selection"],
+    });
 }
 function teardownContextMenu() {
     chrome.contextMenus.removeAll();
