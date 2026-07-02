@@ -140,8 +140,6 @@ export async function rightClickMenuHandle(info: chrome.contextMenus.OnClickData
             {
                 const selectedText = info.selectionText;
                 if (typeof selectedText !== "string") return;
-                console.log("speak");
-                console.log(info.selectionText);
                 chrome.scripting.executeScript({
                     func:(text: string)=>{
                         const tts = new SpeechSynthesisUtterance(text);
