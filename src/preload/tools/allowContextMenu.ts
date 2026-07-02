@@ -48,6 +48,12 @@ export class AllowContextMenu extends AbstractTool {
                 methodName: "addEventListener",
                 id: "pre#HTMLElement.addEventListener",
                 type: "method"
+            },
+            {
+                parent: Window.prototype,
+                methodName: "addEventListener",
+                id: "pre#Window.addEventListener",
+                type: "method"
             }
         ]
     }
