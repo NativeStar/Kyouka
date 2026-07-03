@@ -484,31 +484,17 @@ export const Tools: { [key: string]: () => void } = {
             beforeMethodInvoke: rejectAllInvoke,
             id: "toolBlockConsoleExec"
         });
-        const debugHook = hookerInstance.hookMethod(console, "debug", {
-            beforeMethodInvoke: rejectAllInvoke
-        })
         const logHook = hookerInstance.hookMethod(console, "log", {
             beforeMethodInvoke: rejectAllInvoke,
             id: "toolBlockConsoleExec"
         });
-        const infoHook = hookerInstance.hookMethod(console, "info", {
-            beforeMethodInvoke: rejectAllInvoke
-        });
-        const warnHook = hookerInstance.hookMethod(console, "warn", {
-            beforeMethodInvoke: rejectAllInvoke
-        });
-        const errorHook = hookerInstance.hookMethod(console, "error", {
-            beforeMethodInvoke: rejectAllInvoke
-        });
-        const dirHook = hookerInstance.hookMethod(console, "dir", {
-            beforeMethodInvoke: rejectAllInvoke
-        });
-        const dirxmlHook = hookerInstance.hookMethod(console, "dirxml", {
-            beforeMethodInvoke: rejectAllInvoke
-        });
-        const clearHook = hookerInstance.hookMethod(console, "clear", {
-            beforeMethodInvoke: rejectAllInvoke
-        });
+        const debugHook = FastUtils.hookAbortMethodExecute(hookerInstance, console, "debug", "sync");
+        const infoHook = FastUtils.hookAbortMethodExecute(hookerInstance, console, "info", "sync");
+        const warnHook = FastUtils.hookAbortMethodExecute(hookerInstance, console, "warn", "sync");
+        const errorHook = FastUtils.hookAbortMethodExecute(hookerInstance, console, "error", "sync");
+        const dirHook = FastUtils.hookAbortMethodExecute(hookerInstance, console, "dir", "sync");
+        const dirxmlHook = FastUtils.hookAbortMethodExecute(hookerInstance, console, "dirxml", "sync");
+        const clearHook = FastUtils.hookAbortMethodExecute(hookerInstance, console, "clear", "sync");
         showToast(tableHook && debugHook && logHook && infoHook && warnHook && errorHook && dirHook && dirxmlHook && clearHook ? successText : failedText)
     },
     "blockSendBeacon": () => {
