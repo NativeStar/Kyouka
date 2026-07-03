@@ -21,6 +21,13 @@ function init() {
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
 }
+function checkApiSupport(apiName: string) { 
+    if(apiName in window){
+        return true;
+    }
+    alert(`当前浏览器不支持${apiName}`);
+    return false;
+}
 function initEventHandler() {
     // 使用动态的扩展id作为事件名 避免被页面的自定义事件撞上
     document.addEventListener(`${chrome.runtime.id}-contentEvent`, async (e) => {
@@ -28,10 +35,11 @@ function initEventHandler() {
         const detail: string = (e as CustomEvent).detail;
         switch (detail) {
             case "injectCssByExtension":
-                if (!("showOpenFilePicker" in window)) {
-                    alert("当前浏览器不支持showOpenFilePicker")
-                    return
-                }
+                // if (!("showOpenFilePicker" in window)) {
+                //     alert("当前浏览器不支持showOpenFilePicker")
+                //     return
+                // }
+                if(!checkApiSupport("showOpenFilePicker")) return
                 showOpenFilePicker().then(files => {
                     const targetFile = files[0];
                     if (!targetFile) return
@@ -55,10 +63,11 @@ function initEventHandler() {
                 alert("执行完成");
                 break
             case "siteDataSnapshot":
-                if (!("showSaveFilePicker" in window)) {
-                    alert("当前浏览器不支持showSaveFilePicker")
-                    return
-                }
+                if(!checkApiSupport("showSaveFilePicker")) return
+                // if (!("showSaveFilePicker" in window)) {
+                //     alert("当前浏览器不支持showSaveFilePicker")
+                //     return
+                // }
                 if ((await indexedDB.databases()).length > 0) {
                     if (!confirm("该页面使用了IndexedDB保存数据 但扩展不支持处理此类数据 恢复后可能出现异常\n确定继续?")) return
                 }
@@ -109,10 +118,11 @@ function initEventHandler() {
                 }).catch(() => { });
                 break
             case "sub:siteDataSnapshot":
-                if (!("showOpenFilePicker" in window)) {
-                    alert("当前浏览器不支持showOpenFilePicker");
-                    return
-                }
+                if(!checkApiSupport("showOpenFilePicker")) return
+                // if (!("showOpenFilePicker" in window)) {
+                //     alert("当前浏览器不支持showOpenFilePicker");
+                //     return
+                // }
                 showOpenFilePicker().then(files => {
                     const targetFile = files[0];
                     if (!targetFile) return

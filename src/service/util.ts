@@ -24,6 +24,18 @@ export function windowPrompt(tabId: number, message: string, defaultValue?: stri
         }).catch(e => console.log(e))
     })
 }
+export function sendDaemonEvent(tabId: number, message: string) {
+    chrome.scripting.executeScript({
+        target: {
+            tabId: tabId
+        },
+        func: (id,msg) => {
+            document.dispatchEvent(new CustomEvent(`${id}-daemonEvent`, { detail: msg, bubbles: false, cancelable: true, composed: false }))
+        },
+        world: "MAIN",
+        args: [chrome.runtime.id,message]
+    }).catch(e => console.log(e));
+}
 export function encodeBase64(text: string): string {
     const bytes = new TextEncoder().encode(text);
     let binary = "";

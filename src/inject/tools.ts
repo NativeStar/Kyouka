@@ -1,5 +1,5 @@
 import { Hooker, type OriginObjects, FastUtils } from "js-hooker";
-import { getWatermarkElements, makeFileParentDir, parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
+import { checkApiSupport, getWatermarkElements, makeFileParentDir, parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
 let shadowDomDiv: HTMLElement | null = null;
 let recorder: MediaRecorder | null = null;
 let originObjectReference: typeof OriginObjects = Hooker.getOriginReference();
@@ -73,10 +73,7 @@ export function setMenuElement(menuElement: HTMLElement) {
 }
 export const Tools: { [key: string]: () => void } = {
     "injectScript": () => {
-        if (!("showOpenFilePicker" in window)) {
-            showToast("浏览器不支持showOpenFilePicker")
-            return
-        }
+        if (!checkApiSupport("showOpenFilePicker")) return
         showOpenFilePicker().then(files => {
             files[0] && files[0].getFile().then(fileInstance => {
                 const url = URL.createObjectURL(fileInstance);
@@ -265,10 +262,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(`已${toolState.wheelRemoveElement ? "开启" : "关闭"}中键移除元素`)
     },
     "playAudio": () => {
-        if (!("showOpenFilePicker" in window)) {
-            showToast("当前浏览器不支持showOpenFilePicker")
-            return
-        }
+        if (!checkApiSupport("showOpenFilePicker")) return
         showOpenFilePicker().then(files => {
             const targetFile = files[0];
             if (!targetFile) return
@@ -296,10 +290,7 @@ export const Tools: { [key: string]: () => void } = {
         })
     },
     "webBackground": () => {
-        if (!("showOpenFilePicker" in window)) {
-            showToast("当前浏览器不支持showOpenFilePicker")
-            return
-        }
+        if (!checkApiSupport("showOpenFilePicker")) return
         showOpenFilePicker().then(files => {
             const targetFile = files[0];
             if (!targetFile) return
@@ -333,11 +324,9 @@ export const Tools: { [key: string]: () => void } = {
                         return showToast(successText);
                     }
                 }).catch(() => { });
-            } catch (error) {
-
-            }
+            } catch (error) { }
         } else {
-            showToast(isSecureContext ? "浏览器不支持EyeDropper API!" : "EyeDropper API仅在HTTPS下可用");
+            showToast(isSecureContext ? "浏览器不支持EyeDropper" : "EyeDropper API仅在HTTPS下可用");
         }
     },
     "forceOpenInNewTab": () => {
@@ -390,10 +379,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(stringifyHook && parseHook && rawJsonHook ? successText : failedText)
     },
     "changePageIcon": () => {
-        if (!("showOpenFilePicker" in window)) {
-            showToast("当前浏览器不支持showOpenFilePicker")
-            return
-        }
+        if (!checkApiSupport("showOpenFilePicker")) return
         showOpenFilePicker().then(fileHandles => {
             fileHandles[0] && fileHandles[0].getFile().then(file => {
                 file.arrayBuffer().then(buffer => {
@@ -416,10 +402,7 @@ export const Tools: { [key: string]: () => void } = {
         })
     },
     "recordCanvas": () => {
-        if (!("showSaveFilePicker" in window)) {
-            showToast("当前浏览器不支持showSaveFilePicker")
-            return
-        }
+        if (!checkApiSupport("showSaveFilePicker")) return
         if (recorder) {
             if (confirm("停止正在进行的录制?")) {
                 recorder?.stop();
@@ -607,10 +590,7 @@ export const Tools: { [key: string]: () => void } = {
         showToast(successText)
     },
     "sub:recordCanvas": () => {
-        if (!("showSaveFilePicker" in window)) {
-            showToast("当前浏览器不支持showSaveFilePicker")
-            return
-        }
+        if (!checkApiSupport("showSaveFilePicker")) return
         if (recorder) {
             if (confirm("停止正在进行的录制?")) {
                 recorder?.stop();
@@ -919,10 +899,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         showToast(successText)
     },
     "dumpCache": async () => {
-        if (!("showDirectoryPicker" in window)) {
-            showToast("当前浏览器不支持showDirectoryPicker")
-            return
-        }
+        if (!checkApiSupport("showDirectoryPicker")) return
         const cacheKeys = await caches.keys()
         if (cacheKeys.length <= 0) {
             showToast("当前页面没有主动缓存数据")
@@ -1004,7 +981,7 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         if (hookerInstance.isHooked(window.close)) {
             return showToast(executedText)
         }
-        const result = FastUtils.hookPrintMethodExecuteArgs(hookerInstance, window, "close", "sync")
+        const result = FastUtils.hookPrintMethodExecuteArgs(hookerInstance, window, "close", "sync");
         showToast(result ? successText : failedText)
     },
     "removeElement": () => {

@@ -108,3 +108,10 @@ export function getWatermarkElements() {
     }
     return tempWatermarkElementList;
 }
+export function checkApiSupport(apiName: string) { 
+    if(apiName in window){
+        return true;
+    }
+    showToast(`当前浏览器不支持${apiName}`);
+    return false;
+}
