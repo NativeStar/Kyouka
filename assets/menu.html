@@ -57,14 +57,14 @@
       </div>
       <div class="toolList" type="tool" style="display: none;">
         <button class="itemButton toolButton" tool="injectScript" subTool="sub:injectOnlineScript" tooltip="左键:选择本地JS文件并执行\n右键:加载指定URL的JS并执行\n可能被跨域政策或CSP阻止加载">注入JS</button>
-        <button class="itemButton toolButton" id="injectCssByExtension" subTool="sub:injectOnlineCss" tooltip="左键:选择本地CSS文件并加载\n右键:加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入CSS</button>
+        <button class="itemButton toolButton" event="injectCssByExtension" subTool="sub:injectOnlineCss" tooltip="左键:选择本地CSS文件并加载\n右键:加载网络上的CSS文件\n可能被跨域政策或CSP阻止加载">注入CSS</button>
         <button class="itemButton toolButton" tool="openEyeDropper" tooltip="获取选中像素的颜色RGB值">屏幕取色</button>
         <button class="itemButton toolButton" tool="becomeDocumentPictureInPicture" tooltip="将页面使用文档画中画显示\n可能会有很多问题">转为画中画</button>
         <button class="itemButton toolButton" tool="recordCanvas" subTool="sub:recordCanvas" tooltip="60帧录制Canvas渲染内容并保存至本地\n如果存在多个canvas将自动选择尺寸最大且可见的\n右键:同时申请录音应对游戏录制等情况">录制Canvas</button>
-        <button class="itemButton toolButton" id="persistCookieByExtension" tooltip="将所有Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态\n暂无法处理iframe cookie">持久化Cookie</button>
+        <button class="itemButton toolButton" event="persistCookieByExtension" tooltip="将所有Cookie改为390天后过期\n可在服务器不校验的前提下保持登录态\n暂无法处理iframe cookie">持久化Cookie</button>
         <button class="itemButton toolButton" tool="dumpCache" tooltip="导出页面主动缓存的数据">转储缓存</button>
         <button class="itemButton toolButton" tool="visitRobotsTxt" tooltip="查看网站的robots.txt文件\n会先探测文件是否存在 如存在则在新窗口打开">查看Robots</button>
-        <button class="itemButton toolButton subToolColor" id="siteDataSnapshot" tooltip="保存或加载网站数据快照\n左键:保存当前网站数据快照\n右键:从本地文件加载数据快照">数据快照</button>
+        <button class="itemButton toolButton subToolColor" subEvent="sub:siteDataSnapshot" event="siteDataSnapshot" tooltip="保存或加载网站数据快照\n左键:保存当前网站数据快照\n右键:从本地文件加载数据快照">数据快照</button>
       </div>
       <div class="toolList" type="joy" style="display: none;"> 
         <button class="itemButton toolButton" tool="playAudio" tooltip="选择本地音频文件播放\n除刷新或关闭页面外无法中断播放">播放音频</button>
@@ -78,7 +78,7 @@
         <button class="itemButton toolButton" tool="clientInfo" tooltip="统计浏览器和部分设备数据">客户端信息</button>
       </div>
       <div class="toolList" type="about" style="display: none;">
-        <button class="itemButton toolButton" id="openSettingPage">打开设置</button>
+        <button class="itemButton toolButton" event="openSettingPage">打开设置</button>
         <button class="itemButton helpButton" helpText="该项目主要用于开发调试和辅助工具 请勿用于页面逆向等违法工作\n由于使用了较新的API外加懒得适配 可能无法在较老版本Chrome和移动端浏览器上正常工作\n更多功能请通过设置页操作">使用须知</button>
         <button class="itemButton helpButton" helpText="淡粉色的按钮支持右键点击 意味着它们有两个功能\n如未特意标注左键功能则表示右键为额外功能\n当点击右键时它们会一起执行\n触屏操作时可通过长按功能按钮触发右键功能">右键功能</button>
         <button class="itemButton helpButton" helpText="默认快捷键\nAlt+M切换显示/关闭菜单\nAlt+Shift+M重置菜单位置并切换显示/关闭\n你可以在Chrome扩展管理页内修改快捷键">快捷键</button>

@@ -1,22 +1,51 @@
-import { getHooker, Tools, waitOriginObject } from "./tools"
+import { getHooker, Tools, waitOriginObject ,setMenuElement} from "./tools"
 import type { Hooker } from "js-hooker";
 let hooker: Hooker;
+let extensionId: string | null;
 async function init() {
-    const shadowDomDiv = document.getElementById("kyouka-menu");
-    if (!shadowDomDiv) {
-        alert("Failed to init menu!!!")
+    const currentScript = document.currentScript as HTMLScriptElement;
+    if (!currentScript) {
+        alert("Failed to get current script!")
         return
     }
-    const menuShadowRoot = shadowDomDiv.shadowRoot;
-    if (!menuShadowRoot) {
-        alert("Failed to init menu!!!")
+    extensionId = currentScript.getAttribute("extension-id");
+    const extensionVersion = currentScript.getAttribute("extension-version");
+    if (!extensionId || !extensionVersion) {
+        alert("Failed to get extension id or version!")
         return
     }
-    shadowDomDiv.removeAttribute("id");
+    const menuContainer = document.createElement("div");
+    const menuShadowRoot = menuContainer.attachShadow({ mode: "closed" });
+    const menuHtml = await fetch(`chrome-extension://${extensionId}/menu.html`).then(res => res.text());
+    const menuDocument = new DOMParser().parseFromString(menuHtml, "text/html");
+    const menuCssLinkElement = document.createElement("link");
+    menuCssLinkElement.rel = "stylesheet";
+    menuCssLinkElement.href = `chrome-extension://${extensionId}/menu.css`;
+    menuDocument.head.appendChild(menuCssLinkElement);
+    menuShadowRoot.append(menuDocument.head, menuDocument.body);
+    menuShadowRoot.getElementById("titleText")?.insertAdjacentText("afterbegin", `Kyouka-${extensionVersion}`);
+    document.body.appendChild(menuContainer);
+    currentScript.remove();
+    document.addEventListener(`${extensionId}-daemonEvent`, async (e) => {
+        if (!Reflect.has(e, "detail")) return
+        const dialog = menuShadowRoot.getElementById("root") as HTMLDialogElement | null;
+        if (!dialog) {
+            alert("failed to open menu!")
+            return
+        }
+        const eventDetail: string = (e as CustomEvent).detail;
+        if (eventDetail === "openDialog") {
+            dialog.open ? dialog.close() : dialog.show();
+        } else if (eventDetail === "openWithResetPosition") {
+            dialog.style.top = "25%";
+            dialog.style.left = "25%";
+            dialog.open ? dialog.close() : dialog.show();
+        }
+    })
+    setMenuElement(menuContainer);
     await waitOriginObject();
     hooker = getHooker();
     initDom(menuShadowRoot);
-    menuShadowRoot.getElementById("injectScript")?.remove();
     //等待preload设置干净的OriginObject
 }
 function initDom(shadow: ShadowRoot) {
@@ -67,7 +96,7 @@ function initDom(shadow: ShadowRoot) {
                 root.style.top = (root.offsetTop - offsetY) + "px";
             }
         });
-        titleBar.addEventListener("pointercancel",()=>dragging=false);
+        titleBar.addEventListener("pointercancel", () => dragging = false);
         document.addEventListener("pointerup", event => {
             if (dragging) {
                 event.stopPropagation();
@@ -111,7 +140,14 @@ function initDom(shadow: ShadowRoot) {
                 event.stopPropagation();
                 const toolName = toolButton.getAttribute("tool") ?? null;
                 //由contentScript负责
-                if (!toolName) return
+                if (!toolName) {
+                    //检查event属性
+                    const eventName = toolButton.getAttribute("event") ?? null;
+                    if (eventName) {
+                        document.dispatchEvent(new CustomEvent(`${extensionId}-contentEvent`, { detail: eventName, bubbles: false, cancelable: true, composed: false }));
+                    }
+                    return
+                }
                 if (toolName in Tools) {
                     Tools[toolName]!();
                 } else {
@@ -119,13 +155,20 @@ function initDom(shadow: ShadowRoot) {
                 }
             });
             //副功能执行
-            if (toolButton.hasAttribute("subTool")) {
+            if (toolButton.hasAttribute("subTool") || toolButton.hasAttribute("subEvent")) {
                 const originAddEventListener = hooker.ensureOriginExecutable<typeof HTMLElement.prototype.addEventListener>(HTMLElement.prototype.addEventListener);
                 originAddEventListener.call(toolButton, "contextmenu", (event) => {
                     event.stopImmediatePropagation();
                     event.preventDefault();
                     const subToolName = toolButton.getAttribute("subTool") ?? null;
-                    if (!subToolName) return
+                    if (!subToolName) {
+                        //检查subEvent属性
+                        const subEventName = toolButton.getAttribute("subEvent") ?? null;
+                        if (subEventName) {
+                            document.dispatchEvent(new CustomEvent(`${extensionId}-contentEvent`, { detail: subEventName, bubbles: false, cancelable: true, composed: false }));
+                        }
+                        return
+                    }
                     if (subToolName in Tools) {
                         Tools[subToolName]!();
                     } else {

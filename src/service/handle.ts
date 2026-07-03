@@ -1,4 +1,4 @@
-import { decodeBase64, encodeBase64, onSendMessageError, windowAlert, windowPrompt } from "./util";
+import { decodeBase64, encodeBase64, windowAlert, windowPrompt } from "./util";
 
 type Message = {
     type: string
@@ -97,7 +97,16 @@ export async function rightClickMenuHandle(info: chrome.contextMenus.OnClickData
     }
     switch (info.menuItemId) {
         case "openPanelMenuItem":
-            chrome.tabs.sendMessage(tab.id, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
+            chrome.scripting.executeScript({
+                target: {
+                    tabId: tab.id!
+                },
+                func: (id) => {
+                    document.dispatchEvent(new CustomEvent(`${id}-daemonEvent`, { detail: "openDialog", bubbles: false, cancelable: true, composed: false }))
+                },
+                world: "MAIN",
+                args: [chrome.runtime.id]
+            }).catch(e => console.log(e));
             break
         case "becomeFloatingWindowMenuItem":
             chrome.windows.create({ url: info.pageUrl ?? tab.url, type: "popup", width: 500, height: 500 });

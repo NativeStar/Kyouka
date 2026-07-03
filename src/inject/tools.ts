@@ -1,6 +1,6 @@
 import { Hooker, type OriginObjects, FastUtils } from "js-hooker";
 import { getWatermarkElements, makeFileParentDir, parseFileSize, replaceWindowsFileNameInvalidChars, showProgressToast, showToast } from "./util";
-const shadowDomDiv = document.getElementById("kyouka-menu");
+let shadowDomDiv: HTMLElement | null = null;
 let recorder: MediaRecorder | null = null;
 let originObjectReference: typeof OriginObjects = Hooker.getOriginReference();
 const watermarkElementsMap = new Map<Node, CSSStyleDeclaration>();
@@ -67,6 +67,9 @@ export async function waitOriginObject() {
 }
 export function getHooker() {
     return hookerInstance
+}
+export function setMenuElement(menuElement: HTMLElement) {
+    shadowDomDiv = menuElement;
 }
 export const Tools: { [key: string]: () => void } = {
     "injectScript": () => {

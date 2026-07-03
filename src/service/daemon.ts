@@ -1,6 +1,6 @@
 import { DefaultExtensionConfig, type ExtensionConfig } from "../types.js";
 import { messageHandle, rightClickMenuHandle } from "./handle.js";
-import { onSendMessageError, windowAlert } from "./util.js";
+import { windowAlert } from "./util.js";
 let config: ExtensionConfig | {} = {};
 const guiContentScriptList: chrome.scripting.RegisteredContentScript[] = [
     {
@@ -58,7 +58,16 @@ chrome.action.onClicked.addListener(async (tab) => {
         tab.id && windowAlert(tab.id, "Kyouka:请在设置中开启注入GUI并刷新页面")
         return
     }
-    chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
+    chrome.scripting.executeScript({
+        target: {
+            tabId: tab.id!
+        },
+        func: (id) => {
+            document.dispatchEvent(new CustomEvent(`${id}-daemonEvent`, { detail: "openDialog" ,bubbles: false,cancelable: true,composed: false}))
+        },
+        world: "MAIN",
+        args: [chrome.runtime.id]
+    }).catch(e => console.log(e));
 });
 //快捷键
 chrome.commands.onCommand.addListener(async (command, tab) => {
@@ -71,9 +80,27 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
         return
     }
     if (command === "openPanelHotkey") {
-        chrome.tabs.sendMessage(tab.id!, { type: "openDialog" }).catch((err) => onSendMessageError(err, tab))
+        chrome.scripting.executeScript({
+            target: {
+                tabId: tab.id!
+            },
+            func: (id) => {
+                document.dispatchEvent(new CustomEvent(`${id}-daemonEvent`, { detail: "openDialog" ,bubbles:false,cancelable:true,composed:false}))
+            },
+            world: "MAIN",
+            args: [chrome.runtime.id]
+        }).catch(e => console.log(e));
     } else if (command === "openWithResetPosition") {
-        chrome.tabs.sendMessage(tab.id!, { type: "openWithResetPosition" }).catch((err) => onSendMessageError(err, tab))
+        chrome.scripting.executeScript({
+            target: {
+                tabId: tab.id!
+            },
+            func: (id) => {
+                document.dispatchEvent(new CustomEvent(`${id}-daemonEvent`, { detail: "openWithResetPosition" ,bubbles:false,cancelable:true,composed:false}))
+            },
+            world: "MAIN",
+            args: [chrome.runtime.id]
+        }).catch(e => console.log(e));
     }
 });
 //设置监听
@@ -185,14 +212,14 @@ async function setupContextMenu() {
         contexts: ["selection"],
     });
     chrome.contextMenus.create({
-        id:"encodeBase64",
-        title:"编码Base64",
-        contexts:["selection"]
+        id: "encodeBase64",
+        title: "编码Base64",
+        contexts: ["selection"]
     });
     chrome.contextMenus.create({
-        id:"decodeBase64",
-        title:"解码Base64",
-        contexts:["selection"]
+        id: "decodeBase64",
+        title: "解码Base64",
+        contexts: ["selection"]
     });
 }
 function teardownContextMenu() {
