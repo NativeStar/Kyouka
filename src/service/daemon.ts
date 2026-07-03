@@ -184,6 +184,16 @@ async function setupContextMenu() {
         title: "转换时间格式",
         contexts: ["selection"],
     });
+    chrome.contextMenus.create({
+        id:"encodeBase64",
+        title:"编码Base64",
+        contexts:["selection"]
+    });
+    chrome.contextMenus.create({
+        id:"decodeBase64",
+        title:"解码Base64",
+        contexts:["selection"]
+    });
 }
 function teardownContextMenu() {
     chrome.contextMenus.removeAll();

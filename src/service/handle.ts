@@ -1,9 +1,10 @@
-import { onSendMessageError, windowAlert } from "./util";
+import { decodeBase64, encodeBase64, onSendMessageError, windowAlert, windowPrompt } from "./util";
 
 type Message = {
     type: string
     [key: string]: any
 }
+const promptAreaTitle = "你可以在下方复制内容"
 export async function messageHandle(msg: Message, sender: chrome.runtime.MessageSender) {
     if (sender.id !== chrome.runtime.id) return;
     const tabId = sender.tab?.id;
@@ -141,7 +142,7 @@ export async function rightClickMenuHandle(info: chrome.contextMenus.OnClickData
                 const selectedText = info.selectionText;
                 if (typeof selectedText !== "string") return;
                 chrome.scripting.executeScript({
-                    func:(text: string)=>{
+                    func: (text: string) => {
                         const tts = new SpeechSynthesisUtterance(text);
                         tts.lang = "zh-CN";
                         speechSynthesis.speak(tts);
@@ -162,7 +163,33 @@ export async function rightClickMenuHandle(info: chrome.contextMenus.OnClickData
                     windowAlert(tab.id!, "无效时间格式!");
                     return;
                 }
-                windowAlert(tab.id!, `日期:${date.toLocaleString()}\n时间戳:${date.getTime()}`);
+                windowPrompt(tab.id!, promptAreaTitle, `日期:${date.toLocaleString()}\n时间戳:${date.getTime()}`);
+            }
+            break
+        case "encodeBase64":
+            {
+                const selectedText = info.selectionText;
+                if (typeof selectedText !== "string") return;
+                try {
+                    const base64 = encodeBase64(selectedText);
+                    windowPrompt(tab.id!, promptAreaTitle, base64);
+                } catch (error) {
+                    windowAlert(tab.id!, "尝试进行编码时发生异常");
+                    console.error(error);
+                }
+            }
+            break
+        case "decodeBase64":
+            {
+                const selectedText = info.selectionText;
+                if (typeof selectedText !== "string") return;
+                try {
+                    const decodedText = decodeBase64(selectedText);
+                    windowPrompt(tab.id!, promptAreaTitle, decodedText);
+                } catch (error) {
+                    console.error(error);
+                    windowAlert(tab.id!, "尝试进行解码时发生异常");
+                }
             }
             break
         default:
