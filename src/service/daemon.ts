@@ -1,6 +1,6 @@
-import { DefaultExtensionConfig, type ExtensionConfig } from "../types.js";
+import { DefaultExtensionConfig, type ExtensionConfig ,languageLocations} from "../types.js";
 import { messageHandle, rightClickMenuHandle } from "./handle.js";
-import { windowAlert ,sendDaemonEvent} from "./util.js";
+import { windowAlert, sendDaemonEvent } from "./util.js";
 let config: ExtensionConfig | {} = {};
 const guiContentScriptList: chrome.scripting.RegisteredContentScript[] = [
     {
@@ -138,8 +138,17 @@ function onSettingChange(change: { [key: string]: chrome.storage.StorageChange; 
             })
             break
         case "enableContextMenu":
-            const newValue = change.enableContextMenu!.newValue as boolean;
-            newValue ? setupContextMenu() : teardownContextMenu()
+            {
+                const newValue = change.enableContextMenu!.newValue as boolean;
+                newValue ? setupContextMenu() : teardownContextMenu()
+                break
+            }
+        case "changeLanguageLocation":
+            {
+                const newValue = change.changeLanguageLocation!.newValue as string;
+                updateAcceptLanguageRule(newValue);
+                break
+            }
     }
 }
 async function setupContextMenu() {
@@ -197,4 +206,43 @@ async function setupContextMenu() {
 }
 function teardownContextMenu() {
     chrome.contextMenus.removeAll();
+}
+async function updateAcceptLanguageRule(value: string | "unset") {
+    if (value!=="unset"&&!Reflect.has(languageLocations, value)) {
+        console.warn(`Unsupported language location:${value}`);
+        return
+    }
+    const targetLanguageLocation = value==="unset"?null:languageLocations[value]!;
+    await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [886],
+        addRules: value === "unset" ? [] : [{
+            id: 886,
+            priority: 100,
+            action: {
+                type: "modifyHeaders",
+                requestHeaders: [{
+                    header: "accept-language",
+                    operation: "set",
+                    value:targetLanguageLocation!.acceptLanguage,
+                }],
+            },
+            condition: {
+                regexFilter: "^https?://",
+                resourceTypes: [
+                    "main_frame",
+                    "sub_frame",
+                    "stylesheet",
+                    "script",
+                    "image",
+                    "font",
+                    "xmlhttprequest",
+                    "ping",
+                    "csp_report",
+                    "media",
+                    "websocket",
+                    "other",
+                ],
+            },
+        }],
+    });
 }

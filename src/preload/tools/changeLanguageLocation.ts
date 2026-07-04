@@ -1,16 +1,17 @@
 import { type Hooker } from "js-hooker";
 import { type ExtensionConfig, type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
-import { languageLocations } from "../const/languageLocations";
+import { languageLocations } from "../../types";
 export class ChangeLanguageLocation extends AbstractTool {
     onMount(config: ExtensionConfig, hooker: Hooker): void {
         const targetLanguage = config.changeLanguageLocation;
-        const targetTimezone = languageLocations[config.changeLanguageLocation]?.timezone??null;
+        const targetTimezone = languageLocations[config.changeLanguageLocation]?.timezone ?? null;
+        const targetNavigatorLanguages = languageLocations[config.changeLanguageLocation]?.navigatorLanguages ?? null;
         if (!("Temporal" in window)) {
             console.error("Temporal is not supported,please update your browser!ChangeLanguageLocation skipped mount.");
             return
         }
-        if (!targetTimezone||targetLanguage==="unset") {
+        if (!targetTimezone || !targetNavigatorLanguages || targetLanguage === "unset") {
             console.error(`Invalid language location: ${config.changeLanguageLocation}`);
             return
         }
@@ -26,7 +27,7 @@ export class ChangeLanguageLocation extends AbstractTool {
         });
         hooker.hookAccessor(Navigator.prototype, "languages", {
             beforeGetterInvoke(abortController, _thisArg, tempMethodResult) {
-                tempMethodResult.current = [targetLanguage,"en"]
+                tempMethodResult.current = targetNavigatorLanguages;
                 abortController.abort();
             },
             descriptor: {
