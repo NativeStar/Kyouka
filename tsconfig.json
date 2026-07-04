@@ -13,7 +13,7 @@
     "rootDir": "./src",
     "types": ["chrome"],
     // For nodejs:
-    "lib": ["ES2021","DOM","ES2022","ES2023","ES2024"],
+    "lib": ["ES2021","DOM","ES2022","ES2023","ES2024","ESNext.Temporal"],
     // "types": ["node"],
     // and npm install -D @types/node
 

@@ -14,8 +14,9 @@ export const DefaultExtensionConfig = {
     enableContextMenu: true,
     disableCacheApi: false,
     blockServiceWorker:false,
-    blockStorageOperation:false
-} as const;
+    blockStorageOperation:false,
+    changeLanguageLocation:"unset"
+};
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {
     getConfig: () => ExtensionConfig

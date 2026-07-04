@@ -30,7 +30,7 @@ class OptionSelect extends HTMLElement {
         labelElement.htmlFor = targetSettingKey!;
         labelElement.textContent = this.getAttribute("description")!;
         const defaultOption = document.createElement("option");
-        defaultOption.textContent = "不设置";
+        defaultOption.textContent = "关闭";
         defaultOption.setAttribute("optionValue", "unset");
         selectElement.append(defaultOption);
         const parsedOptions: string[] = JSON.parse(this.getAttribute("optionsList")!);

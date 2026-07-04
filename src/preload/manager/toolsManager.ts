@@ -12,6 +12,7 @@ import { AllowContextMenu } from "../tools/allowContextMenu";
 import { DisableCacheApi } from "../tools/disableCacheApi";
 import { BlockServiceWorker } from "../tools/BlockServiceWorker";
 import { BlockStorageOperation } from "../tools/blockStorageOperation";
+import { ChangeLanguageLocation } from "../tools/changeLanguageLocation";
 
 export class ToolManager {
     private toolsConfigList = {
@@ -24,8 +25,9 @@ export class ToolManager {
         printStackInLogs: new PrintLogStack(),
         allowContextMenu: new AllowContextMenu(),
         disableCacheApi: new DisableCacheApi(),
-        blockServiceWorker:new BlockServiceWorker(),
-        blockStorageOperation:new BlockStorageOperation(),
+        blockServiceWorker: new BlockServiceWorker(),
+        blockStorageOperation: new BlockStorageOperation(),
+        changeLanguageLocation: new ChangeLanguageLocation(),
     } as const;
     private preHooksMethodList: PreHookOption[];
     private hooker: Hooker;
@@ -54,6 +56,11 @@ export class ToolManager {
     initWithConfig(config: ExtensionConfig) {
         const toolKeys = Object.keys(this.toolsConfigList) as (keyof typeof this.toolsConfigList)[];
         for (const key of toolKeys) {
+            //目前只有这个不是bool 暂时应付下
+            if (key === "changeLanguageLocation") {
+                config[key] !== "unset" && this.toolsConfigList[key].onMount(config, this.hooker);
+                continue
+            }
             // 初始化工具
             if (config[key]) {
                 this.toolsConfigList[key].onMount(config as never, this.hooker);
