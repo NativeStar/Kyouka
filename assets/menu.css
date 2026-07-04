@@ -96,7 +96,9 @@ label:not([class*="keepCursor"]) {
 #root::backdrop {
     background-color: rgba(0, 0, 0, 0.6);
 }
-
+#root *{
+    -webkit-tap-highlight-color: transparent;
+}
 #menuTitleBar {
     background-color: rgb(72, 72, 211);
     opacity: 0.9;
