@@ -22,6 +22,8 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
         const currentConfig: ExtensionConfig = await chrome.storage.local.get(null);
         const mergedConfig = { ...DefaultExtensionConfig, ...currentConfig };
         chrome.storage.local.set(mergedConfig);
+        //保证同步
+        updateAcceptLanguageRule(mergedConfig.changeLanguageLocation);
         //更新后会清空动态注册脚本 根据配置恢复注册
         if (mergedConfig.enableGui) {
             chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
@@ -44,6 +46,7 @@ chrome.runtime.onStartup.addListener(() => {
             isRegisteredGuiScript && chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
         }
         mergedConfig.enableContextMenu ? setupContextMenu() : teardownContextMenu();
+        updateAcceptLanguageRule(mergedConfig.changeLanguageLocation)
     });
 });
 // action
@@ -210,6 +213,10 @@ function teardownContextMenu() {
 async function updateAcceptLanguageRule(value: string | "unset") {
     if (value!=="unset"&&!Reflect.has(languageLocations, value)) {
         console.warn(`Unsupported language location:${value}`);
+        await chrome.declarativeNetRequest.updateDynamicRules({
+            removeRuleIds: [886],
+            addRules:[]
+        });
         return
     }
     const targetLanguageLocation = value==="unset"?null:languageLocations[value]!;

@@ -27,7 +27,7 @@ export class ChangeLanguageLocation extends AbstractTool {
         });
         hooker.hookAccessor(Navigator.prototype, "languages", {
             beforeGetterInvoke(abortController, _thisArg, tempMethodResult) {
-                tempMethodResult.current = targetNavigatorLanguages;
+                tempMethodResult.current = structuredClone(targetNavigatorLanguages);
                 abortController.abort();
             },
             descriptor: {
