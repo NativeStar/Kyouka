@@ -1,5 +1,11 @@
+allowBuilds:
+  esbuild: set this to true or false
+
+minimumReleaseAgeExclude:
+  - js-hooker@1.0.4
+
 onlyBuiltDependencies:
   - esbuild
 
 overrides:
-  js-hooker: link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker
+  js-hooker: link:../js-hooker

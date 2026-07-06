@@ -5,15 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  js-hooker: link:C:/Users/z2858/AppData/Local/pnpm/global/5/node_modules/js-hooker
+  js-hooker: link:../js-hooker
 
 importers:
 
   .:
     dependencies:
       js-hooker:
-        specifier: ^1.0.3
-        version: 1.0.3
+        specifier: 1.0.4
+        version: 1.0.4
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.36
@@ -203,8 +203,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  js-hooker@1.0.3:
-    resolution: {integrity: sha512-b/fNB/O0wRk+9xyaJTsq4Aoh8zhAJLzWR35in0BdSnOFGtBTwBK56h2wQeRZgZj5HJl6Qf51uRUZn3OIo1CbLA==}
+  js-hooker@1.0.4:
+    resolution: {integrity: sha512-kkUyL38LWDzC3Q9qraVNs5BXAzh20jFhDvgtj4MgZG74zHW1Ri4r/LkXACViiKIIXaOxGApTSzBz5dCTJSJqcQ==}
 
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
@@ -335,6 +335,6 @@ snapshots:
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
 
-  js-hooker@1.0.3: {}
+  js-hooker@1.0.4: {}
 
   undici-types@7.16.0: {}
