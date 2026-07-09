@@ -22,7 +22,7 @@ export abstract class AbstractTool {
      */
     abstract onMount(config: ExtensionConfig,hooker:Hooker): void
     /**
-     * 预留 万一用得上
+     * 当配置加载完成但工具未被启用时执行
      */
     onUnmount(): void { }
 }

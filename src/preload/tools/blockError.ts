@@ -2,6 +2,7 @@ import { type ExtensionConfig } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 
 export class BlockError extends AbstractTool {
+    private unmountController: AbortController = new AbortController();
     private eventHandlerDescriptor: PropertyDescriptor = {
         configurable: false,
         set() { },
@@ -24,8 +25,11 @@ export class BlockError extends AbstractTool {
         Reflect.defineProperty(window, "onrejectionhandled", this.eventHandlerDescriptor);
     }
     override onPreload(): string[] | void {
-        window.addEventListener("error", (event) => this.processErrorEvent(event));
-        window.addEventListener("unhandledrejection", (event) => this.processErrorEvent(event));
-        window.addEventListener("rejectionhandled", (event) => this.processErrorEvent(event));
+        window.addEventListener("error", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
+        window.addEventListener("unhandledrejection", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
+        window.addEventListener("rejectionhandled", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
+    }
+    onUnmount(): void {
+        this.unmountController.abort();
     }
 }

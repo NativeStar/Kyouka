@@ -9,6 +9,7 @@ function isSensitiveType(item: any) {
     return false
 }
 export class ConsoleDetectBypass extends AbstractTool {
+    private unmountController: AbortController = new AbortController();
     private LogsBeforeMethodInvokeFunction(args: any[], abortController: AbortController) {
         for (let i = 0; i < args.length; i++) {
             if (isSensitiveType(args[i])) {
@@ -65,10 +66,13 @@ export class ConsoleDetectBypass extends AbstractTool {
     onPreload(): void {
         window.addEventListener("keydown",(event)=>{
             this.checkKeyEvent(event);
-        },{capture:true});
+        },{capture:true,signal:this.unmountController.signal});
         document.addEventListener("keydown",(event)=>{
             this.checkKeyEvent(event);
-        },{capture:true});
+        },{capture:true,signal:this.unmountController.signal});
+    }
+    onUnmount(): void {
+        this.unmountController.abort();
     }
     override get preHookMethodList(): PreHookOption[] {
         return [

@@ -10,7 +10,7 @@ import { PrintLogStack } from "../tools/printLogStack";
 import { StringDetectBypass } from "../tools/stringDetectBypass";
 import { AllowContextMenu } from "../tools/allowContextMenu";
 import { DisableCacheApi } from "../tools/disableCacheApi";
-import { BlockServiceWorker } from "../tools/BlockServiceWorker";
+import { BlockServiceWorker } from "../tools/blockServiceWorker";
 import { BlockStorageOperation } from "../tools/blockStorageOperation";
 import { ChangeLanguageLocation } from "../tools/changeLanguageLocation";
 
@@ -64,6 +64,8 @@ export class ToolManager {
             // 初始化工具
             if (config[key]) {
                 this.toolsConfigList[key].onMount(config as never, this.hooker);
+            }else{
+                this.toolsConfigList[key].onUnmount();
             }
         }
         //释放占位hook

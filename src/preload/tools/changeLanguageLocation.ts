@@ -92,6 +92,25 @@ export class ChangeLanguageLocation extends AbstractTool {
         })
     }
     get preHookMethodList(): PreHookOption[] {
-        return [];
+        return [
+            {
+                parent: Intl.DateTimeFormat.prototype,
+                methodName: "resolvedOptions",
+                type: "method",
+                id: "pre#resolvedOptions"
+            },
+            {
+                parent: Date.prototype,
+                methodName: "getTimezoneOffset",
+                type: "method",
+                id: "pre#getTimezoneOffset"
+            },
+            {
+                parent: Date.prototype,
+                methodName: "toString",
+                type: "method",
+                id: "pre#toString"
+            }
+        ];
     }
 }
