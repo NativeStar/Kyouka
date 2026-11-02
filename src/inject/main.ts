@@ -227,5 +227,13 @@ function initDom(shadow: ShadowRoot) {
             titleBar.style.color = titleTextIsBlack ? "black" : "white";
         }, 450);
     }
+    {
+        // 修复某些页面上布局异常
+        const typedToolList = root.getElementsByClassName("toolList") as HTMLCollectionOf<HTMLDivElement>
+        for (const tool of typedToolList) {
+            tool.style.display = tool.getAttribute("type") === "document" ? "flex" : "none";
+        }
+
+    }
 }
 init();
