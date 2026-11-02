@@ -5,6 +5,8 @@ async function injectGuiScript() {
     shadowRootScript.src = chrome.runtime.getURL("./inject.js");
     shadowRootScript.setAttribute("extension-id", chrome.runtime.id);
     shadowRootScript.setAttribute("extension-version", chrome.runtime.getManifest().version);
+    shadowRootScript.setAttribute("menu-html-src", chrome.runtime.getURL("/menu.html"));
+    shadowRootScript.setAttribute("menu-css-src", chrome.runtime.getURL("/menu.css"));
     document.head.appendChild(shadowRootScript);
     initEventHandler();
 }

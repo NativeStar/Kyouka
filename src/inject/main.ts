@@ -1,4 +1,4 @@
-import { getHooker, Tools, waitOriginObject ,setMenuElement} from "./tools"
+import { getHooker, Tools, waitOriginObject, setMenuElement } from "./tools"
 import type { Hooker } from "js-hooker";
 let hooker: Hooker;
 let extensionId: string | null;
@@ -9,18 +9,20 @@ async function init() {
         return
     }
     extensionId = currentScript.getAttribute("extension-id");
+    const extensionMenuHtmlPath = currentScript.getAttribute("menu-html-src");
+    const extensionMenuCssPath = currentScript.getAttribute("menu-css-src");
     const extensionVersion = currentScript.getAttribute("extension-version");
-    if (!extensionId || !extensionVersion) {
+    if (!extensionId || !extensionVersion || !extensionMenuHtmlPath || !extensionMenuCssPath) {
         alert("Failed to get extension id or version!")
         return
     }
     const menuContainer = document.createElement("div");
     const menuShadowRoot = menuContainer.attachShadow({ mode: "closed" });
-    const menuHtml = await fetch(`chrome-extension://${extensionId}/menu.html`).then(res => res.text());
+    const menuHtml = await fetch(extensionMenuHtmlPath).then(res => res.text());
     const menuDocument = new DOMParser().parseFromString(menuHtml, "text/html");
     const menuCssLinkElement = document.createElement("link");
     menuCssLinkElement.rel = "stylesheet";
-    menuCssLinkElement.href = `chrome-extension://${extensionId}/menu.css`;
+    menuCssLinkElement.href = extensionMenuCssPath;
     menuDocument.head.appendChild(menuCssLinkElement);
     menuShadowRoot.append(menuDocument.head, menuDocument.body);
     menuShadowRoot.getElementById("titleText")?.insertAdjacentText("afterbegin", `Kyouka-${extensionVersion}`);
