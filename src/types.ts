@@ -49,7 +49,7 @@ export interface LanguageLocation {
     timezone: string;
     navigatorLanguages: string[];
     acceptLanguage: string;
-    locationString:string
+    locationString: string
 }
 export const languageLocations: {
     [key: string]: LanguageLocation
@@ -60,17 +60,17 @@ export const languageLocations: {
         acceptLanguage: "en-US,en;q=0.9",
         locationString: "Eastern Daylight Time"
     },
-    "ja-JP": {
+    "ja": {
         timezone: "Asia/Tokyo",
-        navigatorLanguages: ["ja-JP", "ja", "en-US", "en"],
-        acceptLanguage: "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
-        locationString:"日本標準時"
+        navigatorLanguages: ["ja", "ja-JP", "en-US", "en"],
+        acceptLanguage: "ja,ja-JP;q=0.9,en-US;q=0.8,en;q=0.7",
+        locationString: "日本標準時"
     },
     "ko-KR": {
         timezone: "Asia/Seoul",
         navigatorLanguages: ["ko-KR", "ko", "en-US", "en"],
         acceptLanguage: "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-        locationString:"한국 표준시"
+        locationString: "한국 표준시"
     },
     "ru-RU": {
         timezone: "Europe/Moscow",

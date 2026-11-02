@@ -2,7 +2,7 @@ import { type Hooker } from "js-hooker";
 import { type ExtensionConfig, type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 import { languageLocations } from "../../types";
-import { makeDateObjectToString } from "../util";
+import { makeDateObjectToString, makeDateObjectToTimeString } from "../util";
 export class ChangeLanguageLocation extends AbstractTool {
     onMount(config: ExtensionConfig, hooker: Hooker): void {
         const targetLanguage = config.changeLanguageLocation;
@@ -43,6 +43,22 @@ export class ChangeLanguageLocation extends AbstractTool {
                 tempMethodResult.current.timeZone = targetTimezone;
             }
         });
+        hooker.hookMethod(Intl.NumberFormat.prototype, "resolvedOptions", {
+            afterMethodInvoke(_args, tempMethodResult) {
+                tempMethodResult.current.locale = targetLanguage;
+            }
+        });
+        hooker.hookMethod(Intl.PluralRules.prototype, "resolvedOptions", {
+            afterMethodInvoke(_args, tempMethodResult) {
+                tempMethodResult.current.locale = targetLanguage;
+            }
+        });
+        hooker.hookMethod(Intl.Collator.prototype, "resolvedOptions", {
+            afterMethodInvoke(_args, tempMethodResult) {
+                tempMethodResult.current.locale = targetLanguage;
+                tempMethodResult.current.collation = "default"
+            }
+        });
         hooker.hookMethod(Date.prototype, "getTimezoneOffset", {
             beforeMethodInvoke(_args, abortController, thisArg, tempMethodResult, originMethod) {
                 abortController.abort();
@@ -51,10 +67,10 @@ export class ChangeLanguageLocation extends AbstractTool {
                     tempMethodResult.current = NaN;
                     return
                 }
-                tempMethodResult.current = Temporal.Instant
+                tempMethodResult.current = -(Temporal.Instant
                     .fromEpochMilliseconds(currentTime)
                     .toZonedDateTimeISO(targetTimezone)
-                    .offsetNanoseconds / 60_000_000_000;
+                    .offsetNanoseconds / 60_000_000_000);
             }
         });
         hooker.hookMethod(Date.prototype, "toString", {
@@ -70,6 +86,11 @@ export class ChangeLanguageLocation extends AbstractTool {
                 tempMethodResult.current = makeDateObjectToString(thisArg, targetLocationString)
             }
         })
+        hooker.hookMethod(Date.prototype, "toTimeString", {
+            afterMethodInvoke(_args, tempMethodResult, thisArg) {
+                tempMethodResult.current = makeDateObjectToTimeString(thisArg as Date, targetLocationString)
+            },
+        });
         hooker.hookObject(Intl, "DateTimeFormat", {
             beforeApply([locale, options], abortController, thisArg, tempResult, originApply) {
                 tempResult.current = originApply.call(thisArg, locale ?? targetLanguage,
