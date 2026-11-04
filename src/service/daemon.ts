@@ -1,4 +1,4 @@
-import { DefaultExtensionConfig, type ExtensionConfig ,languageLocations} from "../types.js";
+import { DefaultExtensionConfig, type ExtensionConfig, languageLocations } from "../types.js";
 import { messageHandle, rightClickMenuHandle } from "./handle.js";
 import { windowAlert, sendDaemonEvent } from "./util.js";
 let config: ExtensionConfig | {} = {};
@@ -28,6 +28,10 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
         if (mergedConfig.enableGui) {
             chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
         }
+        const removeCsp = mergedConfig.removeCsp;
+        chrome.declarativeNetRequest.updateEnabledRulesets({
+            [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
+        })
         try {
             mergedConfig.enableContextMenu ? setupContextMenu() : teardownContextMenu();
         } catch (error) {
@@ -47,6 +51,10 @@ chrome.runtime.onStartup.addListener(() => {
         }
         mergedConfig.enableContextMenu ? setupContextMenu() : teardownContextMenu();
         updateAcceptLanguageRule(mergedConfig.changeLanguageLocation)
+        const removeCsp = mergedConfig.removeCsp;
+        chrome.declarativeNetRequest.updateEnabledRulesets({
+            [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
+        })
     });
 });
 // action
@@ -211,15 +219,15 @@ function teardownContextMenu() {
     chrome.contextMenus.removeAll();
 }
 async function updateAcceptLanguageRule(value: string | "unset") {
-    if (value!=="unset"&&!Reflect.has(languageLocations, value)) {
+    if (value !== "unset" && !Reflect.has(languageLocations, value)) {
         console.warn(`Unsupported language location:${value}`);
         await chrome.declarativeNetRequest.updateDynamicRules({
             removeRuleIds: [886],
-            addRules:[]
+            addRules: []
         });
         return
     }
-    const targetLanguageLocation = value==="unset"?null:languageLocations[value]!;
+    const targetLanguageLocation = value === "unset" ? null : languageLocations[value]!;
     await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: [886],
         addRules: value === "unset" ? [] : [{
@@ -230,7 +238,7 @@ async function updateAcceptLanguageRule(value: string | "unset") {
                 requestHeaders: [{
                     header: "accept-language",
                     operation: "set",
-                    value:targetLanguageLocation!.acceptLanguage,
+                    value: targetLanguageLocation!.acceptLanguage,
                 }],
             },
             condition: {
