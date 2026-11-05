@@ -33,7 +33,8 @@
       "resources": [
         "inject.js",
         "menu.html",
-        "menu.css"
+        "menu.css",
+        "preloadWorker.js"
       ],
       "matches": [
         "http://*/*",

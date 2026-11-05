@@ -34,7 +34,16 @@ esbuild.buildSync({
     minify:true,
     charset:"utf8",
     platform:"browser"
-})
+});
+// worker预加载
+esbuild.buildSync({
+    entryPoints:["./src/preload/workerMain.ts"],
+    bundle:true,
+    outfile:"./dist/preloadWorker.js",
+    minify:true,
+    charset:"utf8",
+    platform:"browser"
+});
 //其他
 esbuild.buildSync({
     entryPoints:["./src/content.ts","./src/service/daemon.ts","./src/options.ts"],

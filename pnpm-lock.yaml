@@ -11,9 +11,12 @@ importers:
 
   .:
     dependencies:
+      es-module-lexer:
+        specifier: ^3.0.4
+        version: 3.0.4
       js-hooker:
-        specifier: 1.0.4
-        version: 1.0.4
+        specifier: link:../js-hooker
+        version: link:../js-hooker
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.36
@@ -198,13 +201,13 @@ packages:
   '@types/node@25.1.0':
     resolution: {integrity: sha512-t7frlewr6+cbx+9Ohpl0NOTKXZNV9xHRmNOvql47BFJKcEG1CxtxlPEEe+gR9uhVWM4DwhnvTF110mIL4yP9RA==}
 
+  es-module-lexer@3.0.4:
+    resolution: {integrity: sha512-BldNY5mwkVu+cQ5Ymn3e6hB9Sx8XHx4ZevWbiUyZbfKxJxYO27Hf0wfzkxIaD5CAJMaGl3YspKELj0ff/7nCMA==}
+
   esbuild@0.27.2:
     resolution: {integrity: sha512-HyNQImnsOC7X9PMNaCIeAm4ISCQXs5a5YasTXVliKv4uuBo1dKrG0A+uQS8M5eXjVMnLg3WgXaKvprHlFJQffw==}
     engines: {node: '>=18'}
     hasBin: true
-
-  js-hooker@1.0.4:
-    resolution: {integrity: sha512-kkUyL38LWDzC3Q9qraVNs5BXAzh20jFhDvgtj4MgZG74zHW1Ri4r/LkXACViiKIIXaOxGApTSzBz5dCTJSJqcQ==}
 
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
@@ -306,6 +309,8 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  es-module-lexer@3.0.4: {}
+
   esbuild@0.27.2:
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.27.2
@@ -334,7 +339,5 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.2
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
-
-  js-hooker@1.0.4: {}
 
   undici-types@7.16.0: {}

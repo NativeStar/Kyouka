@@ -2,11 +2,14 @@
 import { type IpcObject, type ExtensionConfig } from '../types';
 import { Hooker } from "js-hooker";
 import { ToolManager } from "./manager/toolsManager";
+import * as WorkerInjector from './workerInjector';
 let config: ExtensionConfig | {} = {};
+let workerPreloadScriptUrl: string | null = null;
 const hooker = new Hooker();
 const toolManager = new ToolManager(hooker);
+const originObjectsRef = Hooker.getOriginReference();
 async function init() {
-    const originObjectsRef=Hooker.getOriginReference();
+    const originObjectsRef = Hooker.getOriginReference();
     //等待ipc
     for (let index = 0; index < 250; index++) {
         if (!Reflect.has(window, "kyouka-ipc")) {
@@ -24,6 +27,7 @@ async function init() {
         return
     }
     config = ipc.getConfig();
+    workerPreloadScriptUrl = ipc.getWorkerPreloadUrl();
     //unmount ipc
     Reflect.deleteProperty(window, "kyouka-ipc");
     //利用自身来得早优势 将原始方法引用设置到window以便gui调用 不然gui就得吃已经挨过hook的函数了
@@ -51,4 +55,8 @@ function initConfig() {
         return
     }
     toolManager.initWithConfig(config as ExtensionConfig);
+    // TODO 根据配置决定是否初始化
+    if (workerPreloadScriptUrl) {
+        WorkerInjector.init(hooker, workerPreloadScriptUrl, originObjectsRef, config as ExtensionConfig);
+    }
 }

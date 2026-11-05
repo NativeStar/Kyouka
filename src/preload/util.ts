@@ -3,6 +3,7 @@ const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 function pad2(value: number) {
     return value.toString().padStart(2, "0");
 }
+// TODO 这里面的函数改成调用备份 因为他们可能在后期被调用
 export function makeDateObjectToString(date: Date, localString: string) {
     if (Number.isNaN(date.getTime())) {
         return "Invalid Date";
@@ -25,4 +26,12 @@ export function makeDateObjectToTimeString(date: Date, localString: string) {
     const timezoneHours = pad2(Math.floor(timezoneAbsOffset / 60));
     const timezoneMinutes = pad2(timezoneAbsOffset % 60);
     return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())} GMT${timezoneSign}${timezoneHours}${timezoneMinutes} (${localString})`;
+}
+// 应对Worker环境下没有document
+export function getDocument(){
+    if (Reflect.has(globalThis, "document")){
+        return Reflect.get(globalThis, "document");
+    }else{
+        return {};
+    }
 }

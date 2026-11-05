@@ -102,13 +102,14 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
     if (Reflect.ownKeys(config).length === 0) {
         config = await chrome.storage.local.get(null);
     }
+    const workerPreloadUrl = chrome.runtime.getURL("/preloadWorker.js")
     chrome.scripting.executeScript({
         target: {
             tabId: details.tabId
         },
         injectImmediately: true,
         world: chrome.scripting.ExecutionWorld.MAIN,
-        func: (config: ExtensionConfig) => {
+        func: (config: ExtensionConfig, preloadUrl: string) => {
             Reflect.defineProperty(window, "kyouka-ipc", {
                 enumerable: false,
                 configurable: true,
@@ -116,11 +117,14 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
                 value: {
                     getConfig() {
                         return config;
+                    },
+                    getWorkerPreloadUrl() {
+                        return preloadUrl
                     }
                 }
             })
         },
-        args: [config as ExtensionConfig]
+        args: [config as ExtensionConfig, workerPreloadUrl]
     }).catch(e => console.log(e))
 });
 function onSettingChange(change: { [key: string]: chrome.storage.StorageChange; }) {

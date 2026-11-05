@@ -16,6 +16,7 @@
     "esbuild": "^0.27.2"
   },
   "dependencies": {
-    "js-hooker": "1.0.4"
+    "es-module-lexer": "^3.0.4",
+    "js-hooker": "link:../js-hooker"
   }
 }

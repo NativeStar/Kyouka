@@ -64,7 +64,7 @@ export class ToolManager {
             // 初始化工具
             if (config[key]) {
                 this.toolsConfigList[key].onMount(config as never, this.hooker);
-            }else{
+            } else {
                 this.toolsConfigList[key].onUnmount();
             }
         }

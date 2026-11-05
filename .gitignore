@@ -5,3 +5,5 @@
 /node_modules
 *.crx
 test.html
+/testWorker.js
+/testWorker2.js

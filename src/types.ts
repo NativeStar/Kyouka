@@ -20,6 +20,7 @@ export const DefaultExtensionConfig = {
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {
     getConfig: () => ExtensionConfig
+    getWorkerPreloadUrl: () => string
 }
 export type PreHookOption = {
     parent: any

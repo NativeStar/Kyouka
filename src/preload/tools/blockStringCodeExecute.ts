@@ -1,17 +1,17 @@
-import {type Hooker ,FastUtils} from "js-hooker";
+import { type Hooker, FastUtils } from "js-hooker";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 export class BlockStringCodeExecute extends AbstractTool {
     private static readonly abortInvokeTargetAttrs: string[] = ["innerText", "innerHTML", "text", "textContent"] as const;
     onMount(_config: never, hooker: Hooker): void {
-        FastUtils.hookAbortMethodExecute(hooker,window,"eval","sync");
-        hooker.hookObject(window,"Function",{
+        FastUtils.hookAbortMethodExecute(hooker, window, "eval", "sync");
+        hooker.hookObject(window, "Function", {
             beforeConstruct(_args, abortController, tempObject, originConstruct) {
                 abortController.abort();
                 tempObject.current = originConstruct("");
             },
         })
-        hooker.hookMethod(window, "setTimeout",{
+        hooker.hookMethod(window, "setTimeout", {
             beforeMethodInvoke(args, abortController) {
                 if (typeof args[0] === "string") {
                     abortController.abort();
@@ -35,8 +35,8 @@ export class BlockStringCodeExecute extends AbstractTool {
         }
         hooker.hookAccessor(HTMLScriptElement.prototype, "src", {
             beforeSetterInvoke(arg, abortController) {
-                if (typeof arg ==="string") {
-                    const srcString=(arg as TrustedScriptURL|string) instanceof TrustedScriptURL ? arg.toString() : arg;
+                if (typeof arg === "string") {
+                    const srcString = (arg as TrustedScriptURL | string) instanceof TrustedScriptURL ? arg.toString() : arg;
                     if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
                         abortController.abort();
                     }
@@ -51,29 +51,29 @@ export class BlockStringCodeExecute extends AbstractTool {
                     return
                 }
                 if (args[0] === "src") {
-                    const srcString:string=(args[1] as TrustedScriptURL|string) instanceof TrustedScriptURL ? args[1].toString() : args[1];
+                    const srcString: string = (args[1] as TrustedScriptURL | string) instanceof TrustedScriptURL ? args[1].toString() : args[1];
                     if (srcString.startsWith("blob:") || srcString.startsWith("data:")) {
                         abortController.abort();
                     }
                 }
             },
         })
-        FastUtils.hookAbortMethodExecute(hooker,HTMLScriptElement.prototype,"setHTMLUnsafe","sync");
-        FastUtils.hookAbortMethodExecute(hooker,HTMLScriptElement.prototype,"setHTML","sync");
+        FastUtils.hookAbortMethodExecute(hooker, HTMLScriptElement.prototype, "setHTMLUnsafe", "sync");
+        FastUtils.hookAbortMethodExecute(hooker, HTMLScriptElement.prototype, "setHTML", "sync");
     }
     override get preHookMethodList(): PreHookOption[] {
         return [
             {
-                parent: window,
+                parent: globalThis,
                 methodName: "setTimeout",
                 id: "pre#window.setTimeout",
-                type:"method"
+                type: "method"
             },
             {
-                parent: window,
+                parent: globalThis,
                 methodName: "setInterval",
                 id: "pre#window.setInterval",
-                type:"method"
+                type: "method"
             },
         ]
     }
