@@ -3,6 +3,7 @@ import { type ExtensionConfig, type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
 import { languageLocations } from "../../types";
 import { makeDateObjectToString, makeDateObjectToTimeString } from "../util";
+import { isRunningInWorker } from "../util";
 export class ChangeLanguageLocation extends AbstractTool {
     onMount(config: ExtensionConfig, hooker: Hooker): void {
         const targetLanguage = config.changeLanguageLocation;
@@ -17,26 +18,28 @@ export class ChangeLanguageLocation extends AbstractTool {
             console.error(`Invalid language location: ${config.changeLanguageLocation}`);
             return
         }
-        hooker.hookAccessor(Navigator.prototype, "language", {
-            beforeGetterInvoke(abortController, _thisArg, tempMethodResult) {
-                tempMethodResult.current = targetLanguage
-                abortController.abort();
-            },
-            descriptor: {
-                enumerable: true,
-                configurable: true
-            }
-        });
-        hooker.hookAccessor(Navigator.prototype, "languages", {
-            beforeGetterInvoke(abortController, _thisArg, tempMethodResult) {
-                tempMethodResult.current = structuredClone(targetNavigatorLanguages);
-                abortController.abort();
-            },
-            descriptor: {
-                enumerable: true,
-                configurable: true
-            }
-        });
+        if (!isRunningInWorker()){
+            hooker.hookAccessor(Navigator.prototype, "language", {
+                beforeGetterInvoke(abortController, _thisArg, tempMethodResult) {
+                    tempMethodResult.current = targetLanguage
+                    abortController.abort();
+                },
+                descriptor: {
+                    enumerable: true,
+                    configurable: true
+                }
+            });
+            hooker.hookAccessor(Navigator.prototype, "languages", {
+                beforeGetterInvoke(abortController, _thisArg, tempMethodResult) {
+                    tempMethodResult.current = structuredClone(targetNavigatorLanguages);
+                    abortController.abort();
+                },
+                descriptor: {
+                    enumerable: true,
+                    configurable: true
+                }
+            });
+        }
         hooker.hookMethod(Intl.DateTimeFormat.prototype, "resolvedOptions", {
             afterMethodInvoke(_args, tempMethodResult) {
                 tempMethodResult.current.locale = targetLanguage;

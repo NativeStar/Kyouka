@@ -29,6 +29,8 @@ class InjectWorkerWrapper implements AbstractWorker {
     private cachedRemoveEventListenerCall: { type: string, listener: any, options: any }[] = []
     private cachedPostMessageCall: { message: any, transfer?: any }[] = []
     private internalWorker: Worker | null = null
+    private cachedDispatchEventCall: { event: Event }[] = []
+    private isInternalWorkerInitd = false
     constructor(rawWorker: typeof Worker, url: string | URL, options?: WorkerOptions) {
         let workerType: WorkerType = "classic"
         let hrefUrl: string | null = null
@@ -50,32 +52,42 @@ class InjectWorkerWrapper implements AbstractWorker {
                         workerType: workerType,
                         config: extensionConfig
                     })
+            } else if (originalObjects?.Reflect?.has(e.data, "type") && e.data.type === "kyouka-worker-origin-code-executed") {
+                this.isInternalWorkerInitd = true
+                e.stopPropagation()
+                e.stopImmediatePropagation()
+                e.preventDefault()
                 this.internalWorker!.removeEventListener("message", dataDispatcher)
+                this.initInternalWorker()
             }
         }
         this.internalWorker = new rawWorker(URL.createObjectURL(new Blob([bootstrapCode], { type: "application/javascript" })), options)
         this.internalWorker.addEventListener("message", dataDispatcher)
-        this.initInternalWorker()
     }
     addEventListener(type: any, listener: any, options?: any): void {
-        if (this.internalWorker) {
+        if (this.internalWorker && this.isInternalWorkerInitd) {
             this.internalWorker?.addEventListener(type, listener, options)
         } else {
             this.cachedAddEventListenerCall.push({ type, listener, options })
         }
     }
     removeEventListener(type: any, listener: any, options?: any): void {
-        if (this.internalWorker) {
+        if (this.internalWorker && this.isInternalWorkerInitd) {
             this.internalWorker?.removeEventListener(type, listener, options)
         } else {
             this.cachedRemoveEventListenerCall.push({ type, listener, options })
         }
     }
-    dispatchEvent(event: any): boolean {
-        return this.internalWorker?.dispatchEvent(event) ?? false
+    dispatchEvent(event: Event): boolean {
+        if (this.internalWorker && this.isInternalWorkerInitd) {
+            return this.internalWorker?.dispatchEvent(event)
+        } else {
+            this.cachedDispatchEventCall.push({ event })
+            return true
+        }
     }
     postMessage(message: any, transfer: any): void {
-        if (this.internalWorker) {
+        if (this.internalWorker && this.isInternalWorkerInitd) {
             this.internalWorker?.postMessage(message, transfer)
         } else {
             this.cachedPostMessageCall.push({ message, transfer })
@@ -88,7 +100,7 @@ class InjectWorkerWrapper implements AbstractWorker {
         return this._onerror
     }
     private initInternalWorker() {
-        if (this.internalWorker) {
+        if (this.internalWorker && this.isInternalWorkerInitd) {
             this.internalWorker.onerror = this._onerror
             this.internalWorker.onmessage = this._onmessage
             this.internalWorker.onmessageerror = this._onmessageerror
@@ -102,6 +114,10 @@ class InjectWorkerWrapper implements AbstractWorker {
             // 消息
             for (const call of this.cachedPostMessageCall) {
                 this.internalWorker.postMessage(call.message, call.transfer)
+            }
+            // 事件
+            for (const call of this.cachedDispatchEventCall) {
+                this.internalWorker.dispatchEvent(call.event)
             }
         }
     }
