@@ -20,9 +20,15 @@ export abstract class AbstractTool {
      * 当配置加载完成且工具被启用时执行
      * @param config 配置
      */
-    abstract onMount(config: ExtensionConfig,hooker:Hooker): void
+    abstract onMount(config: ExtensionConfig, hooker: Hooker): void
     /**
      * 当配置加载完成但工具未被启用时执行
      */
     onUnmount(): void { }
+    /**
+     *是否支持Worker 
+     */
+    get isSupportWorker(): boolean {
+        return true;
+    }
 }

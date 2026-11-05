@@ -27,7 +27,7 @@ export class AllowContextMenu extends AbstractTool {
                 abortController.abort();
             },
         });
-        hooker.hookMethod(Window.prototype,"addEventListener",{
+        hooker.hookMethod(Window.prototype, "addEventListener", {
             beforeMethodInvoke: ([eventName], abortController) => {
                 if (eventName === "contextmenu") {
                     abortController.abort();
@@ -56,5 +56,8 @@ export class AllowContextMenu extends AbstractTool {
                 type: "method"
             }
         ]
+    }
+    get isSupportWorker(): boolean {
+        return false;
     }
 }

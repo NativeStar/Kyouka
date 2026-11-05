@@ -28,10 +28,13 @@ export function makeDateObjectToTimeString(date: Date, localString: string) {
     return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())} GMT${timezoneSign}${timezoneHours}${timezoneMinutes} (${localString})`;
 }
 // 应对Worker环境下没有document
-export function getDocument(){
-    if (Reflect.has(globalThis, "document")){
+export function getDocument() {
+    if (Reflect.has(globalThis, "document")) {
         return Reflect.get(globalThis, "document");
-    }else{
+    } else {
         return {};
     }
+}
+export function isRunningInWorker() {
+    return typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
 }

@@ -9,7 +9,7 @@ export class ChangeLanguageLocation extends AbstractTool {
         const targetTimezone = languageLocations[config.changeLanguageLocation]?.timezone ?? null;
         const targetNavigatorLanguages = languageLocations[config.changeLanguageLocation]?.navigatorLanguages ?? null;
         const targetLocationString = languageLocations[config.changeLanguageLocation]?.locationString ?? null;
-        if (!("Temporal" in window)) {
+        if (!("Temporal" in globalThis)) {
             console.error("Temporal is not supported,please update your browser!ChangeLanguageLocation skipped mount.");
             return
         }

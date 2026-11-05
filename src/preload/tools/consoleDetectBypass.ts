@@ -1,10 +1,18 @@
-import {type Hooker } from "js-hooker";
+import { type Hooker } from "js-hooker";
 import { type PreHookOption } from "../../types";
 import { AbstractTool } from "../classes/abstractTool";
+import { isRunningInWorker } from "../util";
+const isInWorker = isRunningInWorker();
 //不移出来某些情况下会崩溃
 function isSensitiveType(item: any) {
-    if (item instanceof Function || item instanceof RegExp || item instanceof Date || item instanceof HTMLElement || item instanceof Array) {
-        return true
+    if (isInWorker) {
+        if (item instanceof Function || item instanceof RegExp || item instanceof Date || item instanceof Array) {
+            return true
+        }
+    } else {
+        if (item instanceof Function || item instanceof RegExp || item instanceof Date || item instanceof HTMLElement || item instanceof Array) {
+            return true
+        }
     }
     return false
 }
@@ -20,7 +28,7 @@ export class ConsoleDetectBypass extends AbstractTool {
         if (args.every(item => item === null)) abortController.abort();
     }
     private checkKeyEvent(event: KeyboardEvent) {
-        if (event.key==="F12") {
+        if (event.key === "F12") {
             event.stopPropagation();
             event.stopImmediatePropagation();
         }
@@ -32,7 +40,7 @@ export class ConsoleDetectBypass extends AbstractTool {
                 abortController.abort();
             },
         });
-        hooker.hookMethod(console, "debug",{
+        hooker.hookMethod(console, "debug", {
             beforeMethodInvoke: this.LogsBeforeMethodInvokeFunction
         })
         hooker.hookMethod(console, "log", {
@@ -52,7 +60,7 @@ export class ConsoleDetectBypass extends AbstractTool {
                 abortController.abort();
             },
         });
-        hooker.hookMethod(console, "dirxml",{
+        hooker.hookMethod(console, "dirxml", {
             beforeMethodInvoke(_args, abortController) {
                 abortController.abort();
             }
@@ -64,12 +72,14 @@ export class ConsoleDetectBypass extends AbstractTool {
         });
     }
     onPreload(): void {
-        window.addEventListener("keydown",(event)=>{
-            this.checkKeyEvent(event);
-        },{capture:true,signal:this.unmountController.signal});
-        document.addEventListener("keydown",(event)=>{
-            this.checkKeyEvent(event);
-        },{capture:true,signal:this.unmountController.signal});
+        if (!isRunningInWorker()) {
+            window.addEventListener("keydown", (event) => {
+                this.checkKeyEvent(event);
+            }, { capture: true, signal: this.unmountController.signal });
+            document.addEventListener("keydown", (event) => {
+                this.checkKeyEvent(event);
+            }, { capture: true, signal: this.unmountController.signal });
+        }
     }
     onUnmount(): void {
         this.unmountController.abort();
@@ -80,55 +90,55 @@ export class ConsoleDetectBypass extends AbstractTool {
                 parent: console,
                 methodName: "table",
                 id: "pre#console.table",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "debug",
                 id: "pre#console.debug",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "log",
                 id: "pre#console.log",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "info",
                 id: "pre#console.info",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "warn",
                 id: "pre#console.warn",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "error",
                 id: "pre#console.error",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "dir",
                 id: "pre#console.dir",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "dirxml",
                 id: "pre#console.dirxml",
-                type:"method"
+                type: "method"
             },
             {
                 parent: console,
                 methodName: "clear",
                 id: "pre#console.clear",
-                type:"method"
+                type: "method"
             }
         ]
     }

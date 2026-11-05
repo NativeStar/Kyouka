@@ -20,14 +20,14 @@ export class BlockError extends AbstractTool {
     }
     override onMount(config: ExtensionConfig): void {
         this.isBlockErrorEnabled = config.blockError;
-        Reflect.defineProperty(window, "onerror", this.eventHandlerDescriptor);
-        Reflect.defineProperty(window, "onunhandledrejection", this.eventHandlerDescriptor);
-        Reflect.defineProperty(window, "onrejectionhandled", this.eventHandlerDescriptor);
+        Reflect.defineProperty(globalThis, "onerror", this.eventHandlerDescriptor);
+        Reflect.defineProperty(globalThis, "onunhandledrejection", this.eventHandlerDescriptor);
+        Reflect.defineProperty(globalThis, "onrejectionhandled", this.eventHandlerDescriptor);
     }
     override onPreload(): string[] | void {
-        window.addEventListener("error", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
-        window.addEventListener("unhandledrejection", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
-        window.addEventListener("rejectionhandled", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
+        globalThis.addEventListener("error", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
+        globalThis.addEventListener("unhandledrejection", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
+        globalThis.addEventListener("rejectionhandled", (event) => this.processErrorEvent(event),{signal:this.unmountController.signal,capture:true});
     }
     onUnmount(): void {
         this.unmountController.abort();

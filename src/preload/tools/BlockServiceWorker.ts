@@ -15,4 +15,7 @@ export class BlockServiceWorker extends AbstractTool {
             }
         ];
     }
+    get isSupportWorker(): boolean {
+        return false;
+    }
 }

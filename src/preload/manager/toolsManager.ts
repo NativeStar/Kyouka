@@ -13,6 +13,7 @@ import { DisableCacheApi } from "../tools/disableCacheApi";
 import { BlockServiceWorker } from "../tools/blockServiceWorker";
 import { BlockStorageOperation } from "../tools/blockStorageOperation";
 import { ChangeLanguageLocation } from "../tools/changeLanguageLocation";
+import { isRunningInWorker } from "../util";
 
 export class ToolManager {
     private toolsConfigList = {
@@ -31,10 +32,15 @@ export class ToolManager {
     } as const;
     private preHooksMethodList: PreHookOption[];
     private hooker: Hooker;
+    private runningInWorker = false;
     constructor(hooker: Hooker) {
         this.hooker = hooker;
+        this.runningInWorker = isRunningInWorker();
         const tools: AbstractTool[] = Object.values(this.toolsConfigList);
-        this.preHooksMethodList = tools.flatMap(toolInstance => toolInstance.preHookMethodList);
+        this.preHooksMethodList = tools.flatMap(toolInstance => {
+            if (!toolInstance.isSupportWorker && this.runningInWorker) return [];
+            return toolInstance.preHookMethodList;
+        });
         //preHook
         //避免重复hook
         const hookedIds = new Set<string>();
@@ -63,9 +69,14 @@ export class ToolManager {
             }
             // 初始化工具
             if (config[key]) {
-                this.toolsConfigList[key].onMount(config as never, this.hooker);
+                // this.toolsConfigList[key].onMount(config as never, this.hooker);
+                const toolInstance = this.toolsConfigList[key];
+                if (!toolInstance.isSupportWorker && this.runningInWorker) continue
+                toolInstance.onMount(config as never, this.hooker);
             } else {
-                this.toolsConfigList[key].onUnmount();
+                const toolInstance = this.toolsConfigList[key];
+                if (!toolInstance.isSupportWorker && this.runningInWorker) continue
+                toolInstance.onUnmount();
             }
         }
         //释放占位hook
