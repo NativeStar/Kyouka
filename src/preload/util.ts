@@ -36,9 +36,16 @@ export function getDocument() {
     }
 }
 export function isRunningInWorker() {
-    return typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+    return (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) || (typeof SharedWorkerGlobalScope !== 'undefined' && self instanceof SharedWorkerGlobalScope);
 }
-export function getWorkerInjectBootstrapCode(workerType: WorkerType,preloadUrl:string) {
+export function getRunningWorkerType() {
+    if ("postMessage" in self) {
+        return "worker";
+    } else {
+        return "shared";
+    }
+}
+export function getWorkerInjectBootstrapCode(workerType: WorkerType, preloadUrl: string) {
     if (workerType === "classic") {
         return `importScripts("${preloadUrl}");\n`;
     } else {

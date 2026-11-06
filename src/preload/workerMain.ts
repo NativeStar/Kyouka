@@ -3,13 +3,17 @@
 import { Hooker } from "js-hooker";
 import { init as lexerInit, parse } from "es-module-lexer"
 import { ToolManager } from "./manager/toolsManager";
+import { getRunningWorkerType } from "./util";
+declare const self: SharedWorkerGlobalScope;
 const hooker = new Hooker();
+const currentWorkerType = getRunningWorkerType()
+let sharedWorkerIpcPort: MessagePort | null = null
 async function messageProcessor(event: MessageEvent) {
     if (typeof event.data !== "object") {
         return
     }
     if (Reflect.has(event.data, "originUrl") && Reflect.has(event.data, "loadMode")) {
-        removeEventListener("message", messageProcessor)
+        sharedWorkerIpcPort?.removeEventListener("message", messageProcessor)
         event.stopImmediatePropagation();
         event.stopPropagation();
         event.preventDefault();
@@ -36,22 +40,43 @@ async function messageProcessor(event: MessageEvent) {
         }
         if (event.data.workerType === "classic") {
             importScripts(event.data.originUrl)
-            postMessage({ type: "kyouka-worker-origin-code-executed" })
+            if (currentWorkerType === "shared") {
+                sharedWorkerIpcPort?.postMessage({ type: "kyouka-worker-origin-code-executed" })
+            } else {
+                postMessage({ type: "kyouka-worker-origin-code-executed" })
+            }
         } else {
             // import是改不了的 只能静态替换了
             const codeUrl = await replaceEsModuleImport(event.data.originUrl, event.data.baseUrl)
             if (codeUrl) {
                 await import(codeUrl)
                 URL.revokeObjectURL(codeUrl)
-                postMessage({ type: "kyouka-worker-origin-code-executed" })
+                if (currentWorkerType === "shared") {
+                    sharedWorkerIpcPort?.postMessage({ type: "kyouka-worker-origin-code-executed" })
+                } else {
+                    postMessage({ type: "kyouka-worker-origin-code-executed" })
+                }
             }
         }
     }
 }
 async function init() {
-    addEventListener("message", messageProcessor);
-    postMessage({ type: "kyouka-worker-hook-init" })
-    console.log("worker preload init!");
+    if (currentWorkerType === "shared") {
+        self.addEventListener("connect", (e) => {
+            sharedWorkerIpcPort = e.ports[0] ?? null
+            if (!sharedWorkerIpcPort) {
+                console.error("kyouka worker hook failed!")
+                return
+            }
+            sharedWorkerIpcPort.addEventListener("message", messageProcessor)
+            sharedWorkerIpcPort.start()
+            sharedWorkerIpcPort.postMessage({ type: "kyouka-worker-hook-init" })
+        })
+    } else {
+        addEventListener("message", messageProcessor);
+        postMessage({ type: "kyouka-worker-hook-init" })
+    }
+    console.log("worker preload init!", currentWorkerType);
 }
 async function replaceEsModuleImport(url: string, baseUrl: string): Promise<string | null> {
     try {
