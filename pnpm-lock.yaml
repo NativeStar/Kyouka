@@ -15,8 +15,8 @@ importers:
         specifier: ^3.0.4
         version: 3.0.4
       js-hooker:
-        specifier: link:../js-hooker
-        version: link:../js-hooker
+        specifier: ^1.0.5
+        version: 1.0.5
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.36
@@ -209,6 +209,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  js-hooker@1.0.5:
+    resolution: {integrity: sha512-NApJiYcveEd/zsL1BLCeip+hYYXHsJijut/9uhRWttgiUKqCKhTnY+49I/Wp6dHQbxIVlCUt8tv4jwkiBIgGbw==}
+
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
@@ -339,5 +342,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.2
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
+
+  js-hooker@1.0.5: {}
 
   undici-types@7.16.0: {}

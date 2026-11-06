@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "es-module-lexer": "^3.0.4",
-    "js-hooker": "link:../js-hooker"
+    "js-hooker": "^1.0.5"
   }
 }
