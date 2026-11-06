@@ -38,3 +38,10 @@ export function getDocument() {
 export function isRunningInWorker() {
     return typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
 }
+export function getWorkerInjectBootstrapCode(workerType: WorkerType,preloadUrl:string) {
+    if (workerType === "classic") {
+        return `importScripts("${preloadUrl}");\n`;
+    } else {
+        return `import "${preloadUrl}"\n`
+    }
+}
