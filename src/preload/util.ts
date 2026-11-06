@@ -4,6 +4,7 @@ function pad2(value: number) {
     return value.toString().padStart(2, "0");
 }
 // TODO 这里面的函数改成调用备份 因为他们可能在后期被调用
+// 暂时不管了 要配合更新hooker库
 export function makeDateObjectToString(date: Date, localString: string) {
     if (Number.isNaN(date.getTime())) {
         return "Invalid Date";
