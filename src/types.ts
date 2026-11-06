@@ -15,7 +15,8 @@ export const DefaultExtensionConfig = {
     disableCacheApi: false,
     blockServiceWorker: false,
     blockStorageOperation: false,
-    changeLanguageLocation: "unset"
+    changeLanguageLocation: "unset",
+    injectWorker:false
 };
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {

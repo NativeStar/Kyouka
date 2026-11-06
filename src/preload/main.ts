@@ -55,8 +55,7 @@ function initConfig() {
         return
     }
     toolManager.initWithConfig(config as ExtensionConfig);
-    // TODO 根据配置决定是否初始化
-    if (workerPreloadScriptUrl) {
+    if (workerPreloadScriptUrl && (config as ExtensionConfig).injectWorker) {
         WorkerInjector.init(hooker, workerPreloadScriptUrl, originObjectsRef, config as ExtensionConfig);
     }
 }
