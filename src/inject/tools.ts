@@ -229,6 +229,9 @@ export const Tools: { [key: string]: () => void } = {
         const definePropertyHook = hookerInstance.hookMethod(Object, "defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args;
+                if (descriptor.get || descriptor.set) {
+                    return
+                }
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
@@ -237,6 +240,9 @@ export const Tools: { [key: string]: () => void } = {
             beforeMethodInvoke(args) {
                 const [_target, descriptors] = args;
                 for (const property in descriptors) {
+                    if (descriptors[property]!.get || descriptors[property]!.set) {
+                        continue
+                    }
                     descriptors[property]!.writable = true;
                     descriptors[property]!.configurable = true;
                 }
@@ -245,6 +251,9 @@ export const Tools: { [key: string]: () => void } = {
         const reflectDefinePropertyHook = hookerInstance.hookMethod(Reflect, "defineProperty", {
             beforeMethodInvoke(args) {
                 const [_target, _property, descriptor] = args;
+                if (descriptor.get || descriptor.set) {
+                    return
+                }
                 descriptor.writable = true;
                 descriptor.configurable = true;
             },
