@@ -88,7 +88,8 @@ export async function makeFileParentDir(root: FileSystemDirectoryHandle, path: s
     let lastDirectory = root;
     for (const path of paths) {
         if (path === "") continue;
-        const directory = await lastDirectory.getDirectoryHandle(path, { create: true });
+        const filteredPath = replaceWindowsFileNameInvalidChars(path);
+        const directory = await lastDirectory.getDirectoryHandle(filteredPath, { create: true });
         lastDirectory = directory;
     }
     return { directory: lastDirectory, file: pathLastElement! };
@@ -108,8 +109,8 @@ export function getWatermarkElements() {
     }
     return tempWatermarkElementList;
 }
-export function checkApiSupport(apiName: string) { 
-    if(apiName in window){
+export function checkApiSupport(apiName: string) {
+    if (apiName in window) {
         return true;
     }
     showToast(`当前浏览器不支持${apiName}`);

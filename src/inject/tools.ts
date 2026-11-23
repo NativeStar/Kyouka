@@ -1102,5 +1102,58 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
             }
             showToast(`已注销${counter.success}个ServiceWorker,失败${counter.fail}个`);
         })
+    },
+    "dumpResource": () => {
+        if (!checkApiSupport("showDirectoryPicker")) return
+        const currentResList = performance.getEntriesByType("resource")
+        if (currentResList.length === 0) {
+            showToast("未检测到已加载的资源 可能是尚未加载或类型不支持");
+            return
+        }
+        showDirectoryPicker({ mode: "readwrite" }).then(async (fs) => {
+            let currentResIndex = 0;
+            try {
+                const rootDirHandle = await fs.getDirectoryHandle(replaceWindowsFileNameInvalidChars(`ResDump-${location.hostname}`), { create: true });
+                // 先把html文件写了
+                showProgressToast("正在导出HTML", true)
+                const htmlFileHandle = await rootDirHandle.getFileHandle("index.html", { create: true })
+                const htmlFileWriter = await htmlFileHandle.createWritable();
+                await htmlFileWriter.write(document.documentElement.outerHTML);
+                await htmlFileWriter.close()
+                // 其他资源
+                for (const res of currentResList) {
+                    currentResIndex++
+                    showProgressToast(`正在导出${currentResIndex}/${currentResList.length}个资源`, true)
+                    const url = new URL(res.name);
+                    // console.log(url.pathname);
+                    if (url.pathname.endsWith("/")) {
+                        continue
+                    }
+                    const { directory: lastDirectoryHandle, file } = await makeFileParentDir(rootDirHandle, url.pathname);
+                    const targetFileHandle = await lastDirectoryHandle.getFileHandle(replaceWindowsFileNameInvalidChars(file), { create: true })
+                    const targetFileOutputStream = await targetFileHandle.createWritable();
+                    try {
+                        const rawResult = await fetch(res.name, { mode: "cors", method: "get" })
+                        if (rawResult.status !== 200 || !rawResult.body) {
+                            throw "Error!"
+                        }
+                        await rawResult.body.pipeTo(targetFileOutputStream)
+                    } catch (error) {
+                        // originObjectReference.console.error(error)
+                        await targetFileOutputStream.write("Failed to fetch this resource!!!")
+                        await targetFileOutputStream.close()
+                        continue
+                    }
+
+                }
+                showProgressToast(null, false);
+                showToast(`已导出资源`)
+            } catch (error) {
+                showProgressToast(null, false);
+                originObjectReference.console.error("Dump Resource Error!")
+                originObjectReference.console.error(error);
+                showToast("导出失败 详见控制台")
+            }
+        })
     }
 }
