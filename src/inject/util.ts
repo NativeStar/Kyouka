@@ -1,18 +1,28 @@
 let lastProgressToast: HTMLDialogElement | null = null;
-
+function appendToastStyle(dialog: HTMLDialogElement) {
+    dialog.style.fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+    dialog.style.border = "none";
+    dialog.style.borderRadius = "9px";
+    dialog.style.outline = "none";
+    dialog.style.backgroundColor = "rgba(78, 47, 112, 0.82)";
+    dialog.style.color = "white";
+    dialog.style.position = "fixed";
+    dialog.style.top = "9%";
+    dialog.style.left = "50%";
+    dialog.style.right = "auto";
+    dialog.style.transform = "translateX(-50%)";
+    dialog.style.margin = "0";
+    dialog.style.width = "max-content";
+    dialog.style.maxWidth = "calc(100vw - 2em)";
+    dialog.style.padding = "0.55em 1em";
+    dialog.style.boxSizing = "border-box";
+    dialog.style.userSelect = "none";
+    dialog.style.pointerEvents = "none";
+    dialog.style.zIndex = "9999999999999999999999";
+}
 export function showToast(text: string, time: number = 1500) {
     const toast = document.createElement("dialog");
-    toast.style.fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
-    toast.style.border = "none";
-    toast.style.borderRadius = "9px";
-    toast.style.outline = "none";
-    toast.style.backgroundColor = "rgba(78, 47, 112, 0.82)";
-    toast.style.color = "white";
-    toast.style.position = "fixed";
-    toast.style.top = "9%";
-    toast.style.userSelect = "none";
-    toast.style.pointerEvents = "none";
-    toast.style.zIndex = "9999999999999999999999";
+    appendToastStyle(toast);
     toast.innerText = text;
     document.body.appendChild(toast);
     toast.addEventListener("contextmenu", e => e.preventDefault());
@@ -30,17 +40,7 @@ export function showProgressToast(text: string | null, show: boolean) {
         return
     }
     const toast = document.createElement("dialog");
-    toast.style.fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
-    toast.style.border = "none";
-    toast.style.borderRadius = "9px";
-    toast.style.outline = "none";
-    toast.style.backgroundColor = "rgba(78, 47, 112, 0.82)";
-    toast.style.color = "white";
-    toast.style.position = "fixed";
-    toast.style.pointerEvents = "none";
-    toast.style.top = "9%";
-    toast.style.userSelect = "none";
-    toast.style.zIndex = "9999999999999999999999";
+    appendToastStyle(toast);
     toast.innerText = text ?? "";
     if (lastProgressToast) {
         lastProgressToast.close();
