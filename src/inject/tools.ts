@@ -1053,6 +1053,15 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         for (const pwdInput of passwordInput) {
             pwdInput.removeAttribute("type");
         }
+        // 防止恢复
+        const originTypeSetter = originObjectReference.Reflect.getOwnPropertyDescriptor(HTMLInputElement.prototype, "type")?.set ?? null
+        if (originTypeSetter && !hookerInstance.isHooked(originTypeSetter)) {
+            hookerInstance.hookAccessor(HTMLInputElement.prototype, "type", {
+                beforeSetterInvoke: (typeStr, abortController) => {
+                    if (typeStr === "password") abortController.abort();
+                }
+            })
+        }
         showToast(passwordInput.length > 0 ? successText : "未找到密码输入框");
     },
     "logCredentials": () => {
