@@ -1164,5 +1164,8 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
                 showToast("导出失败 详见控制台")
             }
         })
+    },
+    "interrupt":()=>{
+        debugger
     }
 }

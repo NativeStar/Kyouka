@@ -55,6 +55,7 @@
         <button class="itemButton toolButton" tool="blockShare" tooltip="使share方法调用不触发系统分享并返回成功">屏蔽share</button>
         <button class="itemButton toolButton" tool="logCredentials" tooltip="打印对credentials.get和credentials.create\n的调用参数和返回值">打印凭证</button>
         <button class="itemButton toolButton" tool="unregisterServiceWorker" tooltip="移除该网站注册的ServiceWorker">移除Worker</button>
+        <button class="itemButton toolButton" tool="interrupt" tooltip="立即触发一次debugger中断 省去控制台手敲\n需要开启控制台并且未禁用中断才能生效\n也许有助于调试DOM?">执行中断</button>
       </div>
       <div class="toolList" type="tool" style="display: none;">
         <button class="itemButton toolButton" tool="injectScript" subTool="sub:injectOnlineScript" tooltip="左键:注入本地JS文件\n右键:注入来自指定URL的JS\n可能被跨域政策或CSP阻止加载">注入JS</button>
