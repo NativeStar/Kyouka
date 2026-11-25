@@ -1173,12 +1173,24 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
         const srcText = prompt("输入要替换的文本 如:张三\n此处对大小写敏感!")
         if (!srcText) return
         const targetText = prompt("输入替换后的文本 如:我的姓名")
-        if (!targetText) {
+        if (targetText === null) {
             showToast("输入的替换文本无效!")
             return
         }
+        const domWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+        let currentNode: Node | null = null
+        while (currentNode = domWalker.nextNode()) {
+            if (currentNode.nodeValue) {
+                currentNode.nodeValue = currentNode.nodeValue.replaceAll(srcText, targetText)
+            }
+        }
+        const inputElements: NodeListOf<HTMLInputElement> = document.querySelectorAll("input, textarea")
+        for (const inputElement of inputElements) {
+            inputElement.value = inputElement.value.replaceAll(srcText, targetText)
+            inputElement.placeholder = inputElement.placeholder.replaceAll(srcText, targetText)
+        }
         document.head.innerHTML = document.head.innerHTML.replaceAll(srcText, targetText)
-        document.body.innerHTML = document.body.innerHTML.replaceAll(srcText, targetText)
+        // document.body.innerHTML = document.body.innerHTML.replaceAll(srcText, targetText)
         showToast("已执行替换")
     }
 }
