@@ -1165,7 +1165,20 @@ CPU核数:${navigator.hardwareConcurrency} 内存:${navigator.deviceMemory ? `${
             }
         })
     },
-    "interrupt":()=>{
+    "interrupt": () => {
         debugger
+    },
+    "replaceText": () => {
+        if (!confirm("提醒:该功能的目前实现方式较为暴力 请不要输入HTML代码或过于简单的单字母、单词等 以免执行替换后页面出现异常")) return
+        const srcText = prompt("输入要替换的文本 如:张三\n此处对大小写敏感!")
+        if (!srcText) return
+        const targetText = prompt("输入替换后的文本 如:我的姓名")
+        if (!targetText) {
+            showToast("输入的替换文本无效!")
+            return
+        }
+        document.head.innerHTML = document.head.innerHTML.replaceAll(srcText, targetText)
+        document.body.innerHTML = document.body.innerHTML.replaceAll(srcText, targetText)
+        showToast("已执行替换")
     }
 }
