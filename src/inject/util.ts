@@ -1,4 +1,5 @@
 let lastProgressToast: HTMLDialogElement | null = null;
+let lastProgressToastParent: HTMLDivElement | null = null;
 function appendToastStyle(dialog: HTMLDialogElement) {
     dialog.style.fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
     dialog.style.border = "none";
@@ -21,33 +22,54 @@ function appendToastStyle(dialog: HTMLDialogElement) {
     dialog.style.zIndex = "9999999999999999999999";
 }
 export function showToast(text: string, time: number = 1500) {
+    const tempToastParent = document.createElement("div");
+    const shadowRoot = tempToastParent.attachShadow({
+        mode: "closed",
+        clonable: false,
+        delegatesFocus: false,
+        serializable: false
+    });
     const toast = document.createElement("dialog");
     appendToastStyle(toast);
     toast.innerText = text;
-    document.body.appendChild(toast);
+    shadowRoot.append(toast)
+    document.body.appendChild(tempToastParent);
     toast.addEventListener("contextmenu", e => e.preventDefault());
     toast.show();
     setTimeout(() => {
         toast.close();
         toast.remove();
+        tempToastParent.remove();
     }, time);
 }
 export function showProgressToast(text: string | null, show: boolean) {
-    if (!show && lastProgressToast) {
+    if (!show && lastProgressToast && lastProgressToastParent) {
         lastProgressToast.close();
         lastProgressToast.remove();
         lastProgressToast = null;
+        lastProgressToastParent.remove();
+        lastProgressToastParent = null;
         return
     }
+    const tempToastParent = document.createElement("div");
+    const shadowRoot = tempToastParent.attachShadow({
+        mode: "closed",
+        clonable: false,
+        delegatesFocus: false,
+        serializable: false
+    });
     const toast = document.createElement("dialog");
     appendToastStyle(toast);
     toast.innerText = text ?? "";
-    if (lastProgressToast) {
+    if (lastProgressToast && lastProgressToastParent) {
         lastProgressToast.close();
         lastProgressToast.remove();
+        lastProgressToastParent.remove();
     }
     lastProgressToast = toast;
-    document.body.appendChild(toast);
+    lastProgressToastParent = tempToastParent;
+    shadowRoot.append(toast)
+    document.body.appendChild(tempToastParent);
     toast.addEventListener("contextmenu", e => e.preventDefault());
     toast.show();
 }
