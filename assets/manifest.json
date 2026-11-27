@@ -10,7 +10,8 @@
     "cookies",
     "declarativeNetRequestWithHostAccess",
     "webNavigation",
-    "contextMenus"
+    "contextMenus",
+    "userScripts"
   ],
   "host_permissions": [
     "<all_urls>"

@@ -16,7 +16,7 @@ export const DefaultExtensionConfig = {
     blockServiceWorker: false,
     blockStorageOperation: false,
     changeLanguageLocation: "unset",
-    injectWorker:false
+    injectWorker: false
 };
 export type ExtensionConfig = typeof DefaultExtensionConfig;
 export type IpcObject = {
@@ -104,4 +104,15 @@ export const languageLocations: {
         acceptLanguage: "en-IN,en-US;q=0.9,en;q=0.8,hi;q=0.7",
         locationString: "India Standard Time"
     }
+}
+export interface UserScriptMetadata {
+    name: string,
+    id: string,
+    description: string,
+    versionCode: number,
+    versionName: string,
+    scope: string[]
+}
+export interface UserScriptPersist extends UserScriptMetadata {
+    code: string
 }

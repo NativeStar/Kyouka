@@ -1,4 +1,4 @@
-import { DefaultExtensionConfig, type ExtensionConfig, languageLocations } from "../types.js";
+import { DefaultExtensionConfig, type ExtensionConfig, languageLocations, type UserScriptPersist } from "../types.js";
 import { messageHandle, rightClickMenuHandle } from "./handle.js";
 import { windowAlert, sendDaemonEvent } from "./util.js";
 let config: ExtensionConfig | {} = {};
@@ -37,6 +37,7 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
         } catch (error) {
             console.log(error)
         }
+        ensureUserScripts();
     }
 });
 //兜底 避免某些情况状态不一致
@@ -54,7 +55,8 @@ chrome.runtime.onStartup.addListener(() => {
         const removeCsp = mergedConfig.removeCsp;
         chrome.declarativeNetRequest.updateEnabledRulesets({
             [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
-        })
+        });
+        ensureUserScripts();
     });
 });
 // action
@@ -264,4 +266,24 @@ async function updateAcceptLanguageRule(value: string | "unset") {
             },
         }],
     });
+}
+async function ensureUserScripts() {
+    try {
+        const currentScripts = await chrome.userScripts.getScripts()
+        const { userScripts = [] } = await chrome.storage.local.get("userScripts") as { userScripts: UserScriptPersist[] }
+        const registeredScripts = currentScripts.map(script => script.id)
+        for (const script of userScripts) {
+            if (!registeredScripts.includes(script.id)) {
+                await chrome.userScripts.register([{
+                    id: script.id,
+                    world: "MAIN",
+                    js: [{ code: script.code }],
+                    matches: script.scope,
+                    runAt: "document_end",
+                }])
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
 }

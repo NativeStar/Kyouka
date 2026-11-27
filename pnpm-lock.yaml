@@ -11,12 +11,15 @@ importers:
 
   .:
     dependencies:
+      acorn:
+        specifier: ^8.19.0
+        version: 8.19.0
       es-module-lexer:
         specifier: ^3.0.4
         version: 3.0.4
       js-hooker:
-        specifier: ^1.0.5
-        version: 1.0.5
+        specifier: link:../js-hooker
+        version: link:../js-hooker
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.36
@@ -201,6 +204,11 @@ packages:
   '@types/node@25.1.0':
     resolution: {integrity: sha512-t7frlewr6+cbx+9Ohpl0NOTKXZNV9xHRmNOvql47BFJKcEG1CxtxlPEEe+gR9uhVWM4DwhnvTF110mIL4yP9RA==}
 
+  acorn@8.19.0:
+    resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
   es-module-lexer@3.0.4:
     resolution: {integrity: sha512-BldNY5mwkVu+cQ5Ymn3e6hB9Sx8XHx4ZevWbiUyZbfKxJxYO27Hf0wfzkxIaD5CAJMaGl3YspKELj0ff/7nCMA==}
 
@@ -208,9 +216,6 @@ packages:
     resolution: {integrity: sha512-HyNQImnsOC7X9PMNaCIeAm4ISCQXs5a5YasTXVliKv4uuBo1dKrG0A+uQS8M5eXjVMnLg3WgXaKvprHlFJQffw==}
     engines: {node: '>=18'}
     hasBin: true
-
-  js-hooker@1.0.5:
-    resolution: {integrity: sha512-NApJiYcveEd/zsL1BLCeip+hYYXHsJijut/9uhRWttgiUKqCKhTnY+49I/Wp6dHQbxIVlCUt8tv4jwkiBIgGbw==}
 
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
@@ -312,6 +317,8 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  acorn@8.19.0: {}
+
   es-module-lexer@3.0.4: {}
 
   esbuild@0.27.2:
@@ -342,7 +349,5 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.2
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
-
-  js-hooker@1.0.5: {}
 
   undici-types@7.16.0: {}

@@ -1,4 +1,7 @@
-let audioContext = new AudioContext();
+import type { UserScriptPersist } from "../types";
+import { parseRawUserScript } from "./userScript/parser"
+import { wrapperUserScript } from "./userScript/wrapper";
+const audioContext = new AudioContext();
 let tempedConfig: { [key: string]: string | boolean };
 class OptionCheckBox extends HTMLElement {
     constructor() {
@@ -45,7 +48,7 @@ class OptionSelect extends HTMLElement {
             const targetOption = selectElement.options[selectElement.selectedIndex]!;
             const targetOptionKey = targetOption.getAttribute("optionValue")!;
             chrome.storage.local.set({ [targetSettingKey]: targetOptionKey });
-            playButtonCheckChangeAudio(targetOptionKey!=="unset");
+            playButtonCheckChangeAudio(targetOptionKey !== "unset");
         });
         this.append(labelElement, selectElement);
         getChromeConfig<string>(targetSettingKey, "unset").then(result => {
@@ -90,4 +93,82 @@ async function getChromeConfig<T = any>(key: string, defaultValue: T): Promise<T
 }
 customElements.define("option-checkbox", OptionCheckBox);
 customElements.define("option-select", OptionSelect);
-addEventListener("contextmenu", e => e.preventDefault())
+// addEventListener("contextmenu", e => e.preventDefault())
+document.getElementById("loadUserScript")?.addEventListener("click", async () => {
+    if (!("showOpenFilePicker" in window)) {
+        return alert("浏览器不支持showOpenFilePicker");
+    }
+    let registeredScripts: chrome.userScripts.RegisteredUserScript[] = [];
+    try {
+        registeredScripts = await chrome.userScripts.getScripts();
+    } catch (error) {
+        // TODO 换个方法提示 这鬼地方不允许alert
+        return alert("请先启用用户脚本功能");
+    }
+    showOpenFilePicker().then(async (files) => {
+        try {
+            if (files.length !== 1) {
+                return alert("请选择一个文件!");
+            }
+            const targetFile = files[0];
+            if (!targetFile) return
+            const file = await targetFile.getFile()
+            const fileText = await file.text()
+            const scriptMetadata = parseRawUserScript(fileText);
+            if (!scriptMetadata) {
+                return alert("所选脚本不是有效的Kyouka UserScript!\n详情请参考官网脚本模板");
+            }
+            const wrappedCode = wrapperUserScript(fileText);
+            const { userScripts: userScriptsPersist = [] } = await chrome.storage.local.get("userScripts") as { userScripts: UserScriptPersist[] }
+            const hasOldScript = registeredScripts.some(script => scriptMetadata.id === script.id)
+            chrome.userScripts[hasOldScript ? "update" : "register"]([
+                {
+                    id: scriptMetadata.id,
+                    matches: scriptMetadata.scope,
+                    js: [{ code: wrappedCode }],
+                    world: "MAIN",
+                    runAt: "document_end"
+                }
+            ]);
+            if (hasOldScript) {
+                // 查找并更新现有持久化
+                for (let i = 0; i < userScriptsPersist.length; i++) {
+                    if (userScriptsPersist[i]?.id === scriptMetadata.id) {
+                        userScriptsPersist[i] = { ...scriptMetadata, code: wrappedCode }
+                        break
+                    }
+                }
+            } else {
+                userScriptsPersist.push({
+                    ...scriptMetadata,
+                    code: wrappedCode
+                })
+            }
+            await chrome.storage.local.set({ userScripts: userScriptsPersist })
+        } catch (error) {
+            console.error(error);
+            alert("导入用户脚本时发生异常");
+        }
+    })
+})
+
+
+// test
+// parseRawUserScript(`
+// export const KyoukaScriptMetadata={
+//     name:"test name",
+//     id:"test_id",
+//     versionCode:0,
+//     description:"test desc",
+//     versionName:"0.0.1",
+//     scope:[
+//         "https://www.baidu.com",
+//         "https://www.google.com"
+//     ]
+// }
+// export const Test={
+//     test:true
+// }
+// const a=1
+// alert(a)
+//     `)

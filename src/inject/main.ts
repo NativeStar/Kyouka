@@ -1,6 +1,7 @@
 import { getHooker, Tools, waitOriginObject, setMenuElement } from "./tools"
 import type { Hooker } from "js-hooker";
 let hooker: Hooker;
+// TODO 不再允许关闭gui 因为userScript的定制接口需要contentScript提供实现
 let extensionId: string | null;
 async function init() {
     const currentScript = document.currentScript as HTMLScriptElement;
@@ -44,6 +45,23 @@ async function init() {
             dialog.open ? dialog.close() : dialog.show();
         }
     })
+
+    document.addEventListener(`${extensionId}-userScriptEvent`, async (e) => {
+        if (!Reflect.has(e, "detail")) return;
+        const event = e as CustomEvent;
+        switch (event.detail.type) {
+            case "getHooker":
+                document.dispatchEvent(new CustomEvent(`${extensionId}-response`, { detail: { type: "getHooker", result: hooker }, bubbles: false, cancelable: true, composed: false }));
+                break;
+            case "callTool":
+                if (event.detail.tool && event.detail.tool in Tools) {
+                    Tools[event.detail.tool]?.();
+                }
+            case "waitRemoteInit":
+                document.dispatchEvent(new CustomEvent(`${extensionId}-response`, { detail: { type: "waitRemoteInit" }, bubbles: false, cancelable: true, composed: false }));
+        }
+
+    });
     setMenuElement(menuContainer);
     await waitOriginObject();
     hooker = getHooker();
