@@ -33,5 +33,4 @@ export async function getChromeConfig<T = any>(key: string, defaultValue: T): Pr
 export function showAlert(text: string) {
     document.getElementById("dialogText")!.innerText = text;
     (document.getElementById("dialogElement") as HTMLDialogElement).showModal()
-    
 }

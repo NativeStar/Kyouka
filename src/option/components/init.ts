@@ -4,9 +4,11 @@ import { OptionSelect } from "./optionSelect";
 import { parseRawUserScript } from "../userScript/parser"
 import { wrapperUserScript } from "../userScript/wrapper";
 import { showAlert } from "../util";
+import { UserScriptItem } from "./userScriptItem";
 export function initComponentsAndListeners() {
     customElements.define("option-checkbox", OptionCheckBox);
     customElements.define("option-select", OptionSelect);
+    customElements.define("user-script-item", UserScriptItem);
     document.getElementById("optionModeButtonSettings")?.addEventListener("click", () => {
         document.getElementById('settingsList')!.style.display = 'flex';
         document.getElementById('userScriptList')!.style.display = 'none';
@@ -69,7 +71,15 @@ export function initComponentsAndListeners() {
                         code: wrappedCode
                     })
                 }
+                // TODO 更新脚本时会重复创建行
                 await chrome.storage.local.set({ userScripts: userScriptsPersist })
+                const userScriptItem = document.createElement("user-script-item");
+                userScriptItem.setAttribute("scriptName", scriptMetadata.name);
+                userScriptItem.setAttribute("scriptVersion", scriptMetadata.versionName);
+                userScriptItem.setAttribute("scriptDescription", scriptMetadata.description)
+                userScriptItem.setAttribute("scriptId", scriptMetadata.id)
+                document.getElementById("userScriptList")!.append(userScriptItem);
+                showAlert("导入成功");
             } catch (error) {
                 console.error(error);
                 showAlert("导入用户脚本时发生异常");
