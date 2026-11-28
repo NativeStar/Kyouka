@@ -1,16 +1,7 @@
 import { DefaultExtensionConfig, type ExtensionConfig, languageLocations, type UserScriptPersist } from "../types.js";
 import { messageHandle, rightClickMenuHandle } from "./handle.js";
-import { windowAlert, sendDaemonEvent } from "./util.js";
+import { sendDaemonEvent } from "./util.js";
 let config: ExtensionConfig | {} = {};
-const guiContentScriptList: chrome.scripting.RegisteredContentScript[] = [
-    {
-        id: "guiScript",
-        allFrames: false,
-        matches: ["http://*/*", "https://*/*"],
-        js: ["content.js"],
-        runAt: "document_start"
-    }
-]
 // 消息事件
 chrome.runtime.onMessage.addListener(messageHandle);
 if (!chrome.contextMenus.onClicked.hasListener(rightClickMenuHandle)) {
@@ -24,10 +15,6 @@ chrome.runtime.onInstalled.addListener(async (detail) => {
         chrome.storage.local.set(mergedConfig);
         //保证同步
         updateAcceptLanguageRule(mergedConfig.changeLanguageLocation);
-        //更新后会清空动态注册脚本 根据配置恢复注册
-        if (mergedConfig.enableGui) {
-            chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
-        }
         const removeCsp = mergedConfig.removeCsp;
         chrome.declarativeNetRequest.updateEnabledRulesets({
             [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
@@ -45,11 +32,6 @@ chrome.runtime.onStartup.addListener(() => {
     chrome.storage.local.get(null).then(async (value) => {
         const mergedConfig = { ...DefaultExtensionConfig, ...value };
         const isRegisteredGuiScript = (await chrome.scripting.getRegisteredContentScripts({ ids: ["guiScript"] })).length > 0;
-        if (mergedConfig.enableGui) {
-            !isRegisteredGuiScript && chrome.scripting.registerContentScripts(guiContentScriptList).catch(e => console.log(e))
-        } else {
-            isRegisteredGuiScript && chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
-        }
         mergedConfig.enableContextMenu ? setupContextMenu() : teardownContextMenu();
         updateAcceptLanguageRule(mergedConfig.changeLanguageLocation)
         const removeCsp = mergedConfig.removeCsp;
@@ -67,10 +49,6 @@ chrome.action.onClicked.addListener(async (tab) => {
     if (Reflect.ownKeys(config).length === 0) {
         config = await chrome.storage.local.get(null);
     }
-    if (!(config as ExtensionConfig).enableGui) {
-        tab.id && windowAlert(tab.id, "Kyouka:请在设置中开启注入GUI并刷新页面")
-        return
-    }
     sendDaemonEvent(tab.id!, "openDialog")
 });
 //快捷键
@@ -78,10 +56,6 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
     if (!tab || tab.url?.startsWith("chrome://")) return
     if (Reflect.ownKeys(config).length === 0) {
         config = await chrome.storage.local.get(null);
-    }
-    if (!(config as ExtensionConfig).enableGui) {
-        tab.id && windowAlert(tab.id, "Kyouka:请在设置中开启注入GUI并刷新页面")
-        return
     }
     if (command === "openPanelHotkey") {
         sendDaemonEvent(tab.id!, "openDialog")
@@ -138,14 +112,6 @@ function onSettingChange(change: { [key: string]: chrome.storage.StorageChange; 
             chrome.declarativeNetRequest.updateEnabledRulesets({
                 [removeCsp ? "enableRulesetIds" : "disableRulesetIds"]: ["removeCsp"]
             })
-            break
-        case "enableGui":
-            //开关gui
-            if (change.enableGui!.newValue as boolean) {
-                chrome.scripting.registerContentScripts(guiContentScriptList).catch((e) => console.log(e));
-            } else {
-                chrome.scripting.unregisterContentScripts({ ids: ["guiScript"] }).catch(e => console.log(e));
-            }
             break
         case "disableFont":
             //禁用字体

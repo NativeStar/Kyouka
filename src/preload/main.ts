@@ -31,21 +31,18 @@ async function init() {
     //unmount ipc
     Reflect.deleteProperty(window, "kyouka-ipc");
     //利用自身来得早优势 将原始方法引用设置到window以便gui调用 不然gui就得吃已经挨过hook的函数了
-    //检测gui是否启用
-    if ((config as ExtensionConfig).enableGui) {
-        Reflect.defineProperty(window, "kyouka-hooker", {
-            value: hooker,
-            writable: false,
-            enumerable: false,
-            configurable: true
-        });
-        Reflect.defineProperty(window, "kyouka-backup-object", {
-            enumerable: false,
-            configurable: true,
-            writable: false,
-            value: originObjectsRef
-        });
-    }
+    Reflect.defineProperty(window, "kyouka-hooker", {
+        value: hooker,
+        writable: false,
+        enumerable: false,
+        configurable: true
+    });
+    Reflect.defineProperty(window, "kyouka-backup-object", {
+        enumerable: false,
+        configurable: true,
+        writable: false,
+        value: originObjectsRef
+    });
     initConfig();
 }
 init();

@@ -1,7 +1,6 @@
 import { getHooker, Tools, waitOriginObject, setMenuElement } from "./tools"
 import type { Hooker } from "js-hooker";
 let hooker: Hooker;
-// TODO 不再允许关闭gui 因为userScript的定制接口需要contentScript提供实现
 let extensionId: string | null;
 async function init() {
     const currentScript = document.currentScript as HTMLScriptElement;

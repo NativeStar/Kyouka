@@ -8,7 +8,6 @@ export const DefaultExtensionConfig = {
     blockError: false,
     blockStringCodeExecute: false,
     stringDetectBypass: false,
-    enableGui: true,
     printStackInLogs: false,
     allowContextMenu: false,
     enableContextMenu: true,
