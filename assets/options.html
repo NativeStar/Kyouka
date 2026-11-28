@@ -8,7 +8,18 @@
 </head>
 
 <body>
-    <div style="display: flex;flex-direction: column;">
+    <dialog id="dialogElement">
+        <div style="display: flex;flex-direction: column;">
+            <span id="dialogText"></span>
+            <button id="dialogCloseButton">确定</button>
+        </div>
+    </dialog>
+    <div style="display: flex; flex-direction: row;">
+        <button id="optionModeButtonSettings">设置</button>
+        <button style="margin-left: 1.5%;" id="optionModeButtonScript">脚本</button>
+        <button id="loadUserScript" hidden style="margin-left: 1.5%;">加载用户脚本</button>
+    </div>
+    <div style="display: flex;flex-direction: column;" id="settingsList">
         <span>建议在扩展设置页中关闭'收集各项错误'选项 避免误判影响使用</span>
         <option-checkbox settingKey="removeCsp" description="移除CSP限制"></option-checkbox>
         <option-checkbox settingKey="bypassConsoleDetect" description="绕过控制台检测"></option-checkbox>
@@ -26,8 +37,11 @@
         <option-checkbox settingKey="blockServiceWorker" description="屏蔽注册ServiceWorker"></option-checkbox>
         <option-checkbox settingKey="blockStorageOperation" description="屏蔽Storage修改操作"></option-checkbox>
         <option-checkbox settingKey="injectWorker" description="实验性Worker注入(可能需配合'移除CSP限制'才能生效)"></option-checkbox>
-        <option-select settingKey="changeLanguageLocation" description="模拟语言及时区" optionsList='["en-US:美国","ja:日本","ko-KR:韩国","ru-RU:俄罗斯","en-GB:英国","en-SG:新加坡","fr-FR:法国","en-IN:印度"]'></option-select>
-        <button id="loadUserScript">test load user script</button>
+        <option-select settingKey="changeLanguageLocation" description="模拟语言及时区"
+            optionsList='["en-US:美国","ja:日本","ko-KR:韩国","ru-RU:俄罗斯","en-GB:英国","en-SG:新加坡","fr-FR:法国","en-IN:印度"]'></option-select>
+    </div>
+    <div style="display: none;flex-direction: column;" id="userScriptList">
+
     </div>
     <a href="https://github.com/NativeStar/Kyouka" target="_blank">项目仓库</a>
 </body>
@@ -37,20 +51,25 @@
         display: flex;
         flex-direction: row;
     }
-    html, body {
+
+    html,
+    body {
         overscroll-behavior: none;
         touch-action: manipulation;
     }
+
     * {
         user-select: none;
         -webkit-user-drag: none;
     }
-    a{
+
+    a {
         cursor: pointer;
         color: blue;
         text-decoration: none;
     }
-    a:hover{
+
+    a:hover {
         text-decoration: underline;
         color: pink;
     }
